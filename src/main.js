@@ -10,16 +10,23 @@ import App from './App.vue';
 import router from './router';
 
 // PrimeVue components
+import Breadcrumb from 'primevue/breadcrumb';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Column from 'primevue/column';
+import ConfirmationService from 'primevue/confirmationservice';
+import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
+import Paginator from 'primevue/paginator';
+import ProgressSpinner from 'primevue/progressspinner';
+import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
 const app = createApp(App);
 
@@ -28,6 +35,10 @@ app.use(createPinia());
 app.use(router);
 app.use(PrimeVue);
 app.use(ToastService);
+app.use(ConfirmationService);
+
+// Register directives
+app.directive('tooltip', Tooltip);
 
 // Register PrimeVue components
 app.component('Button', Button);
@@ -39,5 +50,11 @@ app.component('DataTable', DataTable);
 app.component('Column', Column);
 app.component('Dialog', Dialog);
 app.component('Toast', Toast);
+app.component('Paginator', Paginator);
+app.component('ConfirmDialog', ConfirmDialog);
+app.component('Breadcrumb', Breadcrumb);
+app.component('ProgressSpinner', ProgressSpinner);
+app.component('Textarea', Textarea);
+app.component('Dialog', Dialog);
 
 app.mount('#app');

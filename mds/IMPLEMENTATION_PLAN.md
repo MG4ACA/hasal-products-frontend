@@ -161,57 +161,57 @@
 
 #### Supplier Module - Backend
 
-- [ ] Create Supplier controller (`controllers/supplierController.js`)
-  - [ ] GET `/api/suppliers` - Get all suppliers (with pagination, search, filters)
-  - [ ] GET `/api/suppliers/:id` - Get supplier by ID
-  - [ ] POST `/api/suppliers` - Create supplier (auto-generate code)
-  - [ ] PUT `/api/suppliers/:id` - Update supplier
-  - [ ] DELETE `/api/suppliers/:id` - Delete supplier (soft delete)
-  - [ ] GET `/api/suppliers/:id/balance` - Get supplier balance
-- [ ] Create supplier routes (`routes/supplierRoutes.js`)
-- [ ] Implement validation middleware
+- [x] Create Supplier controller (`controllers/supplierController.js`)
+  - [x] GET `/api/suppliers` - Get all suppliers (with pagination, search, filters)
+  - [x] GET `/api/suppliers/:id` - Get supplier by ID
+  - [x] POST `/api/suppliers` - Create supplier (auto-generate code)
+  - [x] PUT `/api/suppliers/:id` - Update supplier
+  - [x] DELETE `/api/suppliers/:id` - Delete supplier (soft delete)
+  - [x] GET `/api/suppliers/:id/balance` - Get supplier balance
+- [x] Create supplier routes (`routes/supplierRoutes.js`)
+- [x] Implement validation middleware
 - [ ] Test all endpoints with Postman
 - [ ] Update Postman collection
 
 #### Supplier Module - Frontend
 
-- [ ] Create supplier service (`services/supplierService.js`)
-- [ ] Create supplier store (`stores/supplier.js`)
-- [ ] Create SupplierIndex view (`views/suppliers/SupplierIndex.vue`)
-- [ ] Create SupplierList component (`components/suppliers/SupplierList.vue`)
-- [ ] Create SupplierForm component (`components/suppliers/SupplierForm.vue`)
-- [ ] Create SupplierCreate view (`views/suppliers/SupplierCreate.vue`)
-- [ ] Create SupplierEdit view (`views/suppliers/SupplierEdit.vue`)
-- [ ] Implement DataTable with pagination
-- [ ] Implement search and filter functionality
-- [ ] Implement form validation
+- [x] Create supplier service (`services/supplierService.js`)
+- [x] Create supplier store (`stores/supplier.js`)
+- [x] Create SupplierIndex view (`views/suppliers/SupplierIndex.vue`)
+- [x] Create SupplierList component (`components/suppliers/SupplierList.vue`)
+- [x] Create SupplierForm component (`components/suppliers/SupplierForm.vue`)
+- [x] Create SupplierCreate view (`views/suppliers/SupplierCreate.vue`)
+- [x] Create SupplierEdit view (`views/suppliers/SupplierEdit.vue`)
+- [x] Implement DataTable with pagination
+- [x] Implement search and filter functionality
+- [x] Implement form validation
 - [ ] Test CRUD operations
 
 #### Raw Material Module - Backend
 
-- [ ] Create RawMaterial controller (`controllers/rawMaterialController.js`)
-  - [ ] GET `/api/raw-materials` - Get all raw materials
-  - [ ] GET `/api/raw-materials/:id` - Get raw material by ID
-  - [ ] POST `/api/raw-materials` - Create raw material (auto-generate code)
-  - [ ] PUT `/api/raw-materials/:id` - Update raw material
-  - [ ] DELETE `/api/raw-materials/:id` - Delete raw material
-  - [ ] GET `/api/raw-materials/:id/batches` - Get batches for material
-  - [ ] GET `/api/raw-materials/:id/stock` - Get current stock level
-- [ ] Create raw material routes (`routes/rawMaterialRoutes.js`)
+- [x] Create RawMaterial controller (`controllers/rawMaterialController.js`)
+  - [x] GET `/api/raw-materials` - Get all raw materials
+  - [x] GET `/api/raw-materials/:id` - Get raw material by ID
+  - [x] POST `/api/raw-materials` - Create raw material (auto-generate code)
+  - [x] PUT `/api/raw-materials/:id` - Update raw material
+  - [x] DELETE `/api/raw-materials/:id` - Delete raw material
+  - [x] GET `/api/raw-materials/:id/batches` - Get batches for material
+  - [x] GET `/api/raw-materials/:id/stock` - Get current stock level
+- [x] Create raw material routes (`routes/rawMaterialRoutes.js`)
 - [ ] Test all endpoints with Postman
 - [ ] Update Postman collection
 
 #### Raw Material Module - Frontend
 
-- [ ] Create raw material service (`services/rawMaterialService.js`)
-- [ ] Create raw material store (`stores/rawMaterial.js`)
-- [ ] Create RawMaterialIndex view
-- [ ] Create RawMaterialList component
-- [ ] Create RawMaterialForm component
-- [ ] Create RawMaterialCreate view
-- [ ] Create RawMaterialEdit view
-- [ ] Implement stock level display
-- [ ] Implement batch list view
+- [x] Create raw material service (`services/rawMaterialService.js`)
+- [x] Create raw material store (`stores/rawMaterial.js`)
+- [x] Create RawMaterialIndex view
+- [x] Create RawMaterialList component
+- [x] Create RawMaterialForm component
+- [x] Create RawMaterialCreate view
+- [x] Create RawMaterialEdit view
+- [x] Implement stock level display
+- [x] Implement batch list view
 - [ ] Test CRUD operations
 
 **Deliverable:** Supplier and raw material modules functional  

@@ -3,6 +3,7 @@
     <component :is="'RouterView'" v-if="!isAuthenticated" />
     <AppLayout v-else />
     <Toast />
+    <ConfirmDialog />
   </div>
 </template>
 

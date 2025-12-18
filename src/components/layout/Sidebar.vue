@@ -9,12 +9,16 @@
         <i class="pi pi-home" />
         <span>Dashboard</span>
       </RouterLink>
-      <a href="#" class="menu-item">
+      <RouterLink to="/suppliers" class="menu-item">
         <i class="pi pi-shopping-bag" />
         <span>Suppliers</span>
-      </a>
-      <a href="#" class="menu-item">
+      </RouterLink>
+      <RouterLink to="/raw-materials" class="menu-item">
         <i class="pi pi-box" />
+        <span>Raw Materials</span>
+      </RouterLink>
+      <a href="#" class="menu-item">
+        <i class="pi pi-tags" />
         <span>Products</span>
       </a>
       <a href="#" class="menu-item">
