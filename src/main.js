@@ -6,6 +6,9 @@ import 'primevue/resources/primevue.css';
 import 'primevue/resources/themes/lara-light-blue/theme.css';
 import { createApp } from 'vue';
 
+// Import custom styles
+import './assets/styles/main.css';
+
 import App from './App.vue';
 import router from './router';
 
