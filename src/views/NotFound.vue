@@ -2,7 +2,7 @@
   <div class="not-found">
     <h1>404</h1>
     <p>Page not found</p>
-    <RouterLink to="/">Back to Dashboard</RouterLink>
+    <RouterLink to="/"> Back to Dashboard </RouterLink>
   </div>
 </template>
 

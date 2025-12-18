@@ -40,16 +40,19 @@ src/
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Configure environment variables:
+
 ```bash
 cp .env.development .env
 ```
 
 3. Update `.env` file with your API base URL:
+
 ```
 VITE_API_BASE_URL=http://localhost:5000/api
 ```
@@ -81,6 +84,7 @@ npm run preview
 ESLint and Prettier for consistent code style.
 
 Lint and fix:
+
 ```bash
 npm run lint
 ```

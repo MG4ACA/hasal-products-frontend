@@ -6,19 +6,19 @@
 
     <nav class="sidebar-menu">
       <RouterLink to="/" class="menu-item">
-        <i class="pi pi-home"></i>
+        <i class="pi pi-home" />
         <span>Dashboard</span>
       </RouterLink>
       <a href="#" class="menu-item">
-        <i class="pi pi-shopping-bag"></i>
+        <i class="pi pi-shopping-bag" />
         <span>Suppliers</span>
       </a>
       <a href="#" class="menu-item">
-        <i class="pi pi-box"></i>
+        <i class="pi pi-box" />
         <span>Products</span>
       </a>
       <a href="#" class="menu-item">
-        <i class="pi pi-shopping-cart"></i>
+        <i class="pi pi-shopping-cart" />
         <span>Sales</span>
       </a>
     </nav>

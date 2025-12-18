@@ -1,23 +1,23 @@
 import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import PrimeVue from 'primevue/config';
-import 'primevue/resources/themes/lara-light-blue/theme.css';
-import 'primevue/resources/primevue.css';
-import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
+import 'primeicons/primeicons.css';
+import PrimeVue from 'primevue/config';
+import 'primevue/resources/primevue.css';
+import 'primevue/resources/themes/lara-light-blue/theme.css';
+import { createApp } from 'vue';
 
 import App from './App.vue';
 import router from './router';
 
 // PrimeVue components
 import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import Dropdown from 'primevue/dropdown';
 import Calendar from 'primevue/calendar';
-import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 

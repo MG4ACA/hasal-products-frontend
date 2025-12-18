@@ -1,7 +1,7 @@
 /**
  * Format currency to LKR
  */
-export const formatCurrency = (amount) => {
+export const formatCurrency = amount => {
   return new Intl.NumberFormat('en-LK', {
     style: 'currency',
     currency: 'LKR',
@@ -11,7 +11,7 @@ export const formatCurrency = (amount) => {
 /**
  * Format date to readable format
  */
-export const formatDate = (date) => {
+export const formatDate = date => {
   return new Intl.DateTimeFormat('en-LK', {
     year: 'numeric',
     month: 'short',
@@ -22,7 +22,7 @@ export const formatDate = (date) => {
 /**
  * Format date with time
  */
-export const formatDateTime = (date) => {
+export const formatDateTime = date => {
   return new Intl.DateTimeFormat('en-LK', {
     year: 'numeric',
     month: 'short',

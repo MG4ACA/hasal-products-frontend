@@ -1,7 +1,7 @@
 /**
  * Validate email format
  */
-export const validateEmail = (email) => {
+export const validateEmail = email => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
@@ -9,7 +9,7 @@ export const validateEmail = (email) => {
 /**
  * Validate phone format
  */
-export const validatePhone = (phone) => {
+export const validatePhone = phone => {
   const re = /^[0-9]{10}$/;
   return re.test(phone);
 };
@@ -17,7 +17,7 @@ export const validatePhone = (phone) => {
 /**
  * Validate required field
  */
-export const validateRequired = (value) => {
+export const validateRequired = value => {
   return value && value.toString().trim() !== '';
 };
 

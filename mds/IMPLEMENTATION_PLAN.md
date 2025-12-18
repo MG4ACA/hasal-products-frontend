@@ -1,0 +1,988 @@
+# Implementation Plan - Hasal Products POS System
+
+**Project:** POS & Inventory Management System  
+**Version:** 1.1  
+**Start Date:** December 18, 2025  
+**Duration:** 10-12 weeks  
+**Total Hours:** 232 hours
+
+---
+
+## 📋 Phase 1: Project Setup & Foundation (Week 1-2)
+
+### Week 1: Environment Setup & Project Initialization
+
+#### Backend Setup
+
+- [x] Create backend repository `hasal-pos-backend`
+- [x] Initialize Node.js project with npm
+- [x] Install dependencies (Express, Sequelize, MySQL2, JWT, bcryptjs, dotenv, cors)
+- [x] Install dev dependencies (nodemon, eslint, prettier, sequelize-cli)
+- [x] Configure ESLint and Prettier
+- [x] Set up folder structure (controllers, models, routes, middleware, utils, config)
+- [x] Create `.env.development` and `.env.production` files
+- [x] Configure Sequelize (`config/database.js`)
+- [x] Set up Express app (`app.js` and `server.js`)
+- [x] Configure CORS middleware
+- [x] Set up error handling middleware
+- [x] Test server startup on port 5000
+
+#### Frontend Setup
+
+- [x] Create frontend repository `hasal-pos-frontend`
+- [x] Initialize Vite + Vue 3 project
+- [x] Install dependencies (Vue Router, Pinia, PrimeVue, PrimeFlex, PrimeIcons, Axios)
+- [x] Install dev dependencies (eslint, prettier, eslint-plugin-vue)
+- [x] Configure ESLint and Prettier
+- [x] Set up folder structure (views, components, stores, services, utils, composables)
+- [x] Create `.env.development` and `.env.production` files
+- [x] Configure Vite (`vite.config.js`)
+- [x] Configure Vue Router (`router/index.js`)
+- [x] Configure Pinia store
+- [x] Set up PrimeVue (app.use with theme configuration)
+- [x] Create axios instance (`services/api.js`) with interceptors
+- [x] Create layout components (AppLayout, Sidebar, Topbar)
+- [x] Test development server startup
+
+#### Git & Version Control
+
+- [ ] Initialize Git repositories (frontend & backend)
+- [ ] Create `.gitignore` files
+- [ ] Create initial commit
+- [ ] Push to GitHub (create `main` and `develop` branches)
+- [ ] Set up branch protection rules
+
+**Deliverable:** ✅ Backend server foundation ready (12/12 tasks completed) | ✅ Frontend development environment ready (14/14 tasks completed)  
+**Status:** Week 1 Complete - Backend running on port 5000, Frontend on port 5173 with API proxy  
+**Effort:** 20 hours  
+**Completion Date:** December 18, 2025
+
+---
+
+### Week 2: Database Schema & Authentication System
+
+#### Database Setup
+
+- [ ] Create MySQL database (`hasal_pos_dev`)
+- [ ] Test database connection from backend
+- [ ] Create Sequelize models for all 21 tables:
+  - [ ] User model (`models/User.js`)
+  - [ ] Supplier model (`models/Supplier.js`)
+  - [ ] RawMaterial model (`models/RawMaterial.js`)
+  - [ ] RawMaterialBatch model (`models/RawMaterialBatch.js`)
+  - [ ] Product model (`models/Product.js`)
+  - [ ] ProductSku model (`models/ProductSku.js`)
+  - [ ] Recipe model (`models/Recipe.js`)
+  - [ ] RecipeItem model (`models/RecipeItem.js`)
+  - [ ] ProductionRun model (`models/ProductionRun.js`)
+  - [ ] ProductionMaterial model (`models/ProductionMaterial.js`)
+  - [ ] ProductionOutput model (`models/ProductionOutput.js`)
+  - [ ] PurchaseOrder model (`models/PurchaseOrder.js`)
+  - [ ] PurchaseOrderItem model (`models/PurchaseOrderItem.js`)
+  - [ ] Route model (`models/Route.js`)
+  - [ ] Outlet model (`models/Outlet.js`)
+  - [ ] Employee model (`models/Employee.js`)
+  - [ ] Vehicle model (`models/Vehicle.js`)
+  - [ ] RouteVehicleHistory model (`models/RouteVehicleHistory.js`)
+  - [ ] SalesInvoice model (`models/SalesInvoice.js`)
+  - [ ] InvoiceItem model (`models/InvoiceItem.js`)
+  - [ ] Payment model (`models/Payment.js`)
+  - [ ] SupplierPayment model (`models/SupplierPayment.js`)
+  - [ ] StockAdjustment model (`models/StockAdjustment.js`)
+- [ ] Define model associations in `models/index.js`
+- [ ] Create migrations for all tables
+- [ ] Run migrations to create tables
+
+#### Seeders (Sample Data)
+
+- [ ] Create seeder for users (admin & cashier)
+- [ ] Create seeder for suppliers (5-10 sample suppliers)
+- [ ] Create seeder for raw materials (10-15 materials)
+- [ ] Create seeder for products (5-10 products with SKUs)
+- [ ] Create seeder for routes (3-5 routes)
+- [ ] Create seeder for outlets (10-20 outlets)
+- [ ] Create seeder for employees (5-10 employees)
+- [ ] Create seeder for vehicles (3-5 vehicles)
+- [ ] Run all seeders
+
+#### Authentication Backend
+
+- [ ] Create auth controller (`controllers/authController.js`)
+  - [ ] POST `/api/auth/login` - Login endpoint
+  - [ ] POST `/api/auth/register` - Register endpoint (admin only)
+  - [ ] GET `/api/auth/me` - Get current user
+- [ ] Create auth routes (`routes/authRoutes.js`)
+- [ ] Create JWT middleware (`middleware/auth.js`)
+- [ ] Create role-based authorization middleware (`middleware/roleCheck.js`)
+- [ ] Hash passwords with bcryptjs
+- [ ] Generate JWT tokens (24-hour expiry)
+- [ ] Test authentication endpoints with Postman
+- [ ] Create Postman collection for auth endpoints
+
+#### Authentication Frontend
+
+- [ ] Create auth service (`services/authService.js`)
+- [ ] Create auth store (`stores/auth.js`) with Pinia
+- [ ] Create Login view (`views/auth/Login.vue`)
+- [ ] Implement login form with PrimeVue components
+- [ ] Store JWT in sessionStorage
+- [ ] Set up token expiry tracking (24 hours)
+- [ ] Create router navigation guards
+- [ ] Redirect to dashboard on successful login
+- [ ] Handle authentication errors (toast notifications)
+- [ ] Create logout functionality
+- [ ] Test login flow end-to-end
+
+#### Dashboard Layout
+
+- [ ] Create Dashboard view (`views/dashboard/Dashboard.vue`)
+- [ ] Create dashboard widgets:
+  - [ ] Today's sales card
+  - [ ] Outstanding receivables card
+  - [ ] Low stock alerts card
+- [ ] Create recent sales table
+- [ ] Create quick action buttons
+- [ ] Test navigation between pages
+
+**Deliverable:** Working authentication system with role-based access  
+**Effort:** 20 hours
+
+---
+
+## 📦 Phase 2: Core Modules Development (Week 3-7)
+
+### Week 3: Supplier & Raw Material Management
+
+#### Supplier Module - Backend
+
+- [ ] Create Supplier controller (`controllers/supplierController.js`)
+  - [ ] GET `/api/suppliers` - Get all suppliers (with pagination, search, filters)
+  - [ ] GET `/api/suppliers/:id` - Get supplier by ID
+  - [ ] POST `/api/suppliers` - Create supplier (auto-generate code)
+  - [ ] PUT `/api/suppliers/:id` - Update supplier
+  - [ ] DELETE `/api/suppliers/:id` - Delete supplier (soft delete)
+  - [ ] GET `/api/suppliers/:id/balance` - Get supplier balance
+- [ ] Create supplier routes (`routes/supplierRoutes.js`)
+- [ ] Implement validation middleware
+- [ ] Test all endpoints with Postman
+- [ ] Update Postman collection
+
+#### Supplier Module - Frontend
+
+- [ ] Create supplier service (`services/supplierService.js`)
+- [ ] Create supplier store (`stores/supplier.js`)
+- [ ] Create SupplierIndex view (`views/suppliers/SupplierIndex.vue`)
+- [ ] Create SupplierList component (`components/suppliers/SupplierList.vue`)
+- [ ] Create SupplierForm component (`components/suppliers/SupplierForm.vue`)
+- [ ] Create SupplierCreate view (`views/suppliers/SupplierCreate.vue`)
+- [ ] Create SupplierEdit view (`views/suppliers/SupplierEdit.vue`)
+- [ ] Implement DataTable with pagination
+- [ ] Implement search and filter functionality
+- [ ] Implement form validation
+- [ ] Test CRUD operations
+
+#### Raw Material Module - Backend
+
+- [ ] Create RawMaterial controller (`controllers/rawMaterialController.js`)
+  - [ ] GET `/api/raw-materials` - Get all raw materials
+  - [ ] GET `/api/raw-materials/:id` - Get raw material by ID
+  - [ ] POST `/api/raw-materials` - Create raw material (auto-generate code)
+  - [ ] PUT `/api/raw-materials/:id` - Update raw material
+  - [ ] DELETE `/api/raw-materials/:id` - Delete raw material
+  - [ ] GET `/api/raw-materials/:id/batches` - Get batches for material
+  - [ ] GET `/api/raw-materials/:id/stock` - Get current stock level
+- [ ] Create raw material routes (`routes/rawMaterialRoutes.js`)
+- [ ] Test all endpoints with Postman
+- [ ] Update Postman collection
+
+#### Raw Material Module - Frontend
+
+- [ ] Create raw material service (`services/rawMaterialService.js`)
+- [ ] Create raw material store (`stores/rawMaterial.js`)
+- [ ] Create RawMaterialIndex view
+- [ ] Create RawMaterialList component
+- [ ] Create RawMaterialForm component
+- [ ] Create RawMaterialCreate view
+- [ ] Create RawMaterialEdit view
+- [ ] Implement stock level display
+- [ ] Implement batch list view
+- [ ] Test CRUD operations
+
+**Deliverable:** Supplier and raw material modules functional  
+**Effort:** 18 hours
+
+---
+
+### Week 4: Purchase Orders & Inventory Receipt
+
+#### Purchase Order Module - Backend
+
+- [ ] Create PurchaseOrder controller (`controllers/purchaseOrderController.js`)
+  - [ ] GET `/api/purchase-orders` - Get all POs
+  - [ ] GET `/api/purchase-orders/:id` - Get PO by ID with items
+  - [ ] POST `/api/purchase-orders` - Create PO (auto-generate PO number)
+  - [ ] PUT `/api/purchase-orders/:id` - Update PO
+  - [ ] DELETE `/api/purchase-orders/:id` - Delete PO
+  - [ ] POST `/api/purchase-orders/:id/receive` - Receive PO (create batches)
+  - [ ] PUT `/api/purchase-orders/:id/status` - Update PO status
+- [ ] Implement batch number generation utility (`utils/batchNumberGenerator.js`)
+- [ ] Create batch number format: `RM-MAT001-20251218-001`
+- [ ] Implement PO receiving logic:
+  - [ ] Create raw material batches with system-generated batch numbers
+  - [ ] Update raw material stock levels
+  - [ ] Update supplier balance
+  - [ ] Update PO status
+- [ ] Handle returns in PO items (negative quantities)
+- [ ] Test all endpoints with Postman
+- [ ] Update Postman collection
+
+#### Purchase Order Module - Frontend
+
+- [ ] Create PO service (`services/purchaseOrderService.js`)
+- [ ] Create PO store (`stores/purchaseOrder.js`)
+- [ ] Create PurchaseOrderIndex view
+- [ ] Create PurchaseOrderList component
+- [ ] Create PurchaseOrderForm component (multi-step)
+  - [ ] Step 1: Supplier selection, PO details
+  - [ ] Step 2: Add items (material, quantity, unit cost)
+  - [ ] Step 3: Review and confirm
+- [ ] Create PurchaseOrderCreate view
+- [ ] Create PurchaseOrderEdit view
+- [ ] Create PurchaseOrderView component (read-only details)
+- [ ] Create ReceivePO dialog component
+- [ ] Implement batch tracking display
+- [ ] Implement returns handling (negative items)
+- [ ] Calculate total amounts
+- [ ] Test full PO workflow (create → receive → update stock)
+
+#### Batch Management
+
+- [ ] Create batch list view for raw materials
+- [ ] Display batch number, quantity, expiry date
+- [ ] Implement FIFO batch consumption tracking
+- [ ] Test batch creation on PO receipt
+
+**Deliverable:** Complete purchase order workflow with batch tracking  
+**Effort:** 22 hours
+
+---
+
+### Week 5: Products, Recipes & Production
+
+#### Product Module - Backend
+
+- [ ] Create Product controller (`controllers/productController.js`)
+  - [ ] GET `/api/products` - Get all products
+  - [ ] GET `/api/products/:id` - Get product with SKUs
+  - [ ] POST `/api/products` - Create product (auto-generate code)
+  - [ ] PUT `/api/products/:id` - Update product
+  - [ ] DELETE `/api/products/:id` - Delete product
+  - [ ] POST `/api/products/:id/skus` - Add SKU to product
+  - [ ] PUT `/api/products/:productId/skus/:skuId` - Update SKU
+  - [ ] DELETE `/api/products/:productId/skus/:skuId` - Delete SKU
+  - [ ] GET `/api/products/:id/stock` - Get stock for all SKUs
+- [ ] Add barcode field support
+- [ ] Validate unique barcodes
+- [ ] Test all endpoints
+
+#### Product Module - Frontend
+
+- [ ] Create product service (`services/productService.js`)
+- [ ] Create product store (`stores/product.js`)
+- [ ] Create ProductIndex view
+- [ ] Create ProductList component
+- [ ] Create ProductForm component with SKU management
+- [ ] Support multiple SKUs per product (100g, 500g, 1kg, etc.)
+- [ ] Add barcode input field
+- [ ] Create ProductCreate view
+- [ ] Create ProductEdit view
+- [ ] Display stock levels for each SKU
+- [ ] Test CRUD operations
+
+#### Recipe Module - Backend
+
+- [ ] Create Recipe controller (`controllers/recipeController.js`)
+  - [ ] GET `/api/recipes` - Get all recipes
+  - [ ] GET `/api/recipes/:id` - Get recipe with items (BOM)
+  - [ ] POST `/api/recipes` - Create recipe with versioning
+  - [ ] PUT `/api/recipes/:id` - Update recipe (create new version)
+  - [ ] DELETE `/api/recipes/:id` - Delete recipe
+  - [ ] GET `/api/recipes/:id/versions` - Get recipe version history
+  - [ ] POST `/api/recipes/:id/items` - Add item to recipe
+  - [ ] PUT `/api/recipes/:recipeId/items/:itemId` - Update recipe item
+  - [ ] DELETE `/api/recipes/:recipeId/items/:itemId` - Delete recipe item
+- [ ] Implement recipe versioning logic
+- [ ] Test all endpoints
+
+#### Recipe Module - Frontend
+
+- [ ] Create recipe service (`services/recipeService.js`)
+- [ ] Create recipe store (`stores/recipe.js`)
+- [ ] Create RecipeIndex view
+- [ ] Create RecipeList component
+- [ ] Create RecipeForm component (BOM builder)
+- [ ] Add raw materials to recipe with quantities
+- [ ] Display total cost calculation
+- [ ] Create RecipeCreate view
+- [ ] Create RecipeEdit view (creates new version)
+- [ ] Display recipe version history
+- [ ] Test recipe creation and versioning
+
+#### Production Module - Backend
+
+- [ ] Create Production controller (`controllers/productionController.js`)
+  - [ ] GET `/api/production-runs` - Get all production runs
+  - [ ] GET `/api/production-runs/:id` - Get production run details
+  - [ ] POST `/api/production-runs` - Create production run
+  - [ ] PUT `/api/production-runs/:id` - Update production run
+  - [ ] DELETE `/api/production-runs/:id` - Delete production run
+  - [ ] POST `/api/production-runs/:id/complete` - Complete production run
+- [ ] Implement production logic:
+  - [ ] Deduct raw materials from batches (FIFO)
+  - [ ] Create production output (finished goods)
+  - [ ] Update product SKU stock levels
+  - [ ] Link to recipe and track materials used
+- [ ] Test all endpoints
+
+#### Production Module - Frontend
+
+- [ ] Create production service (`services/productionService.js`)
+- [ ] Create production store (`stores/production.js`)
+- [ ] Create ProductionIndex view
+- [ ] Create ProductionList component
+- [ ] Create ProductionForm component
+  - [ ] Select product and SKU
+  - [ ] Select recipe
+  - [ ] Enter quantity to produce
+  - [ ] Display material requirements
+  - [ ] Check stock availability
+- [ ] Create ProductionCreate view
+- [ ] Display production history
+- [ ] Test production workflow (recipe → deduct materials → add finished goods)
+
+**Deliverable:** Production management module with recipe versioning  
+**Effort:** 25 hours
+
+---
+
+### Week 6: Routes, Outlets, Employees & Vehicle Assignment
+
+#### Route Module - Backend
+
+- [ ] Create Route controller (`controllers/routeController.js`)
+  - [ ] GET `/api/routes` - Get all routes
+  - [ ] GET `/api/routes/:id` - Get route by ID
+  - [ ] POST `/api/routes` - Create route (auto-generate code)
+  - [ ] PUT `/api/routes/:id` - Update route
+  - [ ] DELETE `/api/routes/:id` - Delete route
+  - [ ] GET `/api/routes/:id/outlets` - Get outlets on route
+  - [ ] GET `/api/routes/:id/employees` - Get employees on route
+- [ ] Test all endpoints
+
+#### Route Module - Frontend
+
+- [ ] Create route service (`services/routeService.js`)
+- [ ] Create route store (`stores/route.js`)
+- [ ] Create RouteIndex view
+- [ ] Create RouteList component
+- [ ] Create RouteForm component
+- [ ] Create RouteCreate view
+- [ ] Create RouteEdit view
+- [ ] Display outlets and employees assigned to route
+- [ ] Test CRUD operations
+
+#### Outlet Module - Backend
+
+- [ ] Create Outlet controller (`controllers/outletController.js`)
+  - [ ] GET `/api/outlets` - Get all outlets (with filters)
+  - [ ] GET `/api/outlets/:id` - Get outlet by ID
+  - [ ] POST `/api/outlets` - Create outlet (auto-generate code)
+  - [ ] PUT `/api/outlets/:id` - Update outlet
+  - [ ] DELETE `/api/outlets/:id` - Delete outlet
+  - [ ] GET `/api/outlets/:id/balance` - Get outlet balance
+  - [ ] GET `/api/outlets/:id/invoices` - Get outlet invoices
+  - [ ] GET `/api/outlets/:id/payments` - Get outlet payments
+- [ ] Test all endpoints
+
+#### Outlet Module - Frontend
+
+- [ ] Create outlet service (`services/outletService.js`)
+- [ ] Create outlet store (`stores/outlet.js`)
+- [ ] Create OutletIndex view
+- [ ] Create OutletList component
+- [ ] Create OutletForm component
+- [ ] Create OutletCreate view
+- [ ] Create OutletEdit view
+- [ ] Display balance and credit limit
+- [ ] Filter outlets by route
+- [ ] Test CRUD operations
+
+#### Employee Module - Backend
+
+- [ ] Create Employee controller (`controllers/employeeController.js`)
+  - [ ] GET `/api/employees` - Get all employees
+  - [ ] GET `/api/employees/:id` - Get employee by ID
+  - [ ] POST `/api/employees` - Create employee (auto-generate code)
+  - [ ] PUT `/api/employees/:id` - Update employee
+  - [ ] DELETE `/api/employees/:id` - Delete employee (soft delete)
+  - [ ] GET `/api/employees/:id/performance` - Get sales ref performance
+- [ ] Support employee types: sales_ref, driver, warehouse
+- [ ] Note: Employees do NOT have user accounts (no login)
+- [ ] Test all endpoints
+
+#### Employee Module - Frontend
+
+- [ ] Create employee service (`services/employeeService.js`)
+- [ ] Create employee store (`stores/employee.js`)
+- [ ] Create EmployeeIndex view
+- [ ] Create EmployeeList component
+- [ ] Create EmployeeForm component
+  - [ ] Employee type selector (sales_ref, driver, warehouse)
+  - [ ] Route assignment (for sales_ref and driver)
+- [ ] Create EmployeeCreate view
+- [ ] Create EmployeeEdit view
+- [ ] Filter employees by type
+- [ ] Display assigned route
+- [ ] Test CRUD operations
+
+#### Vehicle & Assignment Module - Backend
+
+- [ ] Create Vehicle controller (`controllers/vehicleController.js`)
+  - [ ] GET `/api/vehicles` - Get all vehicles
+  - [ ] GET `/api/vehicles/:id` - Get vehicle by ID
+  - [ ] POST `/api/vehicles` - Create vehicle (auto-generate code)
+  - [ ] PUT `/api/vehicles/:id` - Update vehicle
+  - [ ] DELETE `/api/vehicles/:id` - Delete vehicle
+  - [ ] GET `/api/vehicles/:id/assignment-history` - Get route assignment history
+  - [ ] POST `/api/vehicles/:id/assign-route` - Assign vehicle to route
+  - [ ] POST `/api/vehicles/:id/unassign-route` - Unassign vehicle from route
+- [ ] Implement route assignment logic:
+  - [ ] Create RouteVehicleHistory record
+  - [ ] Track assigned_date, unassigned_date, is_current
+  - [ ] One vehicle per route at a time
+- [ ] Test all endpoints
+
+#### Vehicle Module - Frontend
+
+- [ ] Create vehicle service (`services/vehicleService.js`)
+- [ ] Create vehicle store (`stores/vehicle.js`)
+- [ ] Create VehicleIndex view
+- [ ] Create VehicleList component
+- [ ] Create VehicleForm component
+- [ ] Create VehicleCreate view
+- [ ] Create VehicleEdit view
+- [ ] Create VehicleAssignment component
+  - [ ] Assign vehicle to route
+  - [ ] Unassign vehicle
+  - [ ] Display current assignment
+- [ ] Create AssignmentHistory component
+- [ ] Test vehicle-route assignment workflow
+
+**Deliverable:** Route, outlet, employee, and vehicle modules with assignment tracking  
+**Effort:** 22 hours
+
+---
+
+### Week 7: Sales & Invoicing (with Returns)
+
+#### Sales Invoice Module - Backend
+
+- [ ] Create Sales controller (`controllers/salesController.js`)
+  - [ ] GET `/api/sales-invoices` - Get all invoices (with filters)
+  - [ ] GET `/api/sales-invoices/:id` - Get invoice by ID with items
+  - [ ] POST `/api/sales-invoices` - Create invoice (auto-generate invoice number)
+  - [ ] PUT `/api/sales-invoices/:id` - Update invoice
+  - [ ] DELETE `/api/sales-invoices/:id` - Delete invoice
+  - [ ] GET `/api/sales-invoices/:id/pdf` - Generate PDF (future)
+- [ ] Implement invoice number generation (`utils/invoiceNumberGenerator.js`)
+- [ ] Implement invoice creation logic:
+  - [ ] Add invoice items (positive quantities for sales)
+  - [ ] Add return items (negative quantities)
+  - [ ] Track return reason and disposition (stock/dispose)
+  - [ ] Calculate subtotal, discount, total
+  - [ ] Update outlet balance for credit sales
+  - [ ] Update product SKU stock levels
+  - [ ] Process returns to stock if applicable
+  - [ ] Link to sales ref and route
+- [ ] Support payment methods: cash, credit, check
+- [ ] Add check tracking fields (check_number, check_date, clearance_date)
+- [ ] Test all endpoints
+
+#### Sales Invoice Module - Frontend
+
+- [ ] Create sales service (`services/salesService.js`)
+- [ ] Create sales store (`stores/sales.js`)
+- [ ] Create SalesIndex view
+- [ ] Create InvoiceList component
+- [ ] Create InvoiceForm component (multi-section)
+  - [ ] Section 1: Invoice header (outlet, sales ref, route, date)
+  - [ ] Section 2: Add sales items (product SKU, quantity, price, discount)
+  - [ ] Section 3: Add returns (product SKU, quantity, reason, disposition)
+  - [ ] Section 4: Payment details (method, check info if applicable)
+  - [ ] Section 5: Review totals
+- [ ] Create InvoiceCreate view
+- [ ] Create InvoiceEdit view
+- [ ] Create InvoiceView component (read-only)
+- [ ] Implement discount calculation (default 20% + custom)
+- [ ] Display outlet balance and credit limit
+- [ ] Calculate subtotal, discount, returns, total
+- [ ] Support cash/credit/check payment methods
+- [ ] Add check payment fields (number, date)
+- [ ] Display sales ref selector
+- [ ] Display route selector
+- [ ] Validate stock availability before saving
+- [ ] Test invoice creation with returns
+
+#### Returns Handling
+
+- [ ] Add return items as negative line items
+- [ ] Return reason dropdown (damaged, expired, excess, quality_issue, other)
+- [ ] Return disposition toggle (return to stock / dispose)
+- [ ] Update inventory based on disposition
+- [ ] Display returns in invoice view
+- [ ] Test returns workflow
+
+**Deliverable:** Sales, invoicing, and returns module  
+**Effort:** 28 hours
+
+---
+
+## 💰 Phase 3: Payments & Reporting (Week 8-9)
+
+### Week 8: Payment Collection & Credit Management
+
+#### Payment Module - Backend
+
+- [ ] Create Payment controller (`controllers/paymentController.js`)
+  - [ ] GET `/api/payments` - Get all payments
+  - [ ] GET `/api/payments/:id` - Get payment by ID
+  - [ ] POST `/api/payments` - Record payment
+  - [ ] PUT `/api/payments/:id` - Update payment
+  - [ ] DELETE `/api/payments/:id` - Delete payment
+  - [ ] POST `/api/payments/:id/allocate` - Allocate payment to invoices
+  - [ ] GET `/api/outlets/:id/outstanding-invoices` - Get unpaid invoices
+- [ ] Implement payment allocation logic:
+  - [ ] Reduce outlet balance
+  - [ ] Update invoice payment status (paid/partial/unpaid)
+  - [ ] Link payment to specific invoices
+- [ ] Support check payment tracking:
+  - [ ] Store check_number, check_date, clearance_date
+  - [ ] Track check status (pending/cleared)
+- [ ] Test all endpoints
+
+#### Supplier Payment Module - Backend
+
+- [ ] Create Supplier Payment endpoints in supplier controller
+  - [ ] GET `/api/supplier-payments` - Get all supplier payments
+  - [ ] POST `/api/supplier-payments` - Record supplier payment
+  - [ ] GET `/api/suppliers/:id/payments` - Get payments for supplier
+- [ ] Implement supplier payment logic:
+  - [ ] Reduce supplier balance
+  - [ ] Support cash/bank_transfer/check payment methods
+  - [ ] Track check details
+- [ ] Test all endpoints
+
+#### Payment Module - Frontend
+
+- [ ] Create payment service (`services/paymentService.js`)
+- [ ] Create payment store (`stores/payment.js`)
+- [ ] Create PaymentIndex view
+- [ ] Create PaymentList component
+- [ ] Create PaymentForm component
+  - [ ] Select outlet
+  - [ ] Display current balance
+  - [ ] Enter payment amount
+  - [ ] Select payment method (cash/bank_transfer/check)
+  - [ ] Add check details if check payment
+  - [ ] Display outstanding invoices
+  - [ ] Allocate payment to specific invoices
+- [ ] Create PaymentCreate view
+- [ ] Create ReceiptView component (payment receipt)
+- [ ] Test payment recording workflow
+
+#### Supplier Payment Frontend
+
+- [ ] Create SupplierPaymentForm component
+- [ ] Integrate with supplier module
+- [ ] Support check payment tracking
+- [ ] Display supplier payment history
+- [ ] Test supplier payment workflow
+
+#### Check Tracking
+
+- [ ] Create CheckPaymentList view
+- [ ] Display pending checks
+- [ ] Add clearance date functionality
+- [ ] Filter checks by status (pending/cleared)
+- [ ] Display overdue checks (>30 days)
+- [ ] Test check tracking features
+
+**Deliverable:** Payment and receivables management with check tracking  
+**Effort:** 18 hours
+
+---
+
+### Week 9: Reports & Analytics
+
+#### Report Module - Backend
+
+- [ ] Create Report controller (`controllers/reportController.js`)
+  - [ ] GET `/api/reports/sales-by-route` - Sales by route report
+  - [ ] GET `/api/reports/sales-by-outlet` - Sales by outlet report
+  - [ ] GET `/api/reports/sales-by-sales-ref` - Sales by sales ref report
+  - [ ] GET `/api/reports/sales-by-product` - Sales by product report
+  - [ ] GET `/api/reports/stock-raw-materials` - Raw material stock report
+  - [ ] GET `/api/reports/stock-finished-goods` - Finished goods stock report
+  - [ ] GET `/api/reports/receivables-aging` - Receivables aging report
+  - [ ] GET `/api/reports/supplier-ledger` - Supplier ledger report
+  - [ ] GET `/api/reports/product-returns` - Product returns summary
+  - [ ] GET `/api/reports/check-status` - Check payment status report
+  - [ ] GET `/api/reports/vehicle-assignment-history` - Vehicle history report
+  - [ ] GET `/api/reports/employee-performance` - Sales ref performance
+  - [ ] GET `/api/reports/dashboard-stats` - Dashboard statistics
+- [ ] Implement date range filtering
+- [ ] Support export to Excel/CSV (future enhancement)
+- [ ] Test all report endpoints
+
+#### Report Module - Frontend
+
+- [ ] Create report service (`services/reportService.js`)
+- [ ] Create report store (`stores/report.js`)
+- [ ] Create ReportIndex view (dashboard)
+- [ ] Create report components:
+  - [ ] SalesByRouteReport
+  - [ ] SalesByOutletReport
+  - [ ] SalesBySalesRefReport
+  - [ ] SalesByProductReport
+  - [ ] StockReportRaw
+  - [ ] StockReportFinished
+  - [ ] ReceivablesAgingReport
+  - [ ] SupplierLedgerReport
+  - [ ] ProductReturnsReport
+  - [ ] CheckStatusReport
+  - [ ] VehicleHistoryReport
+  - [ ] EmployeePerformanceReport
+- [ ] Add date range picker (PrimeVue Calendar)
+- [ ] Add filters (route, outlet, sales ref, etc.)
+- [ ] Display reports in DataTable format
+- [ ] Add export to CSV functionality (use utility function)
+- [ ] Create dashboard widgets with key metrics
+- [ ] Test all reports with sample data
+
+#### Export Functionality
+
+- [ ] Create export utility (`utils/exportHelpers.js`)
+- [ ] Implement CSV export function
+- [ ] Add export buttons to all reports
+- [ ] Test export with large datasets
+
+**Deliverable:** Comprehensive reporting module with new analytics  
+**Effort:** 24 hours
+
+---
+
+## 🧪 Phase 4: Testing & Deployment (Week 10-12)
+
+### Week 10: Testing & Bug Fixes
+
+#### Backend Testing
+
+- [ ] Create test database (`hasal_pos_test`)
+- [ ] Write unit tests for critical functions:
+  - [ ] Batch number generation
+  - [ ] Invoice number generation
+  - [ ] Authentication and JWT
+  - [ ] Payment allocation logic
+  - [ ] Stock update logic
+- [ ] Write integration tests for API endpoints:
+  - [ ] Auth endpoints
+  - [ ] CRUD operations for each module
+  - [ ] Complex workflows (PO receive, invoice with returns, payment allocation)
+- [ ] Test error handling and validation
+- [ ] Test edge cases (negative quantities, out of stock, etc.)
+- [ ] Run all tests and fix failures
+
+#### Frontend Testing
+
+- [ ] Test component rendering
+- [ ] Test form validation
+- [ ] Test user flows:
+  - [ ] Login → Dashboard → Logout
+  - [ ] Create supplier → Create PO → Receive PO
+  - [ ] Create product → Create recipe → Run production
+  - [ ] Create invoice with items
+  - [ ] Create invoice with returns
+  - [ ] Record payment → Allocate to invoices
+  - [ ] View reports with filters
+- [ ] Test error handling (network errors, validation errors)
+- [ ] Test loading states
+- [ ] Test pagination and search
+
+#### End-to-End Testing
+
+- [ ] Full supplier-to-sale workflow:
+  - [ ] Add supplier
+  - [ ] Create PO with items
+  - [ ] Receive PO (generate batches)
+  - [ ] Verify raw material stock updated
+  - [ ] Create product and recipe
+  - [ ] Run production
+  - [ ] Verify finished goods stock updated
+  - [ ] Create sales invoice
+  - [ ] Verify outlet balance updated
+  - [ ] Record payment
+  - [ ] Verify balance reduced
+- [ ] Test returns workflow
+- [ ] Test check payment workflow
+- [ ] Test employee and vehicle assignment
+
+#### Bug Fixes & Optimization
+
+- [ ] Fix bugs found during testing
+- [ ] Optimize database queries (add indexes if needed)
+- [ ] Optimize frontend performance (lazy loading, code splitting)
+- [ ] Review and refactor code
+- [ ] Security review (SQL injection, XSS prevention)
+- [ ] Test on different browsers (Chrome, Firefox, Edge)
+- [ ] Test responsive design on tablet and mobile
+
+**Deliverable:** Stable, tested application  
+**Effort:** 18 hours
+
+---
+
+### Week 11: Documentation & Training
+
+#### API Documentation
+
+- [ ] Create Postman collection for all endpoints
+- [ ] Add request examples and descriptions
+- [ ] Add response examples
+- [ ] Document authentication headers
+- [ ] Document query parameters and filters
+- [ ] Document error responses
+- [ ] Export Postman collection
+- [ ] Share collection with client
+
+#### User Documentation
+
+- [ ] Create user manual (Markdown or PDF)
+  - [ ] Introduction and overview
+  - [ ] Login instructions
+  - [ ] Admin role guide:
+    - [ ] Supplier management
+    - [ ] Purchase orders
+    - [ ] Product & recipe management
+    - [ ] Production runs
+    - [ ] Route & outlet management
+    - [ ] Employee management
+    - [ ] Vehicle assignment
+    - [ ] Reports
+  - [ ] Cashier role guide:
+    - [ ] Creating sales invoices
+    - [ ] Recording payments
+    - [ ] Viewing reports
+  - [ ] Troubleshooting section
+  - [ ] FAQ
+- [ ] Add screenshots to user manual
+- [ ] Create quick reference guide (1-page cheatsheet)
+
+#### Database Documentation
+
+- [ ] Create ER diagram (entity-relationship diagram)
+- [ ] Document all tables and columns
+- [ ] Document relationships and foreign keys
+- [ ] Document indexes
+- [ ] Already created in DATABASE_SCHEMA.md
+
+#### Deployment Documentation
+
+- [ ] Create deployment guide
+  - [ ] Server requirements (Ubuntu, Node.js, MySQL)
+  - [ ] Installation steps (clone repos, install dependencies)
+  - [ ] Database setup (create database, run migrations, run seeders)
+  - [ ] Environment configuration (.env setup)
+  - [ ] Build frontend (npm run build)
+  - [ ] Configure Nginx (reverse proxy, static files)
+  - [ ] Configure PM2 (process manager for Node.js)
+  - [ ] SSL certificate setup (Let's Encrypt)
+  - [ ] Backup and restore procedures
+- [ ] Create maintenance guide
+  - [ ] How to update the application
+  - [ ] How to backup database
+  - [ ] How to monitor logs
+  - [ ] Common issues and solutions
+
+#### Training Preparation
+
+- [ ] Prepare training slides/demo
+- [ ] Set up demo data
+- [ ] Practice demo walkthrough
+- [ ] Prepare training exercises
+- [ ] Schedule 2-hour training session with client
+
+#### Training Session (2 hours)
+
+- [ ] Overview of system capabilities (15 min)
+- [ ] Admin workflow demo (45 min):
+  - [ ] Supplier & PO management
+  - [ ] Product & production
+  - [ ] Employee & vehicle setup
+  - [ ] Sales & invoicing
+  - [ ] Payments
+  - [ ] Reports
+- [ ] Cashier workflow demo (30 min):
+  - [ ] Creating invoices
+  - [ ] Recording payments
+- [ ] Hands-on practice (20 min)
+- [ ] Q&A (10 min)
+
+**Deliverable:** Complete documentation package and training  
+**Effort:** 12 hours
+
+---
+
+### Week 12: Deployment & Handover
+
+#### Production Environment Setup
+
+- [ ] Provision Ubuntu server (client's server or cloud)
+- [ ] Install Node.js v20.19.1
+- [ ] Install MySQL 8.0.39
+- [ ] Install Nginx
+- [ ] Install PM2 globally
+- [ ] Configure firewall (allow HTTP, HTTPS, SSH)
+- [ ] Create database user with appropriate permissions
+- [ ] Set up SSH keys for secure access
+
+#### Backend Deployment
+
+- [ ] Clone backend repository to server
+- [ ] Install production dependencies (npm install --production)
+- [ ] Create `.env.production` file
+- [ ] Configure database connection
+- [ ] Set JWT secret (secure random string)
+- [ ] Run migrations (npx sequelize-cli db:migrate)
+- [ ] Run seeders (npx sequelize-cli db:seed:all)
+- [ ] Start backend with PM2 (pm2 start server.js --name hasal-pos-api)
+- [ ] Configure PM2 to start on boot (pm2 startup, pm2 save)
+- [ ] Test backend API endpoints
+
+#### Frontend Deployment
+
+- [ ] Clone frontend repository to server
+- [ ] Install dependencies (npm install)
+- [ ] Update `.env.production` with production API URL
+- [ ] Build for production (npm run build)
+- [ ] Configure Nginx:
+  - [ ] Serve static files from dist/
+  - [ ] Reverse proxy /api to backend
+  - [ ] Enable gzip compression
+  - [ ] Set up SSL certificate (Let's Encrypt certbot)
+- [ ] Restart Nginx
+- [ ] Test frontend in browser
+
+#### Domain & SSL
+
+- [ ] Configure domain DNS (if applicable)
+- [ ] Install SSL certificate with Let's Encrypt
+- [ ] Configure auto-renewal for SSL
+- [ ] Force HTTPS redirect
+
+#### Final Testing on Production
+
+- [ ] Smoke test all modules
+- [ ] Test login/logout
+- [ ] Test CRUD operations for each module
+- [ ] Test reports
+- [ ] Test on different devices
+- [ ] Check browser console for errors
+- [ ] Monitor server logs
+
+#### Handover
+
+- [ ] Provide client with:
+  - [ ] Access credentials (admin, cashier)
+  - [ ] Server access details (SSH keys)
+  - [ ] Database credentials
+  - [ ] GitHub repository access
+  - [ ] Postman collection
+  - [ ] User manual
+  - [ ] Deployment guide
+- [ ] Conduct handover meeting
+- [ ] Demonstrate live system
+- [ ] Answer client questions
+- [ ] Get client sign-off
+
+#### Post-Deployment Support Setup
+
+- [ ] Set up monitoring (PM2 monitoring or other tool)
+- [ ] Set up automated database backups (cron job)
+- [ ] Document support contact process
+- [ ] Begin 30-day support period
+
+**Deliverable:** Live production system  
+**Effort:** 10 hours
+
+---
+
+## 📊 Summary
+
+### Total Effort Breakdown
+
+| Phase     | Description                | Hours   |
+| --------- | -------------------------- | ------- |
+| 1         | Project Setup & Foundation | 35      |
+| 2         | Core Modules Development   | 115     |
+| 3         | Payments & Reporting       | 42      |
+| 4         | Testing & Deployment       | 40      |
+| **TOTAL** |                            | **232** |
+
+### Key Milestones
+
+| Week | Milestone                        | Payment           |
+| ---- | -------------------------------- | ----------------- |
+| 2    | Auth system complete             | -                 |
+| 4    | Purchase order workflow complete | -                 |
+| 5    | Production module complete       | -                 |
+| 7    | Sales & invoicing complete       | 120,000 LKR (40%) |
+| 9    | Reports complete                 | -                 |
+| 12   | Deployment & handover            | 90,000 LKR (30%)  |
+
+**Initial Payment:** 90,000 LKR (30%) - Upon project kickoff
+
+---
+
+## 🎯 Success Criteria
+
+- [ ] All 11 core modules fully functional
+- [ ] Authentication and authorization working
+- [ ] All CRUD operations tested
+- [ ] Reports displaying accurate data
+- [ ] Invoice PDF generation working
+- [ ] Database properly indexed and optimized
+- [ ] Application responsive on mobile/tablet
+- [ ] No critical bugs in production
+- [ ] Client trained and comfortable using system
+- [ ] Documentation complete and delivered
+- [ ] Source code handed over
+
+---
+
+## 📝 Notes
+
+- Refer to **PROJECT_STRUCTURE.md** for coding patterns and standards
+- Refer to **PROJECT_REQUIREMENTS.md** for detailed feature requirements
+- Refer to **DATABASE_SCHEMA.md** for database design details
+- Refer to **UI_MOCKUPS.md** for UI/UX guidelines
+- All dates are tentative and subject to client feedback
+- Weekly progress updates recommended
+- Use Postman for API testing throughout development
+- Commit code regularly to Git with meaningful messages
+- Create feature branches for each module
+
+---
+
+**Created:** December 18, 2025  
+**Status:** Ready to implement  
+**Next Action:** Begin Week 1 - Backend Setup

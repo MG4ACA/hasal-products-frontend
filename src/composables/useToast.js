@@ -21,7 +21,7 @@ export const useToast = () => {
     return id;
   };
 
-  const removeToast = (id) => {
+  const removeToast = id => {
     toasts.value = toasts.value.filter(t => t.id !== id);
   };
 

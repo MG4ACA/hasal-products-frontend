@@ -18,13 +18,13 @@
       </div>
     </div>
 
-    <Button label="Logout" @click="handleLogout" class="mt-4" severity="danger" />
+    <Button label="Logout" class="mt-4" severity="danger" @click="handleLogout" />
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const authStore = useAuthStore();

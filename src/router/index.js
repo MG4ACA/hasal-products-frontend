@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { createRouter, createWebHistory } from 'vue-router';
 
 // Lazy load views
 const Login = () => import('@/views/auth/Login.vue');

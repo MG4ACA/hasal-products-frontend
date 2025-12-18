@@ -1,15 +1,15 @@
 <template>
   <div id="app" class="app">
-    <component v-if="!isAuthenticated" :is="'RouterView'" />
+    <component :is="'RouterView'" v-if="!isAuthenticated" />
     <AppLayout v-else />
     <Toast />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/auth';
 import AppLayout from '@/components/layout/AppLayout.vue';
+import { useAuthStore } from '@/stores/auth';
+import { computed, onMounted } from 'vue';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -29,9 +29,9 @@ onMounted(() => {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   background-color: #f5f5f5;
 }
 

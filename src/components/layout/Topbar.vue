@@ -7,10 +7,10 @@
       <div class="user-profile">
         <span>{{ authStore.user?.email }}</span>
         <Button
+          v-tooltip="'Logout'"
           icon="pi pi-sign-out"
           class="p-button-rounded p-button-text"
           @click="handleLogout"
-          v-tooltip="'Logout'"
         />
       </div>
     </div>
@@ -18,9 +18,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();

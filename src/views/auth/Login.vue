@@ -6,7 +6,7 @@
         <p>Inventory Management System</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="login-form">
+      <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">Email</label>
           <InputText
@@ -29,13 +29,7 @@
           />
         </div>
 
-        <Button
-          type="submit"
-          label="Login"
-          class="w-full"
-          :loading="loading"
-          :disabled="loading"
-        />
+        <Button type="submit" label="Login" class="w-full" :loading="loading" :disabled="loading" />
       </form>
 
       <div v-if="error" class="error-message">
@@ -46,9 +40,9 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '@/stores/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -66,7 +60,7 @@ const handleLogin = async () => {
   error.value = null;
 
   try {
-    await authStore.login(form.email, form.password);
+    await authStore.login(form.value.email, form.value.password);
     router.push('/');
   } catch (err) {
     error.value = err.message || 'Login failed. Please try again.';
