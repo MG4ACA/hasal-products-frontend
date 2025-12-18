@@ -5,7 +5,8 @@
     </div>
     <div class="topbar-right">
       <div class="user-profile">
-        <span>{{ authStore.user?.email }}</span>
+        <span>{{ authStore.user?.username }}</span>
+        <span class="role-badge">{{ authStore.userRole }}</span>
         <Button
           v-tooltip="'Logout'"
           icon="pi pi-sign-out"

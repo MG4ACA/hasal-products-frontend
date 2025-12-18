@@ -8,12 +8,12 @@
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="username">Username</label>
           <InputText
-            id="email"
-            v-model="form.email"
-            type="email"
-            placeholder="Enter your email"
+            id="username"
+            v-model="form.username"
+            type="text"
+            placeholder="Enter your username"
             required
           />
         </div>
@@ -31,39 +31,38 @@
 
         <Button type="submit" label="Login" class="w-full" :loading="loading" :disabled="loading" />
       </form>
-
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useToastNotification } from '@/composables/useToastNotification';
 import { useAuthStore } from '@/stores/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { showSuccess, showError } = useToastNotification();
 
 const form = ref({
-  email: 'admin@example.com',
-  password: 'password',
+  username: 'admin',
+  password: 'admin123',
 });
 
 const loading = ref(false);
-const error = ref(null);
 
 const handleLogin = async () => {
   loading.value = true;
-  error.value = null;
 
   try {
-    await authStore.login(form.value.email, form.value.password);
-    router.push('/');
+    await authStore.login(form.value.username, form.value.password);
+    showSuccess('Logged in successfully!', 'Login Successful');
+    router.push('/dashboard');
   } catch (err) {
-    error.value = err.message || 'Login failed. Please try again.';
+    const errorMessage =
+      err.response?.data?.message || err.message || 'Login failed. Please try again.';
+    showError(errorMessage, 'Login Failed');
   } finally {
     loading.value = false;
   }
@@ -128,14 +127,5 @@ const handleLogin = async () => {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-}
-
-.error-message {
-  color: #d32f2f;
-  font-size: 0.9rem;
-  padding: 0.75rem;
-  background-color: #ffebee;
-  border-radius: 4px;
-  border-left: 3px solid #d32f2f;
 }
 </style>
