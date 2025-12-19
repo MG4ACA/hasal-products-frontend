@@ -67,6 +67,12 @@ const InvoiceCreate = () => import('@/views/sales/InvoiceCreate.vue');
 const InvoiceEdit = () => import('@/views/sales/InvoiceEdit.vue');
 const InvoiceView = () => import('@/views/sales/InvoiceView.vue');
 
+// Payment views
+const PaymentIndex = () => import('@/views/payments/PaymentIndex.vue');
+const PaymentCreate = () => import('@/views/payments/PaymentCreate.vue');
+const PaymentDetails = () => import('@/views/payments/PaymentDetails.vue');
+const PendingChecks = () => import('@/views/payments/PendingChecks.vue');
+
 const routes = [
   {
     path: '/login',
@@ -312,6 +318,30 @@ const routes = [
     path: '/sales/:id/view',
     name: 'InvoiceView',
     component: InvoiceView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payments',
+    name: 'Payments',
+    component: PaymentIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payments/create',
+    name: 'PaymentCreate',
+    component: PaymentCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payments/pending-checks',
+    name: 'PendingChecks',
+    component: PendingChecks,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payments/:id',
+    name: 'PaymentDetails',
+    component: PaymentDetails,
     meta: { requiresAuth: true },
   },
   {

@@ -37,6 +37,10 @@
         <i class="pi pi-shopping-cart" />
         <span>Sales</span>
       </RouterLink>
+      <RouterLink to="/payments" class="menu-item">
+        <i class="pi pi-money-bill" />
+        <span>Payments</span>
+      </RouterLink>
       <RouterLink to="/outlets" class="menu-item">
         <i class="pi pi-building" />
         <span>Outlets</span>

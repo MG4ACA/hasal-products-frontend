@@ -577,69 +577,141 @@
 
 #### Payment Module - Backend
 
-- [ ] Create Payment controller (`controllers/paymentController.js`)
-  - [ ] GET `/api/payments` - Get all payments
-  - [ ] GET `/api/payments/:id` - Get payment by ID
-  - [ ] POST `/api/payments` - Record payment
-  - [ ] PUT `/api/payments/:id` - Update payment
-  - [ ] DELETE `/api/payments/:id` - Delete payment
-  - [ ] POST `/api/payments/:id/allocate` - Allocate payment to invoices
-  - [ ] GET `/api/outlets/:id/outstanding-invoices` - Get unpaid invoices
-- [ ] Implement payment allocation logic:
-  - [ ] Reduce outlet balance
-  - [ ] Update invoice payment status (paid/partial/unpaid)
-  - [ ] Link payment to specific invoices
-- [ ] Support check payment tracking:
-  - [ ] Store check_number, check_date, clearance_date
-  - [ ] Track check status (pending/cleared)
-- [ ] Test all endpoints
+- [x] Create Payment controller (`controllers/paymentController.js`)
+  - [x] GET `/api/payments` - Get all payments with pagination & filters
+  - [x] GET `/api/payments/:id` - Get payment by ID with allocations
+  - [x] POST `/api/payments` - Record payment with allocations
+  - [x] PUT `/api/payments/:id` - Update payment
+  - [x] DELETE `/api/payments/:id` - Delete payment
+  - [x] GET `/api/outlets/:id/outstanding-invoices` - Get unpaid invoices
+  - [x] GET `/api/payments/pending-checks` - Get pending/overdue checks
+- [x] Create PaymentAllocation model (`models/PaymentAllocation.js`)
+  - [x] Track payment-to-invoice allocations
+  - [x] Store allocated_amount for partial payments
+  - [x] Link to Payment and SalesInvoice
+- [x] Implement payment allocation logic:
+  - [x] Reduce outlet balance via payment
+  - [x] Update invoice payment status (paid/partial/unpaid)
+  - [x] Link payment to specific invoices
+  - [x] Validate allocations match payment amount
+  - [x] Handle multiple allocations per payment
+- [x] Support check payment tracking:
+  - [x] Store check_number, check_date, clearance_date
+  - [x] Track check status (pending/cleared/overdue)
+  - [x] Identify overdue checks (>30 days)
+- [x] Create payment routes (`routes/paymentRoutes.js`)
+- [x] Test endpoints with Postman
 
 #### Supplier Payment Module - Backend
 
-- [ ] Create Supplier Payment endpoints in supplier controller
-  - [ ] GET `/api/supplier-payments` - Get all supplier payments
-  - [ ] POST `/api/supplier-payments` - Record supplier payment
-  - [ ] GET `/api/suppliers/:id/payments` - Get payments for supplier
-- [ ] Implement supplier payment logic:
-  - [ ] Reduce supplier balance
-  - [ ] Support cash/bank_transfer/check payment methods
-  - [ ] Track check details
-- [ ] Test all endpoints
+- [x] Create Supplier Payment endpoints in supplier controller
+  - [x] GET `/api/supplier-payments` - Get all supplier payments
+  - [x] POST `/api/supplier-payments` - Record supplier payment
+  - [x] GET `/api/suppliers/:id/payments` - Get payments for supplier
+- [x] Implement supplier payment logic:
+  - [x] Reduce supplier balance
+  - [x] Support cash/bank_transfer/check payment methods
+  - [x] Track check details
+- [x] Test all endpoints
 
 #### Payment Module - Frontend
 
-- [ ] Create payment service (`services/paymentService.js`)
-- [ ] Create payment store (`stores/payment.js`)
-- [ ] Create PaymentIndex view
-- [ ] Create PaymentList component
-- [ ] Create PaymentForm component
-  - [ ] Select outlet
-  - [ ] Display current balance
-  - [ ] Enter payment amount
-  - [ ] Select payment method (cash/bank_transfer/check)
-  - [ ] Add check details if check payment
-  - [ ] Display outstanding invoices
-  - [ ] Allocate payment to specific invoices
-- [ ] Create PaymentCreate view
-- [ ] Create ReceiptView component (payment receipt)
-- [ ] Test payment recording workflow
+- [x] Create payment service (`services/paymentService.js`)
+  - [x] getAllPayments(), getPaymentById(), createPayment(), updatePayment(), deletePayment()
+  - [x] getPendingChecks(), getOutstandingInvoices()
+- [x] Create payment store (`stores/payment.js`)
+  - [x] State: payments, selectedPayment, filters, pending checks
+  - [x] Actions: fetch, create, update, delete, filter
+  - [x] Getters: hasPayments, hasPendingChecks, totalOutstanding
+- [x] Create PaymentIndex view with filters & pagination
+- [x] Create PaymentCreate view (record payment & allocate to invoices)
+  - [x] Payment details form (outlet, amount, method, date)
+  - [x] Check fields (conditional: number, date, clearance)
+  - [x] Invoice allocation table
+  - [x] Real-time validation
+- [x] Create PaymentDetails view (read-only)
+- [x] Create PendingChecks view
+  - [x] List pending checks with due dates
+  - [x] Highlight overdue checks
+  - [x] Mark check as cleared
+- [x] Add 4 router entries
+- [x] Add Payments menu item to Sidebar
+- [x] Test payment workflow
 
 #### Supplier Payment Frontend
 
-- [ ] Create SupplierPaymentForm component
-- [ ] Integrate with supplier module
-- [ ] Support check payment tracking
-- [ ] Display supplier payment history
-- [ ] Test supplier payment workflow
+- [x] Create SupplierPaymentForm component
+- [x] Integrate with supplier module
+- [x] Support check payment tracking
+- [x] Display supplier payment history
+- [x] Test supplier payment workflow
 
-#### Check Tracking
+**Deliverable:** ✅ Complete Payment Collection & Credit Management (Backend & Frontend)  
+**Status:** Week 8 Complete - Database schema alignment complete  
+**Bug Fixes Applied:**
 
-- [ ] Create CheckPaymentList view
-- [ ] Display pending checks
-- [ ] Add clearance date functionality
-- [ ] Filter checks by status (pending/cleared)
-- [ ] Display overdue checks (>30 days)
-- [ ] Test check tracking features
+- [x] Fixed outlet.location → outlet.address (5 methods)
+- [x] Fixed createdBy.name → createdBy.full_name (5 methods)
+- [x] Removed invalid created_at ordering
+- [x] Fixed aliases: creator → createdBy
+      **Effort:** 26 hours  
+      **Completion Date:** December 20, 2025  
+      **Documentation:** See WEEK8_IMPLEMENTATION.md
+
+---
+
+## 📊 Phase 3B: Reporting & Dashboard (Week 9-10)
+
+### Week 9: Dashboard, Reports & Analytics
+
+#### Dashboard Module - Backend
+
+- [ ] Create dashboard controller (`controllers/dashboardController.js`)
+  - [ ] GET `/api/dashboard/summary` - Total sales, payments, balance, checks pending
+  - [ ] GET `/api/dashboard/sales-chart` - Sales by date (last 7/30 days)
+  - [ ] GET `/api/dashboard/outlet-balance` - Outlet payment status
+  - [ ] GET `/api/dashboard/inventory-low-stock` - Low stock items
+  - [ ] GET `/api/dashboard/production-status` - Active production runs
+  - [ ] GET `/api/dashboard/payment-status` - Payment collection status
+
+#### Reports Module - Backend
+
+- [ ] Create reports controller (`controllers/reportsController.js`)
+  - [ ] GET `/api/reports/sales` - Sales report (by date, outlet, product)
+  - [ ] GET `/api/reports/payments` - Payment collection report
+  - [ ] GET `/api/reports/supplier-payments` - Supplier payment report
+  - [ ] GET `/api/reports/inventory` - Inventory valuation report
+  - [ ] GET `/api/reports/production` - Production efficiency report
+  - [ ] GET `/api/reports/outlet-balance` - Outlet balance & aging report
+  - [ ] GET `/api/reports/check-status` - Check clearing status
+- [ ] Implement report filtering by date range, outlet, supplier, product
+- [ ] Implement CSV export for reports
+
+#### Dashboard & Reports - Frontend
+
+- [ ] Create dashboard view (DashboardIndex.vue)
+  - [ ] Summary cards (total sales, payments, pending balance, pending checks)
+  - [ ] Sales chart (last 7/30 days)
+  - [ ] Outlet balance status
+  - [ ] Low stock alert
+  - [ ] Recent payments
+  - [ ] Pending checks
+- [ ] Create Reports view (ReportsIndex.vue)
+  - [ ] Sales report with filters & export
+  - [ ] Payment collection report
+  - [ ] Supplier payment report
+  - [ ] Inventory report
+  - [ ] Production report
+  - [ ] Outlet balance report
+  - [ ] Check status report
+- [ ] Add reporting routes to router
+
+**Deliverable:** Dashboard and reports module  
+**Effort:** 16 hours
+
+---
+
+### Week 10: Testing & Documentation Updates
 
 **Deliverable:** Payment and receivables management with check tracking  
 **Effort:** 18 hours
