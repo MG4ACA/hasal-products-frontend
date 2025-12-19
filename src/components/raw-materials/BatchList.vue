@@ -9,6 +9,21 @@
       <Button icon="pi pi-times" rounded text severity="secondary" @click="$emit('close')" />
     </div>
 
+    <!-- Filter Section -->
+    <div class="mb-3">
+      <div class="flex gap-2">
+        <Dropdown
+          v-model="batchTypeFilter"
+          :options="batchTypeOptions"
+          option-label="label"
+          option-value="value"
+          placeholder="Filter by Batch Type"
+          class="w-full md:w-15rem"
+          @change="fetchBatches"
+        />
+      </div>
+    </div>
+
     <!-- Loading State -->
     <div
       v-if="loading"
@@ -92,6 +107,15 @@
           </template>
         </Column>
 
+        <Column field="batch_type" header="Type" :sortable="true">
+          <template #body="{ data }">
+            <Tag
+              :value="data.batch_type === 'return' ? 'Return' : 'Receipt'"
+              :severity="data.batch_type === 'return' ? 'warning' : 'success'"
+            />
+          </template>
+        </Column>
+
         <Column field="Supplier.name" header="Supplier" :sortable="true">
           <template #body="{ data }">
             <span>{{ data.Supplier?.name || 'N/A' }}</span>
@@ -124,15 +148,42 @@
 
         <Column field="initial_quantity" header="Initial Qty" :sortable="true">
           <template #body="{ data }">
-            {{ formatNumber(data.initial_quantity) }}
+            <span :class="{ 'negative-qty': data.initial_quantity < 0 }">
+              {{ formatNumber(data.initial_quantity) }}
+            </span>
           </template>
         </Column>
 
         <Column field="current_quantity" header="Current Qty" :sortable="true">
           <template #body="{ data }">
-            <span :class="{ 'text-red-500 font-semibold': data.current_quantity <= 0 }">
+            <span
+              :class="{
+                'text-red-500 font-semibold': data.current_quantity <= 0,
+                'negative-qty': data.current_quantity < 0,
+              }"
+            >
               {{ formatNumber(data.current_quantity) }}
             </span>
+          </template>
+        </Column>
+
+        <Column v-if="hasReturns" field="return_reason" header="Return Reason">
+          <template #body="{ data }">
+            <span v-if="data.batch_type === 'return' && data.return_reason">
+              {{ formatReturnReason(data.return_reason) }}
+            </span>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+        </Column>
+
+        <Column v-if="hasReturns" field="return_disposition" header="Disposition">
+          <template #body="{ data }">
+            <Tag
+              v-if="data.batch_type === 'return' && data.return_disposition"
+              :value="data.return_disposition === 'stock' ? 'Return to Stock' : 'Dispose'"
+              :severity="data.return_disposition === 'stock' ? 'info' : 'danger'"
+            />
+            <span v-else class="text-gray-400">-</span>
           </template>
         </Column>
 
@@ -211,6 +262,13 @@ const pagination = ref({
   rowsPerPage: 10,
   totalRecords: 0,
 });
+const batchTypeFilter = ref('');
+
+const batchTypeOptions = [
+  { label: 'All Batches', value: '' },
+  { label: 'Receipts Only', value: 'receipt' },
+  { label: 'Returns Only', value: 'return' },
+];
 
 // Computed properties
 const totalCurrentQuantity = computed(() => {
@@ -222,14 +280,24 @@ const activeBatchCount = computed(() => {
     .length;
 });
 
+const hasReturns = computed(() => {
+  return batches.value.some(batch => batch.batch_type === 'return');
+});
+
 // Methods
 const fetchBatches = async () => {
   loading.value = true;
   try {
-    const response = await rawMaterialStore.fetchRawMaterialBatches(props.materialId, {
+    const params = {
       page: pagination.value.page,
       limit: pagination.value.rowsPerPage,
-    });
+    };
+
+    if (batchTypeFilter.value) {
+      params.batch_type = batchTypeFilter.value;
+    }
+
+    const response = await rawMaterialStore.fetchRawMaterialBatches(props.materialId, params);
 
     if (response && response.data) {
       batches.value = response.data.data || [];
@@ -292,6 +360,14 @@ const isExpiringSoon = expiryDate => {
   return expiry <= thirtyDaysFromNow;
 };
 
+const formatReturnReason = reason => {
+  if (!reason) return '';
+  return reason
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 // Lifecycle
 onMounted(() => {
   fetchBatches();
@@ -305,5 +381,10 @@ onMounted(() => {
 
 .font-mono {
   font-family: 'Courier New', monospace;
+}
+
+.negative-qty {
+  color: #e53e3e;
+  font-weight: 600;
 }
 </style>

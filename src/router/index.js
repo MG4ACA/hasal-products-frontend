@@ -16,6 +16,12 @@ const RawMaterialIndex = () => import('@/views/raw-materials/RawMaterialIndex.vu
 const RawMaterialCreate = () => import('@/views/raw-materials/RawMaterialCreate.vue');
 const RawMaterialEdit = () => import('@/views/raw-materials/RawMaterialEdit.vue');
 
+// Purchase Order views
+const PurchaseOrderIndex = () => import('@/views/purchase-orders/PurchaseOrderIndex.vue');
+const PurchaseOrderCreate = () => import('@/views/purchase-orders/PurchaseOrderCreate.vue');
+const PurchaseOrderEdit = () => import('@/views/purchase-orders/PurchaseOrderEdit.vue');
+const PurchaseOrderView = () => import('@/views/purchase-orders/PurchaseOrderView.vue');
+
 const routes = [
   {
     path: '/login',
@@ -63,6 +69,30 @@ const routes = [
     path: '/raw-materials/:id/edit',
     name: 'RawMaterialEdit',
     component: RawMaterialEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/purchase-orders',
+    name: 'PurchaseOrders',
+    component: PurchaseOrderIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/purchase-orders/create',
+    name: 'PurchaseOrderCreate',
+    component: PurchaseOrderCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/purchase-orders/:id/edit',
+    name: 'PurchaseOrderEdit',
+    component: PurchaseOrderEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/purchase-orders/:id/view',
+    name: 'PurchaseOrderView',
+    component: PurchaseOrderView,
     meta: { requiresAuth: true },
   },
   {

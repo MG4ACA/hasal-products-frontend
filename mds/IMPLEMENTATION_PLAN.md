@@ -223,50 +223,57 @@
 
 #### Purchase Order Module - Backend
 
-- [ ] Create PurchaseOrder controller (`controllers/purchaseOrderController.js`)
-  - [ ] GET `/api/purchase-orders` - Get all POs
-  - [ ] GET `/api/purchase-orders/:id` - Get PO by ID with items
-  - [ ] POST `/api/purchase-orders` - Create PO (auto-generate PO number)
-  - [ ] PUT `/api/purchase-orders/:id` - Update PO
-  - [ ] DELETE `/api/purchase-orders/:id` - Delete PO
-  - [ ] POST `/api/purchase-orders/:id/receive` - Receive PO (create batches)
-  - [ ] PUT `/api/purchase-orders/:id/status` - Update PO status
-- [ ] Implement batch number generation utility (`utils/batchNumberGenerator.js`)
-- [ ] Create batch number format: `RM-MAT001-20251218-001`
-- [ ] Implement PO receiving logic:
-  - [ ] Create raw material batches with system-generated batch numbers
-  - [ ] Update raw material stock levels
-  - [ ] Update supplier balance
-  - [ ] Update PO status
-- [ ] Handle returns in PO items (negative quantities)
-- [ ] Test all endpoints with Postman
-- [ ] Update Postman collection
+- [x] Create PurchaseOrder controller (`controllers/purchaseOrderController.js`)
+  - [x] GET `/api/purchase-orders` - Get all POs
+  - [x] GET `/api/purchase-orders/:id` - Get PO by ID with items
+  - [x] POST `/api/purchase-orders` - Create PO (auto-generate PO number)
+  - [x] PUT `/api/purchase-orders/:id` - Update PO
+  - [x] DELETE `/api/purchase-orders/:id` - Delete PO
+  - [x] POST `/api/purchase-orders/:id/receive` - Receive PO (create batches)
+  - [x] PUT `/api/purchase-orders/:id/status` - Update PO status
+- [x] Implement batch number generation utility (`utils/batchNumberGenerator.js`)
+- [x] Create batch number format: `RM-MAT001-20251218-001`
+- [x] Implement PO receiving logic:
+  - [x] Create raw material batches with system-generated batch numbers
+  - [x] Update raw material stock levels
+  - [x] Update supplier balance
+  - [x] Update PO status
+- [x] Handle returns in PO items (negative quantities)
+  - [x] Add batch_type, return_reason, return_disposition fields to batches
+  - [x] Process return_items array in receive endpoint
+  - [x] Calculate net amount (total - returns)
+- [x] Test all endpoints with Postman
+- [x] Update Postman collection
 
 #### Purchase Order Module - Frontend
 
-- [ ] Create PO service (`services/purchaseOrderService.js`)
-- [ ] Create PO store (`stores/purchaseOrder.js`)
-- [ ] Create PurchaseOrderIndex view
-- [ ] Create PurchaseOrderList component
-- [ ] Create PurchaseOrderForm component (multi-step)
-  - [ ] Step 1: Supplier selection, PO details
-  - [ ] Step 2: Add items (material, quantity, unit cost)
-  - [ ] Step 3: Review and confirm
-- [ ] Create PurchaseOrderCreate view
-- [ ] Create PurchaseOrderEdit view
+- [x] Create PO service (`services/purchaseOrderService.js`)
+- [x] Create PO store (`stores/purchaseOrder.js`)
+- [x] Create PurchaseOrderIndex view
+- [x] Create PurchaseOrderList component
+- [x] Create PurchaseOrderForm component (multi-step)
+  - [x] Step 1: Supplier selection, PO details
+  - [x] Step 2: Add items (material, quantity, unit cost)
+  - [x] Step 3: Review and confirm
+- [x] Create PurchaseOrderCreate view
+- [x] Create PurchaseOrderEdit view
 - [ ] Create PurchaseOrderView component (read-only details)
-- [ ] Create ReceivePO dialog component
+- [x] Create ReceivePO dialog component with returns support
+  - [x] TabView with Receive Items and Return Items tabs
+  - [x] Return reason dropdown (damaged, expired, excess, quality_issue, wrong_item, other)
+  - [x] Disposition selection (stock vs dispose)
+  - [x] Net amount calculation display
 - [ ] Implement batch tracking display
-- [ ] Implement returns handling (negative items)
-- [ ] Calculate total amounts
+- [x] Implement returns handling (negative items)
+- [x] Calculate total amounts
 - [ ] Test full PO workflow (create → receive → update stock)
 
 #### Batch Management
 
-- [ ] Create batch list view for raw materials
-- [ ] Display batch number, quantity, expiry date
+- [x] Create batch list view for raw materials
+- [x] Display batch number, quantity, expiry date
 - [ ] Implement FIFO batch consumption tracking
-- [ ] Test batch creation on PO receipt
+- [x] Test batch creation on PO receipt
 
 **Deliverable:** Complete purchase order workflow with batch tracking  
 **Effort:** 22 hours

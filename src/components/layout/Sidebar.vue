@@ -17,6 +17,10 @@
         <i class="pi pi-box" />
         <span>Raw Materials</span>
       </RouterLink>
+      <RouterLink to="/purchase-orders" class="menu-item">
+        <i class="pi pi-file-edit" />
+        <span>Purchase Orders</span>
+      </RouterLink>
       <a href="#" class="menu-item">
         <i class="pi pi-tags" />
         <span>Products</span>

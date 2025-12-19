@@ -31,3 +31,10 @@ export const formatDateTime = date => {
     minute: '2-digit',
   }).format(new Date(date));
 };
+
+/**
+ * Format number with decimals
+ */
+export const formatNumber = (number, decimals = 2) => {
+  return parseFloat(number).toFixed(decimals);
+};
