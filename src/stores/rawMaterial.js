@@ -37,8 +37,8 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.getAllRawMaterials(params);
-      rawMaterials.value = response.data.raw_materials;
-      pagination.value = response.data.pagination;
+      rawMaterials.value = response.raw_materials;
+      pagination.value = response.pagination;
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch raw materials';
@@ -53,7 +53,7 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.getRawMaterialById(id);
-      currentRawMaterial.value = response.data.raw_material;
+      currentRawMaterial.value = response.raw_material;
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch raw material';
@@ -68,7 +68,7 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.getRawMaterialBatches(id, params);
-      batches.value = response.data.batches;
+      batches.value = response.batches;
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch batches';
@@ -81,7 +81,7 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
   const fetchRawMaterialStock = async id => {
     try {
       const response = await rawMaterialService.getRawMaterialStock(id);
-      currentStock.value = response.data.stock;
+      currentStock.value = response.stock;
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch stock';
@@ -94,7 +94,7 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.createRawMaterial(data);
-      rawMaterials.value.unshift(response.data.raw_material);
+      rawMaterials.value.unshift(response.raw_material);
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create raw material';
@@ -111,10 +111,10 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
       const response = await rawMaterialService.updateRawMaterial(id, data);
       const index = rawMaterials.value.findIndex(rm => rm.id === id);
       if (index !== -1) {
-        rawMaterials.value[index] = response.data.raw_material;
+        rawMaterials.value[index] = response.raw_material;
       }
       if (currentRawMaterial.value?.id === id) {
-        currentRawMaterial.value = response.data.raw_material;
+        currentRawMaterial.value = response.raw_material;
       }
       return response;
     } catch (err) {

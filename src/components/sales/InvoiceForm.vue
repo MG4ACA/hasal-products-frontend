@@ -56,6 +56,7 @@ const selectedSku = ref(null);
 const itemQuantity = ref(1);
 const itemPrice = ref(0);
 const itemDiscount = ref(0);
+const stockError = ref('');
 
 // Return items management
 const returnProduct = ref(null);
@@ -115,9 +116,42 @@ const isFormValid = computed(() => {
     formData.value.invoice_date &&
     formData.value.payment_method &&
     formData.value.items &&
-    formData.value.items.length > 0
+    formData.value.items.length > 0 &&
+    !hasInsufficientStock.value
   );
 });
+
+// Check if any sales item has insufficient stock
+const hasInsufficientStock = computed(() => {
+  const salesItems = (formData.value.items || []).filter(item => !item.is_return);
+  return salesItems.some(item => {
+    const product = productStore.products.find(p => p.skus && p.skus.some(s => s.id === item.sku_id));
+    if (!product) return false;
+    const sku = product.skus.find(s => s.id === item.sku_id);
+    return sku && sku.current_stock < item.quantity;
+  });
+});
+
+// Validate stock availability for current selection
+const validateStock = () => {
+  stockError.value = '';
+  
+  if (!selectedSku.value || !itemQuantity.value) {
+    return true;
+  }
+
+  const sku = skuOptions.value.find(s => s.id === selectedSku.value);
+  if (!sku) {
+    return true;
+  }
+
+  if (sku.current_stock < itemQuantity.value) {
+    stockError.value = `Insufficient stock. Only ${sku.current_stock} units available.`;
+    return false;
+  }
+
+  return true;
+};
 
 // Watch SKU selection to set price
 watch(selectedSku, newSku => {
@@ -129,8 +163,15 @@ watch(selectedSku, newSku => {
       if (selectedOutlet.value && selectedOutlet.value.default_discount) {
         itemDiscount.value = selectedOutlet.value.default_discount;
       }
+      // Validate stock when SKU changes
+      validateStock();
     }
   }
+});
+
+// Watch quantity changes to validate stock
+watch(itemQuantity, () => {
+  validateStock();
 });
 
 watch(returnSku, newSku => {
@@ -145,6 +186,11 @@ watch(returnSku, newSku => {
 // Methods
 const addSalesItem = () => {
   if (!selectedSku.value || itemQuantity.value <= 0 || itemPrice.value <= 0) {
+    return;
+  }
+
+  // Validate stock before adding
+  if (!validateStock()) {
     return;
   }
 
@@ -171,6 +217,7 @@ const addSalesItem = () => {
   itemQuantity.value = 1;
   itemPrice.value = 0;
   itemDiscount.value = 0;
+  stockError.value = '';
 };
 
 const addReturnItem = () => {
@@ -413,6 +460,7 @@ onMounted(async () => {
                   :options="skuOptions"
                   :disabled="!selectedProduct"
                   placeholder="Select SKU"
+                  :class="{ 'p-invalid': stockError }"
                   class="w-full"
                 >
                   <template #value="slotProps">
@@ -425,18 +473,25 @@ onMounted(async () => {
                   <template #option="slotProps">
                     <div>
                       <div>{{ slotProps.option.size }}{{ slotProps.option.unit }}</div>
-                      <div class="text-sm text-gray-500">
-                        Stock: {{ slotProps.option.stock_quantity }} | Price:
+                      <div class="text-sm" :class="slotProps.option.current_stock > 0 ? 'text-gray-500' : 'text-red-500'">
+                        Stock: {{ slotProps.option.current_stock || 0 }} | Price:
                         {{ formatCurrency(slotProps.option.price) }}
                       </div>
                     </div>
                   </template>
                 </Dropdown>
+                <small v-if="stockError" class="p-error">{{ stockError }}</small>
               </div>
 
               <div class="field" style="width: 120px">
                 <label for="quantity">Quantity</label>
-                <InputNumber id="quantity" v-model="itemQuantity" :min="1" class="w-full" />
+                <InputNumber 
+                  id="quantity" 
+                  v-model="itemQuantity" 
+                  :min="1" 
+                  :class="{ 'p-invalid': stockError }"
+                  class="w-full" 
+                />
               </div>
 
               <div class="field" style="width: 140px">
@@ -468,7 +523,7 @@ onMounted(async () => {
                 <Button
                   icon="pi pi-plus"
                   label="Add"
-                  :disabled="!selectedSku || itemQuantity <= 0"
+                  :disabled="!selectedSku || itemQuantity <= 0 || !!stockError"
                   class="w-full"
                   @click="addSalesItem"
                 />
@@ -759,12 +814,17 @@ onMounted(async () => {
 
     <div class="form-actions">
       <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="$emit('cancel')" />
-      <Button
-        label="Submit Invoice"
-        icon="pi pi-check"
-        :disabled="!isFormValid"
-        @click="handleSubmit"
-      />
+      <div class="flex flex-column align-items-end" style="flex: 1;">
+        <small v-if="hasInsufficientStock" class="p-error mb-2">
+          Cannot submit: Some items have insufficient stock
+        </small>
+        <Button
+          label="Submit Invoice"
+          icon="pi pi-check"
+          :disabled="!isFormValid"
+          @click="handleSubmit"
+        />
+      </div>
     </div>
   </div>
 </template>

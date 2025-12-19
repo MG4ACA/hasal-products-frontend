@@ -1,8 +1,8 @@
 <script setup>
 import InvoiceList from '@/components/sales/InvoiceList.vue';
-import { useEmployeeStore } from '@/stores/employeeStore';
-import { useOutletStore } from '@/stores/outletStore';
-import { useRouteStore } from '@/stores/routeStore';
+import { useEmployeeStore } from '@/stores/employee';
+import { useOutletStore } from '@/stores/outlet';
+import { useRouteStore } from '@/stores/route';
 import { useSalesStore } from '@/stores/salesStore';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';

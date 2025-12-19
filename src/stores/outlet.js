@@ -44,8 +44,8 @@ export const useOutletStore = defineStore('outlet', () => {
       };
 
       const response = await outletService.getAll(params);
-      outlets.value = response.data.outlets;
-      pagination.value = response.data.pagination;
+      outlets.value = response.outlets;
+      pagination.value = response.pagination;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch outlets';
       throw err;
@@ -59,8 +59,8 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getById(id);
-      currentOutlet.value = response.data;
-      return response.data;
+      currentOutlet.value = response;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch outlet';
       throw err;
@@ -75,7 +75,7 @@ export const useOutletStore = defineStore('outlet', () => {
       error.value = null;
       const response = await outletService.create(outletData);
       await fetchOutlets();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create outlet';
       throw err;
@@ -90,7 +90,7 @@ export const useOutletStore = defineStore('outlet', () => {
       error.value = null;
       const response = await outletService.update(id, outletData);
       await fetchOutlets();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to update outlet';
       throw err;
@@ -118,8 +118,8 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getBalance(id);
-      outletBalance.value = response.data;
-      return response.data;
+      outletBalance.value = response;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch outlet balance';
       throw err;
@@ -133,8 +133,8 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getInvoices(id, params);
-      outletInvoices.value = response.data.invoices;
-      return response.data;
+      outletInvoices.value = response.invoices;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch outlet invoices';
       throw err;
@@ -148,8 +148,8 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getPayments(id, params);
-      outletPayments.value = response.data.payments;
-      return response.data;
+      outletPayments.value = response.payments;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch outlet payments';
       throw err;

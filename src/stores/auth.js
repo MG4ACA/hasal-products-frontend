@@ -65,8 +65,8 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
     try {
       const response = await authService.login(username, password);
-      token.value = response.data.token;
-      user.value = response.data.user;
+      token.value = response.token;
+      user.value = response.user;
 
       // Calculate expiry time (24 hours from now)
       const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
@@ -103,7 +103,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) return;
     try {
       const response = await authService.getCurrentUser();
-      user.value = response.data.user;
+      user.value = response.user;
     } catch (err) {
       error.value = err.message;
       logout();

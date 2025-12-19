@@ -282,7 +282,7 @@ const loadProducts = async () => {
     productOptions.value = [
       { label: 'All Products', value: '' },
       ...productStore.products.map(p => ({
-        label: `${p.product_code} - ${p.name}`,
+        label: `${p.code} - ${p.name}`,
         value: p.id,
       })),
     ];

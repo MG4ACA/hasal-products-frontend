@@ -45,8 +45,8 @@ export const useEmployeeStore = defineStore('employee', () => {
       };
 
       const response = await employeeService.getAll(params);
-      employees.value = response.data.employees;
-      pagination.value = response.data.pagination;
+      employees.value = response.employees;
+      pagination.value = response.pagination;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch employees';
       throw err;
@@ -60,8 +60,8 @@ export const useEmployeeStore = defineStore('employee', () => {
       loading.value = true;
       error.value = null;
       const response = await employeeService.getById(id);
-      currentEmployee.value = response.data;
-      return response.data;
+      currentEmployee.value = response;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch employee';
       throw err;
@@ -76,7 +76,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       error.value = null;
       const response = await employeeService.create(employeeData);
       await fetchEmployees();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create employee';
       throw err;
@@ -91,7 +91,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       error.value = null;
       const response = await employeeService.update(id, employeeData);
       await fetchEmployees();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to update employee';
       throw err;
@@ -119,8 +119,8 @@ export const useEmployeeStore = defineStore('employee', () => {
       loading.value = true;
       error.value = null;
       const response = await employeeService.getPerformance(id, params);
-      employeePerformance.value = response.data;
-      return response.data;
+      employeePerformance.value = response;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch employee performance';
       throw err;

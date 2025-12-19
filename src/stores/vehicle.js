@@ -40,8 +40,8 @@ export const useVehicleStore = defineStore('vehicle', () => {
       };
 
       const response = await vehicleService.getAll(params);
-      vehicles.value = response.data.vehicles;
-      pagination.value = response.data.pagination;
+      vehicles.value = response.vehicles;
+      pagination.value = response.pagination;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch vehicles';
       throw err;
@@ -55,8 +55,8 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.getById(id);
-      currentVehicle.value = response.data;
-      return response.data;
+      currentVehicle.value = response;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch vehicle';
       throw err;
@@ -71,7 +71,7 @@ export const useVehicleStore = defineStore('vehicle', () => {
       error.value = null;
       const response = await vehicleService.create(vehicleData);
       await fetchVehicles();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create vehicle';
       throw err;
@@ -86,7 +86,7 @@ export const useVehicleStore = defineStore('vehicle', () => {
       error.value = null;
       const response = await vehicleService.update(id, vehicleData);
       await fetchVehicles();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to update vehicle';
       throw err;
@@ -115,7 +115,7 @@ export const useVehicleStore = defineStore('vehicle', () => {
       error.value = null;
       const response = await vehicleService.assignToRoute(id, assignmentData);
       await fetchVehicles();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to assign vehicle to route';
       throw err;
@@ -130,7 +130,7 @@ export const useVehicleStore = defineStore('vehicle', () => {
       error.value = null;
       const response = await vehicleService.unassignFromRoute(id, unassignmentData);
       await fetchVehicles();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to unassign vehicle from route';
       throw err;
@@ -144,8 +144,8 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.getAssignmentHistory(id, params);
-      vehicleHistory.value = response.data.history;
-      return response.data;
+      vehicleHistory.value = response.history || response.data.history;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch vehicle assignment history';
       throw err;

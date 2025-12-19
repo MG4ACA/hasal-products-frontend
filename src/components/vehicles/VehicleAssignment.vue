@@ -1,7 +1,7 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
-import { useRouteStore } from '@/stores/routeStore';
-import { useVehicleStore } from '@/stores/vehicleStore';
+import { useRouteStore } from '@/stores/route';
+import { useVehicleStore } from '@/stores/vehicle';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';

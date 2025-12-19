@@ -2,7 +2,7 @@
 import VehicleAssignment from '@/components/vehicles/VehicleAssignment.vue';
 import VehicleList from '@/components/vehicles/VehicleList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
-import { useVehicleStore } from '@/stores/vehicleStore';
+import { useVehicleStore } from '@/stores/vehicle';
 import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Dropdown from 'primevue/dropdown';

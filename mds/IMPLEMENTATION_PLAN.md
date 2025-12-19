@@ -551,7 +551,7 @@
 - [x] Display sales ref selector (employee dropdown)
 - [x] Display route selector
 - [x] Add sales routes to router (4 routes: index, create, edit, view)
-- [ ] Validate stock availability before saving
+- [x] Validate stock availability before saving
 - [ ] Test invoice creation with returns
 
 #### Returns Handling

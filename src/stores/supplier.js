@@ -25,8 +25,8 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.getAllSuppliers(params);
-      suppliers.value = response.data.suppliers;
-      pagination.value = response.data.pagination;
+      suppliers.value = response.suppliers;
+      pagination.value = response.pagination;
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch suppliers';
@@ -41,7 +41,7 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.getSupplierById(id);
-      currentSupplier.value = response.data.supplier;
+      currentSupplier.value = response.supplier;
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch supplier';
@@ -54,7 +54,7 @@ export const useSupplierStore = defineStore('supplier', () => {
   const getSupplierBalance = async id => {
     try {
       const response = await supplierService.getSupplierBalance(id);
-      return response.data.balance;
+      return response.balance;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch supplier balance';
       throw err;
@@ -66,7 +66,7 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.createSupplier(data);
-      suppliers.value.unshift(response.data.supplier);
+      suppliers.value.unshift(response.supplier);
       return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create supplier';
@@ -83,10 +83,10 @@ export const useSupplierStore = defineStore('supplier', () => {
       const response = await supplierService.updateSupplier(id, data);
       const index = suppliers.value.findIndex(s => s.id === id);
       if (index !== -1) {
-        suppliers.value[index] = response.data.supplier;
+        suppliers.value[index] = response.supplier;
       }
       if (currentSupplier.value?.id === id) {
-        currentSupplier.value = response.data.supplier;
+        currentSupplier.value = response.supplier;
       }
       return response;
     } catch (err) {

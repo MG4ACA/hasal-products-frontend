@@ -33,10 +33,26 @@
         <i class="pi pi-cog" />
         <span>Production</span>
       </RouterLink>
-      <a href="#" class="menu-item">
+      <RouterLink to="/sales" class="menu-item">
         <i class="pi pi-shopping-cart" />
         <span>Sales</span>
-      </a>
+      </RouterLink>
+      <RouterLink to="/outlets" class="menu-item">
+        <i class="pi pi-building" />
+        <span>Outlets</span>
+      </RouterLink>
+      <RouterLink to="/routes" class="menu-item">
+        <i class="pi pi-map" />
+        <span>Routes</span>
+      </RouterLink>
+      <RouterLink to="/vehicles" class="menu-item">
+        <i class="pi pi-car" />
+        <span>Vehicles</span>
+      </RouterLink>
+      <RouterLink to="/employees" class="menu-item">
+        <i class="pi pi-users" />
+        <span>Employees</span>
+      </RouterLink>
     </nav>
   </div>
 </template>

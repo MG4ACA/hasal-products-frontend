@@ -39,8 +39,8 @@ export const useRouteStore = defineStore('route', () => {
       };
 
       const response = await routeService.getAll(params);
-      routes.value = response.data.routes;
-      pagination.value = response.data.pagination;
+      routes.value = response.routes;
+      pagination.value = response.pagination;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch routes';
       throw err;
@@ -54,8 +54,8 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.getById(id);
-      currentRoute.value = response.data;
-      return response.data;
+      currentRoute.value = response;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch route';
       throw err;
@@ -70,7 +70,7 @@ export const useRouteStore = defineStore('route', () => {
       error.value = null;
       const response = await routeService.create(routeData);
       await fetchRoutes();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create route';
       throw err;
@@ -85,7 +85,7 @@ export const useRouteStore = defineStore('route', () => {
       error.value = null;
       const response = await routeService.update(id, routeData);
       await fetchRoutes();
-      return response.data;
+      return response;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to update route';
       throw err;
@@ -113,8 +113,8 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.getOutlets(id);
-      routeOutlets.value = response.data;
-      return response.data;
+      routeOutlets.value = response.outlets || response.data;
+      return response.outlets || response.data;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch route outlets';
       throw err;
@@ -128,8 +128,8 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.getEmployees(id);
-      routeEmployees.value = response.data;
-      return response.data;
+      routeEmployees.value = response.employees || response.data;
+      return response.employees || response.data;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch route employees';
       throw err;
