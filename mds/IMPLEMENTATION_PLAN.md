@@ -284,97 +284,100 @@
 
 #### Product Module - Backend
 
-- [ ] Create Product controller (`controllers/productController.js`)
-  - [ ] GET `/api/products` - Get all products
-  - [ ] GET `/api/products/:id` - Get product with SKUs
-  - [ ] POST `/api/products` - Create product (auto-generate code)
-  - [ ] PUT `/api/products/:id` - Update product
-  - [ ] DELETE `/api/products/:id` - Delete product
-  - [ ] POST `/api/products/:id/skus` - Add SKU to product
-  - [ ] PUT `/api/products/:productId/skus/:skuId` - Update SKU
-  - [ ] DELETE `/api/products/:productId/skus/:skuId` - Delete SKU
-  - [ ] GET `/api/products/:id/stock` - Get stock for all SKUs
-- [ ] Add barcode field support
-- [ ] Validate unique barcodes
-- [ ] Test all endpoints
+- [x] Create Product controller (`controllers/productController.js`)
+  - [x] GET `/api/products` - Get all products
+  - [x] GET `/api/products/:id` - Get product with SKUs
+  - [x] POST `/api/products` - Create product (auto-generate code)
+  - [x] PUT `/api/products/:id` - Update product
+  - [x] DELETE `/api/products/:id` - Delete product
+  - [x] POST `/api/products/:id/skus` - Add SKU to product
+  - [x] PUT `/api/products/:productId/skus/:skuId` - Update SKU
+  - [x] DELETE `/api/products/:productId/skus/:skuId` - Delete SKU
+  - [x] GET `/api/products/:id/stock` - Get stock for all SKUs
+- [x] Add barcode field support
+- [x] Validate unique barcodes
+- [x] Test all endpoints
 
 #### Product Module - Frontend
 
-- [ ] Create product service (`services/productService.js`)
-- [ ] Create product store (`stores/product.js`)
-- [ ] Create ProductIndex view
-- [ ] Create ProductList component
-- [ ] Create ProductForm component with SKU management
-- [ ] Support multiple SKUs per product (100g, 500g, 1kg, etc.)
-- [ ] Add barcode input field
-- [ ] Create ProductCreate view
-- [ ] Create ProductEdit view
-- [ ] Display stock levels for each SKU
+- [x] Create product service (`services/productService.js`)
+- [x] Create product store (`stores/product.js`)
+- [x] Create ProductIndex view
+- [x] Create ProductList component
+- [x] Create ProductForm component with SKU management (size/unit fields)
+- [x] Support multiple SKUs per product (100g, 500g, 1kg, etc.)
+- [x] Add barcode input field
+- [x] Create ProductCreate view
+- [x] Create ProductEdit view
+- [x] Display stock levels for each SKU
 - [ ] Test CRUD operations
 
 #### Recipe Module - Backend
 
-- [ ] Create Recipe controller (`controllers/recipeController.js`)
-  - [ ] GET `/api/recipes` - Get all recipes
-  - [ ] GET `/api/recipes/:id` - Get recipe with items (BOM)
-  - [ ] POST `/api/recipes` - Create recipe with versioning
-  - [ ] PUT `/api/recipes/:id` - Update recipe (create new version)
-  - [ ] DELETE `/api/recipes/:id` - Delete recipe
-  - [ ] GET `/api/recipes/:id/versions` - Get recipe version history
-  - [ ] POST `/api/recipes/:id/items` - Add item to recipe
-  - [ ] PUT `/api/recipes/:recipeId/items/:itemId` - Update recipe item
-  - [ ] DELETE `/api/recipes/:recipeId/items/:itemId` - Delete recipe item
-- [ ] Implement recipe versioning logic
-- [ ] Test all endpoints
+- [x] Create Recipe controller (`controllers/recipeController.js`)
+  - [x] GET `/api/recipes` - Get all recipes
+  - [x] GET `/api/recipes/:id` - Get recipe with items (BOM)
+  - [x] POST `/api/recipes` - Create recipe with versioning
+  - [x] PUT `/api/recipes/:id` - Update recipe (create new version)
+  - [x] DELETE `/api/recipes/:id` - Delete recipe
+  - [x] GET `/api/recipes/:id/versions` - Get recipe version history
+  - [x] POST `/api/recipes/:id/items` - Add item to recipe
+  - [x] PUT `/api/recipes/:recipeId/items/:itemId` - Update recipe item
+  - [x] DELETE `/api/recipes/:recipeId/items/:itemId` - Delete recipe item
+- [x] Implement recipe versioning logic (standalone, not linked to products)
+- [x] Test all endpoints
 
 #### Recipe Module - Frontend
 
-- [ ] Create recipe service (`services/recipeService.js`)
-- [ ] Create recipe store (`stores/recipe.js`)
-- [ ] Create RecipeIndex view
-- [ ] Create RecipeList component
-- [ ] Create RecipeForm component (BOM builder)
-- [ ] Add raw materials to recipe with quantities
-- [ ] Display total cost calculation
-- [ ] Create RecipeCreate view
-- [ ] Create RecipeEdit view (creates new version)
-- [ ] Display recipe version history
+- [x] Create recipe service (`services/recipeService.js`)
+- [x] Create recipe store (`stores/recipe.js`)
+- [x] Create RecipeIndex view
+- [x] Create RecipeList component
+- [x] Create RecipeForm component (BOM builder)
+- [x] Add raw materials to recipe with quantities
+- [x] Display total cost calculation
+- [x] Create RecipeCreate view
+- [x] Create RecipeEdit view (creates new version)
+- [x] Display recipe version history
 - [ ] Test recipe creation and versioning
 
 #### Production Module - Backend
 
-- [ ] Create Production controller (`controllers/productionController.js`)
-  - [ ] GET `/api/production-runs` - Get all production runs
-  - [ ] GET `/api/production-runs/:id` - Get production run details
-  - [ ] POST `/api/production-runs` - Create production run
-  - [ ] PUT `/api/production-runs/:id` - Update production run
-  - [ ] DELETE `/api/production-runs/:id` - Delete production run
-  - [ ] POST `/api/production-runs/:id/complete` - Complete production run
-- [ ] Implement production logic:
-  - [ ] Deduct raw materials from batches (FIFO)
-  - [ ] Create production output (finished goods)
-  - [ ] Update product SKU stock levels
-  - [ ] Link to recipe and track materials used
-- [ ] Test all endpoints
+- [x] Create Production controller (`controllers/productionController.js`)
+  - [x] GET `/api/production-runs` - Get all production runs
+  - [x] GET `/api/production-runs/:id` - Get production run details
+  - [x] POST `/api/production-runs` - Create production run
+  - [x] PUT `/api/production-runs/:id` - Update production run
+  - [x] DELETE `/api/production-runs/:id` - Delete production run
+  - [x] POST `/api/production-runs/:id/complete` - Complete production run
+  - [x] GET `/api/production-runs/:id/check-materials` - Check material availability
+- [x] Implement production logic:
+  - [x] Deduct raw materials from batches (FIFO)
+  - [x] Create production output (finished goods)
+  - [x] Update product SKU stock levels
+  - [x] Link to recipe and track materials used
+- [x] Test all endpoints
 
 #### Production Module - Frontend
 
-- [ ] Create production service (`services/productionService.js`)
-- [ ] Create production store (`stores/production.js`)
-- [ ] Create ProductionIndex view
-- [ ] Create ProductionList component
-- [ ] Create ProductionForm component
-  - [ ] Select product and SKU
-  - [ ] Select recipe
-  - [ ] Enter quantity to produce
-  - [ ] Display material requirements
-  - [ ] Check stock availability
-- [ ] Create ProductionCreate view
-- [ ] Display production history
+- [x] Create production service (`services/productionService.js`)
+- [x] Create production store (`stores/production.js`)
+- [x] Create ProductionIndex view
+- [x] Create ProductionList component
+- [x] Create ProductionForm component
+  - [x] Select recipe
+  - [x] Enter quantity to produce
+  - [x] Display material requirements
+  - [x] Check stock availability
+- [x] Create ProductionCreate view
+- [x] Create ProductionView component
+- [x] Display production history
 - [ ] Test production workflow (recipe → deduct materials → add finished goods)
 
-**Deliverable:** Production management module with recipe versioning  
-**Effort:** 25 hours
+**Deliverable:** ✅ Production management module with recipe versioning (Backend & Frontend Complete)  
+**Status:** Week 5 Complete - Testing Pending  
+**Effort:** 25 hours  
+**Completion Date:** December 19, 2025
 
 ---
 

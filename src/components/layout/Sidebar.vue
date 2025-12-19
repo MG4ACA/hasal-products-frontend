@@ -21,10 +21,18 @@
         <i class="pi pi-file-edit" />
         <span>Purchase Orders</span>
       </RouterLink>
-      <a href="#" class="menu-item">
+      <RouterLink to="/products" class="menu-item">
         <i class="pi pi-tags" />
         <span>Products</span>
-      </a>
+      </RouterLink>
+      <RouterLink to="/recipes" class="menu-item">
+        <i class="pi pi-book" />
+        <span>Recipes</span>
+      </RouterLink>
+      <RouterLink to="/production-runs" class="menu-item">
+        <i class="pi pi-cog" />
+        <span>Production</span>
+      </RouterLink>
       <a href="#" class="menu-item">
         <i class="pi pi-shopping-cart" />
         <span>Sales</span>

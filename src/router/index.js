@@ -22,6 +22,24 @@ const PurchaseOrderCreate = () => import('@/views/purchase-orders/PurchaseOrderC
 const PurchaseOrderEdit = () => import('@/views/purchase-orders/PurchaseOrderEdit.vue');
 const PurchaseOrderView = () => import('@/views/purchase-orders/PurchaseOrderView.vue');
 
+// Product views
+const ProductIndex = () => import('@/views/products/ProductIndex.vue');
+const ProductCreate = () => import('@/views/products/ProductCreate.vue');
+const ProductEdit = () => import('@/views/products/ProductEdit.vue');
+const ProductView = () => import('@/views/products/ProductView.vue');
+
+// Recipe views
+const RecipeIndex = () => import('@/views/recipes/RecipeIndex.vue');
+const RecipeCreate = () => import('@/views/recipes/RecipeCreate.vue');
+const RecipeEdit = () => import('@/views/recipes/RecipeEdit.vue');
+const RecipeView = () => import('@/views/recipes/RecipeView.vue');
+
+// Production views
+const ProductionIndex = () => import('@/views/production/ProductionIndex.vue');
+const ProductionCreate = () => import('@/views/production/ProductionCreate.vue');
+const ProductionEdit = () => import('@/views/production/ProductionEdit.vue');
+const ProductionView = () => import('@/views/production/ProductionView.vue');
+
 const routes = [
   {
     path: '/login',
@@ -93,6 +111,78 @@ const routes = [
     path: '/purchase-orders/:id/view',
     name: 'PurchaseOrderView',
     component: PurchaseOrderView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/products',
+    name: 'Products',
+    component: ProductIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/products/create',
+    name: 'ProductCreate',
+    component: ProductCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/products/:id/edit',
+    name: 'ProductEdit',
+    component: ProductEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/products/:id/view',
+    name: 'ProductView',
+    component: ProductView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/recipes',
+    name: 'Recipes',
+    component: RecipeIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/recipes/create',
+    name: 'RecipeCreate',
+    component: RecipeCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/recipes/:id/edit',
+    name: 'RecipeEdit',
+    component: RecipeEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/recipes/:id/view',
+    name: 'RecipeView',
+    component: RecipeView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/production-runs',
+    name: 'ProductionRuns',
+    component: ProductionIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/production-runs/create',
+    name: 'ProductionCreate',
+    component: ProductionCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/production-runs/:id/edit',
+    name: 'ProductionEdit',
+    component: ProductionEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/production-runs/:id/view',
+    name: 'ProductionView',
+    component: ProductionView,
     meta: { requiresAuth: true },
   },
   {
