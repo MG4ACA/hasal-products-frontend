@@ -1,4 +1,5 @@
 <script setup>
+import VehicleAssignment from '@/components/vehicles/VehicleAssignment.vue';
 import VehicleList from '@/components/vehicles/VehicleList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useVehicleStore } from '@/stores/vehicleStore';
@@ -21,6 +22,8 @@ const statusFilter = ref('');
 const currentPage = ref(1);
 const pageSize = ref(10);
 const loading = ref(false);
+const showAssignmentDialog = ref(false);
+const selectedVehicleId = ref(null);
 
 const statusOptions = [
   { label: 'All Status', value: '' },
@@ -69,8 +72,12 @@ const handleView = id => {
 };
 
 const handleAssign = vehicle => {
-  // TODO: Open assignment dialog
-  showError('Assignment feature coming soon');
+  selectedVehicleId.value = vehicle.id;
+  showAssignmentDialog.value = true;
+};
+
+const handleAssignmentChange = () => {
+  fetchVehicles();
 };
 
 const handleEdit = id => {
@@ -106,6 +113,12 @@ onMounted(() => {
 <template>
   <div class="vehicle-index">
     <ConfirmDialog />
+    <VehicleAssignment
+      v-model:visible="showAssignmentDialog"
+      :vehicle-id="selectedVehicleId"
+      @assigned="handleAssignmentChange"
+      @unassigned="handleAssignmentChange"
+    />
 
     <div class="page-header">
       <div>

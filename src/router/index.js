@@ -59,6 +59,7 @@ const EmployeeEdit = () => import('@/views/employees/EmployeeEdit.vue');
 const VehicleIndex = () => import('@/views/vehicles/VehicleIndex.vue');
 const VehicleCreate = () => import('@/views/vehicles/VehicleCreate.vue');
 const VehicleEdit = () => import('@/views/vehicles/VehicleEdit.vue');
+const VehicleHistory = () => import('@/views/vehicles/VehicleHistory.vue');
 
 // Sales Invoice views
 const SalesIndex = () => import('@/views/sales/SalesIndex.vue');
@@ -281,6 +282,12 @@ const routes = [
     path: '/vehicles/:id/edit',
     name: 'VehicleEdit',
     component: VehicleEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehicles/:id/history',
+    name: 'VehicleHistory',
+    component: VehicleHistory,
     meta: { requiresAuth: true },
   },
   {

@@ -199,6 +199,7 @@ export const useVehicleStore = defineStore('vehicle', () => {
     inactiveVehicles,
     assignedVehicles,
     unassignedVehicles,
+    totalVehicles: computed(() => pagination.value.total),
     // Actions
     fetchVehicles,
     fetchVehicleById,
@@ -208,6 +209,10 @@ export const useVehicleStore = defineStore('vehicle', () => {
     assignVehicleToRoute,
     unassignVehicleFromRoute,
     fetchVehicleAssignmentHistory,
+    // Aliases for component compatibility
+    assignVehicle: assignVehicleToRoute,
+    unassignVehicle: unassignVehicleFromRoute,
+    fetchAssignmentHistory: fetchVehicleAssignmentHistory,
     setPage,
     setLimit,
     setFilters,

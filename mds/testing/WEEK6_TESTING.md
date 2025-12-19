@@ -533,6 +533,106 @@ WHERE name = 'Delivery Van 001';
 
 ---
 
+### Test 4.7: Assign Vehicle to Route
+
+**Objective:** Verify vehicle-to-route assignment functionality
+
+**Steps:**
+
+1. Navigate to Vehicles page
+2. Click "View" button on a vehicle to go to history page
+3. Click "Manage Assignment" button
+4. Verify assignment dialog opens
+5. Select a route from dropdown
+6. Click "Assign" button
+
+**Expected Results:**
+
+- ✅ Assignment dialog opens with vehicle details
+- ✅ Active routes dropdown is populated
+- ✅ Current assignment status shown
+- ✅ Success notification: "Vehicle assigned to route successfully"
+- ✅ Dialog closes automatically
+- ✅ Vehicle list refreshes with assignment
+
+**Database Validation:**
+
+```sql
+SELECT * FROM route_vehicle_history
+WHERE vehicle_id = <VEHICLE_ID> AND is_current = 1;
+-- Verify record created with assigned_date and is_current = true
+```
+
+---
+
+### Test 4.8: Unassign Vehicle from Route
+
+**Objective:** Verify vehicle unassignment functionality
+
+**Steps:**
+
+1. Navigate to vehicle history page (with assigned vehicle)
+2. Click "Manage Assignment" button
+3. Verify current assignment is displayed
+4. Click "Unassign" button
+5. Confirm action
+
+**Expected Results:**
+
+- ✅ Dialog shows current route assignment
+- ✅ "Unassign" button is visible (instead of Assign)
+- ✅ Success notification: "Vehicle unassigned from route successfully"
+- ✅ Dialog closes
+- ✅ Vehicle status updates to unassigned
+
+**Database Validation:**
+
+```sql
+SELECT * FROM route_vehicle_history
+WHERE vehicle_id = <VEHICLE_ID> AND is_current = 0;
+-- Verify unassigned_date is set and is_current = false
+```
+
+---
+
+### Test 4.9: View Vehicle Assignment History
+
+**Objective:** Verify assignment history display
+
+**Steps:**
+
+1. Navigate to vehicle history page
+2. View assignment history DataTable
+3. Assign and unassign vehicle multiple times
+4. Refresh history and verify all records
+
+**Expected Results:**
+
+- ✅ Assignment history DataTable displays:
+  - Route name and code
+  - Assigned date
+  - Unassigned date (or "N/A" for current)
+  - Duration calculation
+  - Status tag (Current/Past)
+  - Notes column
+- ✅ Pagination works for >10 records
+- ✅ Current assignment shows "Current" tag in green
+- ✅ Past assignments show "Past" tag in gray
+- ✅ Duration calculated correctly (days/months)
+- ✅ Empty state shown when no history
+
+**Database Validation:**
+
+```sql
+SELECT vehicle_id, route_id, assigned_date, unassigned_date, is_current, notes
+FROM route_vehicle_history
+WHERE vehicle_id = <VEHICLE_ID>
+ORDER BY assigned_date DESC;
+-- Verify all assignments tracked with correct dates
+```
+
+---
+
 ## Integration Tests
 
 ### Test 5.1: Route → Outlet Assignment
@@ -887,7 +987,7 @@ SELECT COUNT(*) as vehicle_count FROM vehicles;
 | Routes      | 5 + 2        | ⏳     |
 | Outlets     | 6 + 2        | ⏳     |
 | Employees   | 6 + 2        | ⏳     |
-| Vehicles    | 6 + 1        | ⏳     |
+| Vehicles    | 9 + 1        | ⏳     |
 | Integration | 3            | ⏳     |
 | UI/UX       | 4            | ⏳     |
 | Errors      | 3            | ⏳     |
@@ -895,7 +995,7 @@ SELECT COUNT(*) as vehicle_count FROM vehicles;
 | Browser     | 3            | ⏳     |
 | Data        | 2            | ⏳     |
 | Database    | 1            | ⏳     |
-| **TOTAL**   | **41 tests** | ⏳     |
+| **TOTAL**   | **44 tests** | ⏳     |
 
 ---
 
@@ -904,7 +1004,7 @@ SELECT COUNT(*) as vehicle_count FROM vehicles;
 - [ ] Module 1: Route Management (5 tests)
 - [ ] Module 2: Outlet Management (6 tests)
 - [ ] Module 3: Employee Management (6 tests)
-- [ ] Module 4: Vehicle Management (6 tests)
+- [ ] Module 4: Vehicle Management (9 tests - includes assignment feature)
 - [ ] Integration Tests (3 tests)
 - [ ] UI/UX Testing (4 tests)
 - [ ] Error Handling (3 tests)
