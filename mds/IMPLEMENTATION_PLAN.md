@@ -487,18 +487,19 @@
 - [x] Create VehicleForm component
 - [x] Create VehicleCreate view
 - [x] Create VehicleEdit view
-- [ ] Create VehicleAssignment component
-  - [ ] Assign vehicle to route
-  - [ ] Unassign vehicle
-  - [ ] Display current assignment
-- [ ] Create AssignmentHistory component
-- [ ] Test vehicle-route assignment workflow
+- [x] Create VehicleAssignment component
+  - [x] Assign vehicle to route
+  - [x] Unassign vehicle
+  - [x] Display current assignment
+- [x] Create AssignmentHistory component
+- [x] Create VehicleHistory view
+- [x] Test vehicle-route assignment workflow
 
 **Deliverable:** ✅ Route, outlet, employee, and vehicle modules with CRUD operations  
 **Status:** Week 6 Complete - Backend ✅ | Frontend ✅ | Testing ⏳  
 **Effort:** 22 hours  
 **Completion Date:** December 20, 2025  
-**Note:** Basic CRUD complete. Vehicle-route assignment feature (dialog component) deferred to Week 7 as part of enhanced features
+**Note:** All Week 6 tasks complete including vehicle-route assignment feature
 
 ---
 
