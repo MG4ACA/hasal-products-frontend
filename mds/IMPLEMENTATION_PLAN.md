@@ -506,63 +506,67 @@
 
 #### Sales Invoice Module - Backend
 
-- [ ] Create Sales controller (`controllers/salesController.js`)
-  - [ ] GET `/api/sales-invoices` - Get all invoices (with filters)
-  - [ ] GET `/api/sales-invoices/:id` - Get invoice by ID with items
-  - [ ] POST `/api/sales-invoices` - Create invoice (auto-generate invoice number)
-  - [ ] PUT `/api/sales-invoices/:id` - Update invoice
-  - [ ] DELETE `/api/sales-invoices/:id` - Delete invoice
-  - [ ] GET `/api/sales-invoices/:id/pdf` - Generate PDF (future)
-- [ ] Implement invoice number generation (`utils/invoiceNumberGenerator.js`)
-- [ ] Implement invoice creation logic:
-  - [ ] Add invoice items (positive quantities for sales)
-  - [ ] Add return items (negative quantities)
-  - [ ] Track return reason and disposition (stock/dispose)
-  - [ ] Calculate subtotal, discount, total
-  - [ ] Update outlet balance for credit sales
-  - [ ] Update product SKU stock levels
-  - [ ] Process returns to stock if applicable
-  - [ ] Link to sales ref and route
-- [ ] Support payment methods: cash, credit, check
-- [ ] Add check tracking fields (check_number, check_date, clearance_date)
-- [ ] Test all endpoints
+- [x] Create Sales controller (`controllers/salesController.js`)
+  - [x] GET `/api/sales-invoices` - Get all invoices (with filters)
+  - [x] GET `/api/sales-invoices/:id` - Get invoice by ID with items
+  - [x] POST `/api/sales-invoices` - Create invoice (auto-generate invoice number)
+  - [x] PUT `/api/sales-invoices/:id` - Update invoice
+  - [x] DELETE `/api/sales-invoices/:id` - Delete invoice
+  - [x] GET `/api/sales-invoices/:id/pdf` - Generate PDF (placeholder - 501)
+- [x] Implement invoice number generation (`utils/invoiceNumberGenerator.js`)
+- [x] Implement invoice creation logic:
+  - [x] Add invoice items (positive quantities for sales)
+  - [x] Add return items (negative quantities)
+  - [x] Track return reason and disposition (stock/dispose)
+  - [x] Calculate subtotal, discount, total
+  - [x] Update outlet balance for credit sales
+  - [x] Update product SKU stock levels
+  - [x] Process returns to stock if applicable
+  - [x] Link to sales ref and route
+- [x] Support payment methods: cash, credit, check
+- [x] Add check tracking fields (check_number, check_date, clearance_date)
+- [x] Register sales routes in app.js
+- [ ] Test all endpoints with Postman
 
 #### Sales Invoice Module - Frontend
 
-- [ ] Create sales service (`services/salesService.js`)
-- [ ] Create sales store (`stores/sales.js`)
-- [ ] Create SalesIndex view
-- [ ] Create InvoiceList component
-- [ ] Create InvoiceForm component (multi-section)
-  - [ ] Section 1: Invoice header (outlet, sales ref, route, date)
-  - [ ] Section 2: Add sales items (product SKU, quantity, price, discount)
-  - [ ] Section 3: Add returns (product SKU, quantity, reason, disposition)
-  - [ ] Section 4: Payment details (method, check info if applicable)
-  - [ ] Section 5: Review totals
-- [ ] Create InvoiceCreate view
-- [ ] Create InvoiceEdit view
-- [ ] Create InvoiceView component (read-only)
-- [ ] Implement discount calculation (default 20% + custom)
-- [ ] Display outlet balance and credit limit
-- [ ] Calculate subtotal, discount, returns, total
-- [ ] Support cash/credit/check payment methods
-- [ ] Add check payment fields (number, date)
-- [ ] Display sales ref selector
-- [ ] Display route selector
+- [x] Create sales service (`services/salesService.js`)
+- [x] Create sales store (`stores/salesStore.js`)
+- [x] Create SalesIndex view with comprehensive filters
+- [x] Create InvoiceList component (DataTable)
+- [x] Create InvoiceForm component (multi-tab with TabView)
+  - [x] Tab 1: Invoice details (outlet, sales ref, route, date, payment method, check fields)
+  - [x] Tab 2: Sales items manager (add/remove items, SKU selection, pricing, discounts)
+  - [x] Tab 3: Returns manager (return items, reason, disposition)
+  - [x] Tab 4: Summary & notes (totals calculation, notes textarea)
+- [x] Create InvoiceCreate view
+- [x] Create InvoiceEdit view (limited to notes & payment_status)
+- [x] Create InvoiceView component (read-only with separate sales/returns tables)
+- [x] Implement discount calculation (outlet default + custom per item)
+- [x] Display outlet in dropdown with name and code
+- [x] Calculate subtotal, discount, returns, total (real-time)
+- [x] Support cash/credit/check payment methods
+- [x] Add conditional check payment fields (number, date, clearance date)
+- [x] Display sales ref selector (employee dropdown)
+- [x] Display route selector
+- [x] Add sales routes to router (4 routes: index, create, edit, view)
 - [ ] Validate stock availability before saving
 - [ ] Test invoice creation with returns
 
 #### Returns Handling
 
-- [ ] Add return items as negative line items
-- [ ] Return reason dropdown (damaged, expired, excess, quality_issue, other)
-- [ ] Return disposition toggle (return to stock / dispose)
-- [ ] Update inventory based on disposition
-- [ ] Display returns in invoice view
+- [x] Add return items as negative line items
+- [x] Return reason dropdown (damaged, expired, excess, quality_issue, other)
+- [x] Return disposition checkbox (return_to_stock true/false)
+- [x] Update inventory based on disposition in backend
+- [x] Display returns in separate DataTable in invoice view
 - [ ] Test returns workflow
 
-**Deliverable:** Sales, invoicing, and returns module  
-**Effort:** 28 hours
+**Deliverable:** ✅ Sales, invoicing, and returns module (Backend & Frontend Complete)  
+**Status:** Week 7 Complete - Testing Pending  
+**Effort:** 28 hours  
+**Completion Date:** December 20, 2025  
+**Documentation:** See WEEK7_IMPLEMENTATION.md for detailed implementation notes
 
 ---
 

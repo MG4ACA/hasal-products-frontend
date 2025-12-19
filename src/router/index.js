@@ -60,6 +60,12 @@ const VehicleIndex = () => import('@/views/vehicles/VehicleIndex.vue');
 const VehicleCreate = () => import('@/views/vehicles/VehicleCreate.vue');
 const VehicleEdit = () => import('@/views/vehicles/VehicleEdit.vue');
 
+// Sales Invoice views
+const SalesIndex = () => import('@/views/sales/SalesIndex.vue');
+const InvoiceCreate = () => import('@/views/sales/InvoiceCreate.vue');
+const InvoiceEdit = () => import('@/views/sales/InvoiceEdit.vue');
+const InvoiceView = () => import('@/views/sales/InvoiceView.vue');
+
 const routes = [
   {
     path: '/login',
@@ -275,6 +281,30 @@ const routes = [
     path: '/vehicles/:id/edit',
     name: 'VehicleEdit',
     component: VehicleEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/sales',
+    name: 'Sales',
+    component: SalesIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/sales/create',
+    name: 'InvoiceCreate',
+    component: InvoiceCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/sales/:id/edit',
+    name: 'InvoiceEdit',
+    component: InvoiceEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/sales/:id/view',
+    name: 'InvoiceView',
+    component: InvoiceView,
     meta: { requiresAuth: true },
   },
   {
