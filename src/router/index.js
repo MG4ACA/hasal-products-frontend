@@ -40,6 +40,26 @@ const ProductionCreate = () => import('@/views/production/ProductionCreate.vue')
 const ProductionEdit = () => import('@/views/production/ProductionEdit.vue');
 const ProductionView = () => import('@/views/production/ProductionView.vue');
 
+// Route views
+const RouteIndex = () => import('@/views/routes/RouteIndex.vue');
+const RouteCreate = () => import('@/views/routes/RouteCreate.vue');
+const RouteEdit = () => import('@/views/routes/RouteEdit.vue');
+
+// Outlet views
+const OutletIndex = () => import('@/views/outlets/OutletIndex.vue');
+const OutletCreate = () => import('@/views/outlets/OutletCreate.vue');
+const OutletEdit = () => import('@/views/outlets/OutletEdit.vue');
+
+// Employee views
+const EmployeeIndex = () => import('@/views/employees/EmployeeIndex.vue');
+const EmployeeCreate = () => import('@/views/employees/EmployeeCreate.vue');
+const EmployeeEdit = () => import('@/views/employees/EmployeeEdit.vue');
+
+// Vehicle views
+const VehicleIndex = () => import('@/views/vehicles/VehicleIndex.vue');
+const VehicleCreate = () => import('@/views/vehicles/VehicleCreate.vue');
+const VehicleEdit = () => import('@/views/vehicles/VehicleEdit.vue');
+
 const routes = [
   {
     path: '/login',
@@ -183,6 +203,78 @@ const routes = [
     path: '/production-runs/:id/view',
     name: 'ProductionView',
     component: ProductionView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/routes',
+    name: 'Routes',
+    component: RouteIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/routes/create',
+    name: 'RouteCreate',
+    component: RouteCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/routes/:id/edit',
+    name: 'RouteEdit',
+    component: RouteEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/outlets',
+    name: 'Outlets',
+    component: OutletIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/outlets/create',
+    name: 'OutletCreate',
+    component: OutletCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/outlets/:id/edit',
+    name: 'OutletEdit',
+    component: OutletEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/employees',
+    name: 'Employees',
+    component: EmployeeIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/employees/create',
+    name: 'EmployeeCreate',
+    component: EmployeeCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/employees/:id/edit',
+    name: 'EmployeeEdit',
+    component: EmployeeEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehicles',
+    name: 'Vehicles',
+    component: VehicleIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehicles/create',
+    name: 'VehicleCreate',
+    component: VehicleCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehicles/:id/edit',
+    name: 'VehicleEdit',
+    component: VehicleEdit,
     meta: { requiresAuth: true },
   },
   {
