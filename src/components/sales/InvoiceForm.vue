@@ -125,7 +125,9 @@ const isFormValid = computed(() => {
 const hasInsufficientStock = computed(() => {
   const salesItems = (formData.value.items || []).filter(item => !item.is_return);
   return salesItems.some(item => {
-    const product = productStore.products.find(p => p.skus && p.skus.some(s => s.id === item.sku_id));
+    const product = productStore.products.find(
+      p => p.skus && p.skus.some(s => s.id === item.sku_id)
+    );
     if (!product) return false;
     const sku = product.skus.find(s => s.id === item.sku_id);
     return sku && sku.current_stock < item.quantity;
@@ -135,7 +137,7 @@ const hasInsufficientStock = computed(() => {
 // Validate stock availability for current selection
 const validateStock = () => {
   stockError.value = '';
-  
+
   if (!selectedSku.value || !itemQuantity.value) {
     return true;
   }
@@ -473,7 +475,12 @@ onMounted(async () => {
                   <template #option="slotProps">
                     <div>
                       <div>{{ slotProps.option.size }}{{ slotProps.option.unit }}</div>
-                      <div class="text-sm" :class="slotProps.option.current_stock > 0 ? 'text-gray-500' : 'text-red-500'">
+                      <div
+                        class="text-sm"
+                        :class="
+                          slotProps.option.current_stock > 0 ? 'text-gray-500' : 'text-red-500'
+                        "
+                      >
                         Stock: {{ slotProps.option.current_stock || 0 }} | Price:
                         {{ formatCurrency(slotProps.option.price) }}
                       </div>
@@ -485,12 +492,12 @@ onMounted(async () => {
 
               <div class="field" style="width: 120px">
                 <label for="quantity">Quantity</label>
-                <InputNumber 
-                  id="quantity" 
-                  v-model="itemQuantity" 
-                  :min="1" 
+                <InputNumber
+                  id="quantity"
+                  v-model="itemQuantity"
+                  :min="1"
                   :class="{ 'p-invalid': stockError }"
-                  class="w-full" 
+                  class="w-full"
                 />
               </div>
 
@@ -814,7 +821,7 @@ onMounted(async () => {
 
     <div class="form-actions">
       <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="$emit('cancel')" />
-      <div class="flex flex-column align-items-end" style="flex: 1;">
+      <div class="flex flex-column align-items-end" style="flex: 1">
         <small v-if="hasInsufficientStock" class="p-error mb-2">
           Cannot submit: Some items have insufficient stock
         </small>
