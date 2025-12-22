@@ -2,7 +2,7 @@ import { employeeService } from '@/services/employeeService';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-export const useEmployeeStore = defineStore('employee', () => {
+export const useEmployeeStore = defineStore('employeeStore', () => {
   // State
   const employees = ref([]);
   const currentEmployee = ref(null);

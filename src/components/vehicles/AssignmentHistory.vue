@@ -1,6 +1,6 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
-import { useVehicleStore } from '@/stores/vehicleStore';
+import { useVehicleStore } from '@/stores/vehicle';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';

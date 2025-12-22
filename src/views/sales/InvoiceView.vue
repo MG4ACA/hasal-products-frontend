@@ -1,5 +1,5 @@
 <script setup>
-import { useSalesStore } from '@/stores/salesStore';
+import { useSalesStore } from '@/stores/sales';
 import Breadcrumb from 'primevue/breadcrumb';
 import Button from 'primevue/button';
 import Column from 'primevue/column';

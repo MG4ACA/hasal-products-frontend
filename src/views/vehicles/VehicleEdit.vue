@@ -1,7 +1,7 @@
 <script setup>
 import VehicleForm from '@/components/vehicles/VehicleForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
-import { useVehicleStore } from '@/stores/vehicleStore';
+import { useVehicleStore } from '@/stores/vehicle';
 import Breadcrumb from 'primevue/breadcrumb';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';

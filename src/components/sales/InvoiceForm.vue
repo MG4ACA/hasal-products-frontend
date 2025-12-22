@@ -1,8 +1,8 @@
 <script setup>
-import { useEmployeeStore } from '@/stores/employeeStore';
-import { useOutletStore } from '@/stores/outletStore';
-import { useProductStore } from '@/stores/productStore';
-import { useRouteStore } from '@/stores/routeStore';
+import { useEmployeeStore } from '@/stores/employee';
+import { useOutletStore } from '@/stores/outlet';
+import { useProductStore } from '@/stores/product';
+import { useRouteStore } from '@/stores/route';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Column from 'primevue/column';
