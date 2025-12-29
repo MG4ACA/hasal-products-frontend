@@ -25,7 +25,7 @@
 ├─────────────┤         ├──────────────────┤         ├─────────────┤
 │ id (PK)     │         │ id (PK)          │         │ id (PK)     │
 │ username    │         │ code             │         │ code        │
-│ password    │         │ name             │         │ name        │
+│ password_hash│         │ name             │         │ name        │
 │ role        │         │ contact_person   │         │ description │
 │ full_name   │         │ phone            │         └─────────────┘
 │ status      │         │ email            │               │

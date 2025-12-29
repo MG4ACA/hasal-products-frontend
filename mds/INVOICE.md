@@ -91,52 +91,38 @@ This project includes the development of a comprehensive web-based Point of Sale
 
 ---
 
-## COST BREAKDOWN
+## COST BREAKDOWN (Aligned to Invoice #DEC-0001)
 
-| Phase       | Description                           | Hours         | Rate (LKR/hr) | Amount (LKR) |
-| ----------- | ------------------------------------- | ------------- | ------------- | ------------ |
-| **Phase 1** | **Project Setup & Foundation**        |               |               |              |
-| 1.1         | Environment setup, project structure  | 15            | 1,376         | 20,640       |
-| 1.2         | Database schema & authentication      | 20            | 1,376         | 27,520       |
-| **Phase 2** | **Core Modules Development**          |               |               |              |
-| 2.1         | Supplier & raw material management    | 18            | 1,376         | 24,768       |
-| 2.2         | Purchase orders & inventory receipt   | 22            | 1,293         | 28,446       |
-| 2.3         | Products, recipes & production        | 25            | 1,293         | 32,325       |
-| 2.4         | Routes, outlets, employees & vehicles | 22            | 1,293         | 28,446       |
-| 2.5         | Sales & invoicing (with returns)      | 28            | 1,293         | 36,204       |
-| **Phase 3** | **Payments & Reporting**              |               |               |              |
-| 3.1         | Payment collection (check tracking)   | 18            | 1,293         | 23,274       |
-| 3.2         | Reports & analytics (expanded)        | 24            | 1,293         | 31,032       |
-| **Phase 4** | **Testing & Deployment**              |               |               |              |
-| 4.1         | Testing & bug fixes                   | 18            | 1,376         | 24,768       |
-| 4.2         | Documentation & training              | 12            | 1,376         | 16,512       |
-| 4.3         | Deployment & handover                 | 10            | 1,376         | 13,760       |
-|             |                                       |               |               |              |
-|             | **Subtotal**                          | **232 hours** |               | **299,964**  |
-|             | **Rounded Total**                     |               |               | **300,000**  |
+| Phase   | Description                                                                                                                                                                             | Amount (LKR) |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| Phase 1 | Environment setup, project structure, Database schema & auth                                                                                                                            | 80,000       |
+| Phase 2 | Supplier/raw materials, POs/receipts, products/SKUs, recipes/production, routes/outlets/employees/vehicles, sales & invoicing (returns), payments with check tracking, baseline reports | 130,000      |
+| Phase 3 | Testing & bug fixes, documentation & training, deployment & handover                                                                                                                    | 70,000       |
+|         | **Subtotal**                                                                                                                                                                            | **280,000**  |
+|         | **Discount**                                                                                                                                                                            | **(20,000)** |
+|         | **Total Project Cost**                                                                                                                                                                  | **260,000**  |
 
 ---
 
-## PAYMENT SCHEDULE
+## PAYMENT SCHEDULE (Invoice #DEC-0001)
 
-| Milestone     | Description                      | Percentage | Amount (LKR)    | Due Date               |
-| ------------- | -------------------------------- | ---------- | --------------- | ---------------------- |
-| **Payment 1** | Advance upon project kickoff     | 30%        | **90,000**      | Upon agreement signing |
-| **Payment 2** | Upon Phase 2 completion (Week 7) | 40%        | **120,000**     | Week 7 milestone       |
-| **Payment 3** | Upon deployment & handover       | 30%        | **90,000**      | Upon go-live           |
-|               |                                  |            |                 |                        |
-|               | **TOTAL PROJECT COST**           | **100%**   | **300,000 LKR** |                        |
+| Milestone     | Description                             | Percentage | Amount (LKR)    | Due Date               |
+| ------------- | --------------------------------------- | ---------- | --------------- | ---------------------- |
+| **Payment 1** | Advance upon project kickoff            | 30%        | **80,000**      | Upon agreement signing |
+| **Payment 2** | Upon Phase 3 completion                 | 40%        | **110,000**     | Week 7 milestone       |
+| **Payment 3** | Upon deployment & handover              | 30%        | **70,000**      | Upon go-live           |
+|               |                                         |            |                 |                        |
+|               | **TOTAL PROJECT COST (after discount)** | **100%**   | **260,000 LKR** |                        |
 
 ---
 
 ## PAYMENT TERMS
 
-1. **Advance Payment (30%):** 90,000 LKR due upon signing of this agreement and before development begins.
+1. **Advance Payment (30%):** 80,000 LKR due upon signing of this agreement and before development begins.
 
-2. **Progress Payment (40%):** 120,000 LKR due upon successful completion and demonstration of Phase 2 (Core Modules Development), expected around Week 7.
+2. **Progress Payment (40%):** 110,000 LKR due upon successful completion and demonstration of Phase 3 (Core Modules Development), expected around Week 7.
 
-3. **Final Payment (30%):** 90,000 LKR due upon:
-
+3. **Final Payment (30%):** 70,000 LKR due upon:
    - Successful deployment to production environment
    - Completion of user training
    - Handover of source code and documentation
@@ -218,18 +204,18 @@ By signing below, both parties agree to the terms and conditions outlined in thi
 
 **CLIENT ACCEPTANCE:**
 
-Name: ****\*\*\*\*****\_\_\_****\*\*\*\*****  
-Signature: ****\*\*\*\*****\_\_\_****\*\*\*\*****  
-Date: ****\*\*\*\*****\_\_\_****\*\*\*\*****  
-Position: ****\*\*\*\*****\_\_\_****\*\*\*\*****
+Name: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***  
+Signature: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***  
+Date: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***  
+Position: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ---
 
 **DEVELOPER/VENDOR:**
 
-Name: ****\*\*\*\*****\_\_\_****\*\*\*\*****  
-Signature: ****\*\*\*\*****\_\_\_****\*\*\*\*****  
-Date: ****\*\*\*\*****\_\_\_****\*\*\*\*****
+Name: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***  
+Signature: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***  
+Date: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ---
 

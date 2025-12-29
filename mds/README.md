@@ -111,15 +111,15 @@ Client proposal and billing document:
 ### Core Modules
 
 ✅ Supplier Management (with check payment tracking)  
-✅ Purchase Orders & Raw Material Inventory (with returns)  
-✅ Product & SKU Management (multiple sizes, barcodes)  
+✅ Purchase  & SKU Management (multiple sizes, barcodes)  
 ✅ Recipe Management with Versioning  
 ✅ Production Runs  
 ✅ Route & Outlet (Customer) Management  
 ✅ Employee Management (sales refs, drivers, warehouse)  
 ✅ Vehicle-Route Assignment with History  
 ✅ Sales Invoicing with Discounts & Returns  
-✅ Credit Sales & Receivables  
+✅ Credit Sales & Receivables  Orders & Raw Material Inventory (with returns)  
+✅ Product
 ✅ Payment Collection (cash/credit/check tracking)  
 ✅ Comprehensive Reporting (sales, inventory, returns, checks)
 

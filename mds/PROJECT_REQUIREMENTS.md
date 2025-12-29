@@ -423,13 +423,13 @@ Hasal_Products requires a comprehensive web-based POS and inventory management s
 
 ### 5.1 Core Entities
 
-1. **Users** (id, username, password_hash, role, name, status)
+1. **Users** (id, username, password_hash, role, full_name, status)
 2. **Employees** (id, code, name, type, phone, assigned_route_id, status)
 3. **Suppliers** (id, code, name, contact, phone, email, address, payment_terms, balance, status)
 4. **Raw Materials** (id, code, name, category, unit, reorder_level, status)
 5. **Raw Material Batches** (id, material_id, batch_number_auto, supplier_id, quantity, unit_cost, purchase_date, expiry_date)
-6. **Products** (id, code, name, category, barcode, status)
-7. **Product SKUs** (id, product_id, size, unit, price, current_stock, status)
+6. **Products** (id, code, name, category, barcode, description, status)
+7. **Product SKUs** (id, product_id, size, unit, barcode, price, current_stock, status)
 8. **Recipes** (id, code, name, version, expected_yield, is_active, created_date)
 9. **Recipe Items** (id, recipe_id, material_id, quantity)
 10. **Production Runs** (id, recipe_id, recipe_version, production_date, batch_number, quantities_used, quantities_produced)
@@ -582,20 +582,17 @@ The system will be considered complete when:
 ## 10. Deliverables
 
 1. **Web Application**
-
    - Frontend (Vue.js)
    - Backend API (Express.js)
    - MySQL database with schema
 
 2. **Documentation**
-
    - User manual (admin guide)
    - API documentation
    - Database schema diagram
    - Deployment guide
 
 3. **Source Code**
-
    - Version-controlled repository (Git)
    - README with setup instructions
 
@@ -615,15 +612,15 @@ See separate PROJECT_TIMELINE.md for detailed breakdown.
 
 **Client Approval:**
 
-Name: ****\*\*****\_\_\_\_****\*\*****  
-Signature: ****\*\*****\_\_\_\_****\*\*****  
-Date: ****\*\*****\_\_\_\_****\*\*****
+Name: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***  
+Signature: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***  
+Date: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
 
 **Developer:**
 
-Name: ****\*\*****\_\_\_\_****\*\*****  
-Signature: ****\*\*****\_\_\_\_****\*\*****  
-Date: ****\*\*****\_\_\_\_****\*\*****
+Name: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***  
+Signature: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***  
+Date: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
 
 ---
 
