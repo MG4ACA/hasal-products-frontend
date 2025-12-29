@@ -169,15 +169,6 @@
 
 <script setup>
 import { usePaymentStore } from '@/stores/payment';
-import Breadcrumb from 'primevue/breadcrumb';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import ProgressSpinner from 'primevue/progressspinner';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';

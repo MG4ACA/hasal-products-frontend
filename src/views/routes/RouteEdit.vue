@@ -2,7 +2,6 @@
 import RouteForm from '@/components/routes/RouteForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRouteStore } from '@/stores/route';
-import Breadcrumb from 'primevue/breadcrumb';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

@@ -2,8 +2,6 @@
 import SupplierForm from '@/components/suppliers/SupplierForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useSupplierStore } from '@/stores/supplier';
-import Breadcrumb from 'primevue/breadcrumb';
-import ProgressSpinner from 'primevue/progressspinner';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

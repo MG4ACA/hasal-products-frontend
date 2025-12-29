@@ -68,10 +68,6 @@
 import SupplierList from '@/components/suppliers/SupplierList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useSupplierStore } from '@/stores/supplier';
-import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
-import InputText from 'primevue/inputtext';
-import Paginator from 'primevue/paginator';
 import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';

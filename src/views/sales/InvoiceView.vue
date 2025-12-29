@@ -1,11 +1,5 @@
 <script setup>
 import { useSalesStore } from '@/stores/sales';
-import Breadcrumb from 'primevue/breadcrumb';
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
-import DataTable from 'primevue/datatable';
-import Tag from 'primevue/tag';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted } from 'vue';

@@ -2,9 +2,6 @@
 import RawMaterialList from '@/components/raw-materials/RawMaterialList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRawMaterialStore } from '@/stores/rawMaterial';
-import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
-import InputText from 'primevue/inputtext';
 import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';

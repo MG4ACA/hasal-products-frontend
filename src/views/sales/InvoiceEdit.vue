@@ -1,7 +1,6 @@
 <script setup>
 import InvoiceForm from '@/components/sales/InvoiceForm.vue';
 import { useSalesStore } from '@/stores/sales';
-import Breadcrumb from 'primevue/breadcrumb';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';

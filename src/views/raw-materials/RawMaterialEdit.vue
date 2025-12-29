@@ -3,9 +3,6 @@ import BatchList from '@/components/raw-materials/BatchList.vue';
 import RawMaterialForm from '@/components/raw-materials/RawMaterialForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRawMaterialStore } from '@/stores/rawMaterial';
-import Breadcrumb from 'primevue/breadcrumb';
-import Dialog from 'primevue/dialog';
-import ProgressSpinner from 'primevue/progressspinner';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

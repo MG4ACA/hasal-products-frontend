@@ -115,14 +115,6 @@
 
 <script setup>
 import { usePaymentStore } from '@/stores/payment';
-import Breadcrumb from 'primevue/breadcrumb';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Checkbox from 'primevue/checkbox';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';

@@ -2,7 +2,6 @@
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useEmployeeStore } from '@/stores/employee';
-import Breadcrumb from 'primevue/breadcrumb';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 

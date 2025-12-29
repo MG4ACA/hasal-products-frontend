@@ -2,7 +2,6 @@
 import OutletForm from '@/components/outlets/OutletForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useOutletStore } from '@/stores/outlet';
-import Breadcrumb from 'primevue/breadcrumb';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 

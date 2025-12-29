@@ -2,7 +2,6 @@
 import VehicleForm from '@/components/vehicles/VehicleForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useVehicleStore } from '@/stores/vehicle';
-import Breadcrumb from 'primevue/breadcrumb';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 

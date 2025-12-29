@@ -45,7 +45,6 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useAuthStore } from '@/stores/auth';
-import Button from 'primevue/button';
 import { watch } from 'vue';
 import { useRouter } from 'vue-router';
 

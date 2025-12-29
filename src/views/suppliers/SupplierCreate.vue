@@ -2,7 +2,6 @@
 import SupplierForm from '@/components/suppliers/SupplierForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useSupplierStore } from '@/stores/supplier';
-import Breadcrumb from 'primevue/breadcrumb';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

@@ -2,10 +2,6 @@
 import RouteList from '@/components/routes/RouteList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRouteStore } from '@/stores/route';
-import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
-import InputText from 'primevue/inputtext';
-import Paginator from 'primevue/paginator';
 import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';

@@ -3,10 +3,6 @@ import AssignmentHistory from '@/components/vehicles/AssignmentHistory.vue';
 import VehicleAssignment from '@/components/vehicles/VehicleAssignment.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useVehicleStore } from '@/stores/vehicle';
-import Breadcrumb from 'primevue/breadcrumb';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Tag from 'primevue/tag';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

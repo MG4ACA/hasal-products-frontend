@@ -189,12 +189,6 @@
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRecipeStore } from '@/stores/recipe';
 import { formatDate, formatNumber } from '@/utils/formatters';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Divider from 'primevue/divider';
-import Tag from 'primevue/tag';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

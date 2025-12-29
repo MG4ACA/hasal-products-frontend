@@ -179,16 +179,6 @@
 <script setup>
 import { useOutletStore } from '@/stores/outlet';
 import { usePaymentStore } from '@/stores/payment';
-import Breadcrumb from 'primevue/breadcrumb';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import Message from 'primevue/message';
-import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
