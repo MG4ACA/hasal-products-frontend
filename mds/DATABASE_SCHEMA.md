@@ -166,21 +166,21 @@
 │ order_date           │     │ created_by (FK)  │
 │ expected_date        │     │ created_at       │
 │ total_amount         │     └──────────────────┘
-│ status               │
-│ created_by (FK)      │     ┌──────────────────────┐
-│ created_at           │     │ supplier_payments    │
-└──────────────────────┘     ├──────────────────────┤
-        │                    │ id (PK)              │
-        ▼                    │ supplier_id (FK)     │
-┌──────────────────────┐     │ payment_date         │
-│    po_items          │     │ amount               │
-├──────────────────────┤     │ payment_method       │
-│ id (PK)              │     │ reference            │
-│ po_id (FK)           │     │ notes                │
-│ material_id (FK)     │     │ created_by (FK)      │
-│ quantity             │     │ created_at           │
-│ unit_cost            │     └──────────────────────┘
-│ total_amount         │
+│ status               │             │
+│ created_by (FK)      │             │
+│ created_at           │             ▼
+└──────────────────────┘     ┌──────────────────────┐
+        │                    │ payment_allocations  │
+        ▼                    ├──────────────────────┤
+┌──────────────────────┐     │ id (PK)              │
+│    po_items          │     │ payment_id (FK)──────┼──────────┘
+├──────────────────────┤     │ invoice_id (FK)      │
+│ id (PK)              │     │ allocated_amount     │
+│ po_id (FK)           │     │ created_at           │
+│ material_id (FK)     │     └──────────────────────┘
+│ quantity             │
+│ unit_cost            │     ┌──────────────────────┐
+│ total_amount         │     │ supplier_payments    │
 └──────────────────────┘     ┌──────────────────────┐
                              │ stock_adjustments    │
                              ├──────────────────────┤
@@ -720,7 +720,27 @@ CREATE TABLE payments (
 
 ---
 
-### 2.11 Stock Adjustments
+### 2.11 Payment Allocations
+
+#### `payment_allocations`
+
+**Purpose:** Track how payments are allocated to specific invoices
+
+```sql
+CREATE TABLE payment_allocations (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  payment_id INT NOT NULL,
+  invoice_id INT NOT NULL,
+  allocated_amount DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE,
+  FOREIGN KEY (invoice_id) REFERENCES sales_invoices(id) ON DELETE CASCADE
+);
+```
+
+---
+
+### 2.12 Stock Adjustments
 
 #### `stock_adjustments`
 

@@ -1,0 +1,1353 @@
+{
+  "info": {
+    "name": "Hasal POS API Collection",
+    "description": "Complete API collection for Hasal Products POS System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "hasal-pos"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login to get JWT token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.data.token);",
+                  "    console.log('Token saved:', response.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"role\": \"cashier\",\n  \"full_name\": \"Test User\",\n  \"email\": \"test@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user (admin only)"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get current authenticated user info"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout current user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Suppliers",
+      "item": [
+        {
+          "name": "Get All Suppliers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suppliers?page=1&limit=10&search=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name, contact person, phone"
+                }
+              ]
+            },
+            "description": "Get paginated list of suppliers with optional search"
+          }
+        },
+        {
+          "name": "Get Supplier by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "1"
+              ]
+            },
+            "description": "Get single supplier by ID"
+          }
+        },
+        {
+          "name": "Get Supplier Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/1/balance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "1",
+                "balance"
+              ]
+            },
+            "description": "Get supplier balance information"
+          }
+        },
+        {
+          "name": "Create Supplier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ceylon Spice Co.\",\n  \"contact_person\": \"Nimal Silva\",\n  \"phone\": \"0771234567\",\n  \"email\": \"nimal@ceylonspice.lk\",\n  \"address\": \"123 Galle Road, Colombo 03\",\n  \"credit_limit\": 500000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/suppliers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers"
+              ]
+            },
+            "description": "Create new supplier (admin only)"
+          }
+        },
+        {
+          "name": "Update Supplier",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Supplier Name\",\n  \"phone\": \"0779999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "1"
+              ]
+            },
+            "description": "Update supplier details (admin only)"
+          }
+        },
+        {
+          "name": "Delete Supplier",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "1"
+              ]
+            },
+            "description": "Delete supplier (admin only)"
+          }
+        },
+        {
+          "name": "Get Supplier Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/1/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "1",
+                "payments"
+              ]
+            },
+            "description": "Get payments for specific supplier"
+          }
+        },
+        {
+          "name": "Create Supplier Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_date\": \"2025-12-29\",\n  \"amount\": 50000,\n  \"payment_method\": \"bank_transfer\",\n  \"reference\": \"PAY001\",\n  \"notes\": \"Payment for spice delivery\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/1/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "1",
+                "payments"
+              ]
+            },
+            "description": "Create payment for supplier"
+          }
+        },
+        {
+          "name": "Get All Supplier Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suppliers/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                "payments"
+              ]
+            },
+            "description": "Get all supplier payments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Raw Materials",
+      "item": [
+        {
+          "name": "Get All Raw Materials",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials?page=1&limit=10&search=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name or code"
+                }
+              ]
+            },
+            "description": "Get paginated list of raw materials"
+          }
+        },
+        {
+          "name": "Get Raw Material by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials",
+                "1"
+              ]
+            },
+            "description": "Get single raw material by ID"
+          }
+        },
+        {
+          "name": "Get Raw Material Stock",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials/1/stock",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials",
+                "1",
+                "stock"
+              ]
+            },
+            "description": "Get current stock level for raw material"
+          }
+        },
+        {
+          "name": "Get Raw Material Batches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials/1/batches",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials",
+                "1",
+                "batches"
+              ]
+            },
+            "description": "Get all batches for a raw material"
+          }
+        },
+        {
+          "name": "Create Raw Material",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Black Pepper\",\n  \"description\": \"Premium quality black pepper\",\n  \"unit\": \"kg\",\n  \"reorder_level\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials"
+              ]
+            },
+            "description": "Create new raw material (admin only)"
+          }
+        },
+        {
+          "name": "Update Raw Material",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Material Name\",\n  \"reorder_level\": 75\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials",
+                "1"
+              ]
+            },
+            "description": "Update raw material details (admin only)"
+          }
+        },
+        {
+          "name": "Delete Raw Material",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/raw-materials/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "raw-materials",
+                "1"
+              ]
+            },
+            "description": "Delete raw material (admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "Get all products"
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            },
+            "description": "Get single product by ID"
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ceylon Curry Powder\",\n  \"description\": \"Authentic Sri Lankan curry powder\",\n  \"category\": \"Spices\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "Create new product"
+          }
+        },
+        {
+          "name": "Add Product SKU",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"size\": \"100g\",\n  \"unit\": \"packet\",\n  \"price\": 250.00,\n  \"barcode\": \"CURRY100G001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/products/1/skus",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1",
+                "skus"
+              ]
+            },
+            "description": "Add SKU to product"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchase Orders",
+      "item": [
+        {
+          "name": "Get All Purchase Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/purchase-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders"
+              ]
+            },
+            "description": "Get all purchase orders"
+          }
+        },
+        {
+          "name": "Get Purchase Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/purchase-orders/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders",
+                "1"
+              ]
+            },
+            "description": "Get purchase order with items"
+          }
+        },
+        {
+          "name": "Create Purchase Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplier_id\": 1,\n  \"order_date\": \"2025-12-29\",\n  \"expected_date\": \"2025-12-31\",\n  \"items\": [\n    {\n      \"material_id\": 1,\n      \"quantity\": 100,\n      \"unit_cost\": 500.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/purchase-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders"
+              ]
+            },
+            "description": "Create new purchase order"
+          }
+        },
+        {
+          "name": "Receive Purchase Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"received_date\": \"2025-12-29\",\n  \"batches\": [\n    {\n      \"material_id\": 1,\n      \"quantity\": 100,\n      \"unit_cost\": 500.00,\n      \"batch_number\": \"BATCH001\",\n      \"expiry_date\": \"2026-12-29\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/purchase-orders/1/receive",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders",
+                "1",
+                "receive"
+              ]
+            },
+            "description": "Receive purchase order and create batches"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sales Invoices",
+      "item": [
+        {
+          "name": "Get All Sales Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sales-invoices",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sales-invoices"
+              ]
+            },
+            "description": "Get all sales invoices"
+          }
+        },
+        {
+          "name": "Get Sales Invoice by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sales-invoices/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sales-invoices",
+                "1"
+              ]
+            },
+            "description": "Get sales invoice with items"
+          }
+        },
+        {
+          "name": "Create Sales Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outlet_id\": 1,\n  \"vehicle_id\": 1,\n  \"invoice_date\": \"2025-12-29\",\n  \"items\": [\n    {\n      \"sku_id\": 1,\n      \"quantity\": 2,\n      \"unit_price\": 250.00,\n      \"discount_percent\": 0\n    }\n  ],\n  \"payment_method\": \"cash\",\n  \"discount_percent\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sales-invoices",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sales-invoices"
+              ]
+            },
+            "description": "Create new sales invoice"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get All Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            },
+            "description": "Get all payments with filters"
+          }
+        },
+        {
+          "name": "Get Pending Checks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments/pending-checks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "pending-checks"
+              ]
+            },
+            "description": "Get pending check payments"
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outlet_id\": 1,\n  \"payment_date\": \"2025-12-29\",\n  \"amount\": 10000,\n  \"payment_method\": \"cash\",\n  \"reference\": \"PAY001\",\n  \"notes\": \"Customer payment\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            },
+            "description": "Create new payment"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Production",
+      "item": [
+        {
+          "name": "Get All Production Runs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/production-runs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "production-runs"
+              ]
+            },
+            "description": "Get all production runs"
+          }
+        },
+        {
+          "name": "Create Production Run",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipe_id\": 1,\n  \"production_date\": \"2025-12-29\",\n  \"batch_number\": \"PROD001\",\n  \"notes\": \"Production run for curry powder\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/production-runs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "production-runs"
+              ]
+            },
+            "description": "Create new production run"
+          }
+        },
+        {
+          "name": "Complete Production Run",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"output\": [\n    {\n      \"sku_id\": 1,\n      \"quantity_produced\": 50\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/production-runs/1/complete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "production-runs",
+                "1",
+                "complete"
+              ]
+            },
+            "description": "Complete production run and record output"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recipes",
+      "item": [
+        {
+          "name": "Get All Recipes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/recipes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipes"
+              ]
+            },
+            "description": "Get all recipes"
+          }
+        },
+        {
+          "name": "Create Recipe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CURRY_POWDER\",\n  \"name\": \"Ceylon Curry Powder\",\n  \"expected_yield\": 100,\n  \"notes\": \"Traditional Sri Lankan curry powder recipe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipes"
+              ]
+            },
+            "description": "Create new recipe"
+          }
+        },
+        {
+          "name": "Add Recipe Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"material_id\": 1,\n  \"quantity\": 10,\n  \"unit\": \"kg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipes/1/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipes",
+                "1",
+                "items"
+              ]
+            },
+            "description": "Add ingredient to recipe"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Routes & Outlets",
+      "item": [
+        {
+          "name": "Get All Routes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/routes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "routes"
+              ]
+            },
+            "description": "Get all delivery routes"
+          }
+        },
+        {
+          "name": "Get All Outlets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/outlets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "outlets"
+              ]
+            },
+            "description": "Get all sales outlets"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees & Vehicles",
+      "item": [
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employees"
+              ]
+            },
+            "description": "Get all employees"
+          }
+        },
+        {
+          "name": "Get All Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/vehicles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "vehicles"
+              ]
+            },
+            "description": "Get all delivery vehicles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "API Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Check API server health"
+          }
+        },
+        {
+          "name": "API Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api"
+              ]
+            },
+            "description": "Get API information"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Add any global pre-request scripts here"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Add any global test scripts here"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
