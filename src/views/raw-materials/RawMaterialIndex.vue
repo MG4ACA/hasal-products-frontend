@@ -133,7 +133,16 @@ onMounted(() => {
           <h1>Raw Materials</h1>
           <p>Manage raw materials and inventory</p>
         </div>
-        <Button label="Add Raw Material" icon="pi pi-plus" @click="handleCreate" />
+        <div class="header-actions">
+          <Button
+            v-tooltip="'Refresh'"
+            icon="pi pi-refresh"
+            rounded
+            severity="primary"
+            @click="loadRawMaterials"
+          />
+          <Button label="Add Raw Material" icon="pi pi-plus" @click="handleCreate" />
+        </div>
       </div>
     </div>
 
@@ -142,14 +151,14 @@ onMounted(() => {
       <div class="filter-group">
         <!-- Search -->
         <div class="search-box">
-          <span class="p-input-icon-left">
-            <i class="pi pi-search" />
+          <IconField>
+            <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters.search"
               placeholder="Search by name or code..."
               class="search-input"
             />
-          </span>
+          </IconField>
         </div>
 
         <!-- Category Filter -->

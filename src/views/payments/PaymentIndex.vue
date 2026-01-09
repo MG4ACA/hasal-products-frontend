@@ -4,6 +4,13 @@
       <h1>Payment Collection</h1>
       <div class="header-actions">
         <Button
+          v-tooltip="'Refresh'"
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchPayments"
+        />
+        <Button
           label="Pending Checks"
           icon="pi pi-clock"
           severity="warning"
@@ -350,11 +357,6 @@ onMounted(async () => {
   margin: 0;
   font-size: 2rem;
   color: #333;
-}
-
-.header-actions {
-  display: flex;
-  gap: 1rem;
 }
 
 .filters-section {

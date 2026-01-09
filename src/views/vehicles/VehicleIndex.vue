@@ -120,20 +120,29 @@ onMounted(() => {
         <h1>Vehicles</h1>
         <p class="text-muted">Manage fleet vehicles</p>
       </div>
-      <Button label="Add Vehicle" icon="pi pi-plus" @click="handleCreate" />
+      <div class="header-actions">
+        <Button
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchVehicles"
+          v-tooltip="'Refresh'"
+        />
+        <Button label="Add Vehicle" icon="pi pi-plus" @click="handleCreate" />
+      </div>
     </div>
 
     <div class="filters-card">
       <div class="filters">
         <div class="search-box">
-          <span class="p-input-icon-left">
-            <i class="pi pi-search" />
+          <IconField>
+            <InputIcon class="pi pi-search" />
             <InputText
               v-model="searchQuery"
               placeholder="Search vehicles..."
               class="search-input"
             />
-          </span>
+          </IconField>
         </div>
 
         <Dropdown

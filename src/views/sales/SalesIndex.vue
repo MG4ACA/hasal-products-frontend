@@ -169,7 +169,16 @@ onMounted(async () => {
         <h1 class="page-title">Sales Invoices</h1>
         <p class="page-subtitle">Manage sales invoices and returns</p>
       </div>
-      <Button label="Create Invoice" icon="pi pi-plus" @click="handleCreate" />
+      <div class="header-actions">
+        <Button
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchInvoices"
+          v-tooltip="'Refresh'"
+        />
+        <Button label="Create Invoice" icon="pi pi-plus" @click="handleCreate" />
+      </div>
     </div>
 
     <div class="filters-card">

@@ -6,9 +6,9 @@
     <div class="topbar-right">
       <div class="user-profile">
         <span>{{ authStore.user?.username }}</span>
-        <span class="role-badge">{{ authStore.userRole }}</span>
+        <!-- <span class="role-badge">{{ authStore.userRole }}</span> -->
         <Button
-          v-tooltip="'Logout'"
+          v-tooltip.focus.top="'Logout'"
           icon="pi pi-sign-out"
           class="p-button-rounded p-button-text"
           @click="handleLogout"

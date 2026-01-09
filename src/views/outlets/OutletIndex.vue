@@ -117,15 +117,28 @@ onMounted(() => {
         <h1>Outlets</h1>
         <p>Manage customer outlets and their information</p>
       </div>
-      <Button label="Add Outlet" icon="pi pi-plus" @click="() => router.push('/outlets/create')" />
+      <div class="header-actions">
+        <Button
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchData"
+          v-tooltip="'Refresh'"
+        />
+        <Button
+          label="Add Outlet"
+          icon="pi pi-plus"
+          @click="() => router.push('/outlets/create')"
+        />
+      </div>
     </div>
 
     <div class="filters-section">
       <div class="search-box">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search" />
+        <IconField>
+          <InputIcon class="pi pi-search" />
           <InputText v-model="filters.search" placeholder="Search outlets..." @input="onSearch" />
-        </span>
+        </IconField>
       </div>
 
       <div class="filter-controls">

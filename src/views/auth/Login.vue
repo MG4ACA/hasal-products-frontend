@@ -58,7 +58,7 @@ const handleLogin = async () => {
   try {
     await authStore.login(form.value.username, form.value.password);
     showSuccess('Logged in successfully!', 'Login Successful');
-    router.push('/dashboard');
+    router.push('/');
   } catch (err) {
     const errorMessage =
       err.response?.data?.message || err.message || 'Login failed. Please try again.';

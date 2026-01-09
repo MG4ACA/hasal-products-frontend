@@ -3,8 +3,17 @@
     <Breadcrumb :home="breadcrumbHome" :model="breadcrumbItems" class="mb-4" />
 
     <div class="page-header">
-      <h1>Pending Checks</h1>
-      <p>Manage and clear pending check payments</p>
+      <div>
+        <h1>Pending Checks</h1>
+        <p>Manage and clear pending check payments</p>
+      </div>
+      <Button
+        icon="pi pi-refresh"
+        rounded
+        severity="primary"
+        @click="fetchChecks"
+        v-tooltip="'Refresh'"
+      />
     </div>
 
     <div class="filters-section">

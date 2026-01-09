@@ -25,6 +25,8 @@ import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
 import Dropdown from 'primevue/dropdown';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Paginator from 'primevue/paginator';
@@ -69,5 +71,7 @@ app.component('Card', Card);
 app.component('Tag', Tag);
 app.component('Divider', Divider);
 app.component('Steps', Steps);
+app.component('IconField', IconField);
+app.component('InputIcon', InputIcon);
 
 app.mount('#app');

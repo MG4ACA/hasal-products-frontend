@@ -131,29 +131,63 @@ onMounted(() => {
   <div class="invoice-view">
     <ConfirmDialog />
 
-    <Breadcrumb :home="breadcrumbHome" :model="breadcrumbItems" class="mb-4" />
+    <Breadcrumb
+      :home="breadcrumbHome"
+      :model="breadcrumbItems"
+      class="mb-4"
+    />
 
-    <div v-if="salesStore.loading" class="loading-state">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
+    <div
+      v-if="salesStore.loading"
+      class="loading-state"
+    >
+      <i
+        class="pi pi-spin pi-spinner"
+        style="font-size: 2rem"
+      />
       <p>Loading invoice...</p>
     </div>
 
-    <div v-else-if="invoice" class="invoice-details">
+    <div
+      v-else-if="invoice"
+      class="invoice-details"
+    >
       <div class="page-header">
         <div>
-          <h1 class="page-title">Invoice {{ invoice.invoice_number }}</h1>
-          <p class="page-subtitle">View invoice details and items</p>
+          <h1 class="page-title">
+            Invoice {{ invoice.invoice_number }}
+          </h1>
+          <p class="page-subtitle">
+            View invoice details and items
+          </p>
         </div>
         <div class="header-actions">
-          <Button label="Back" icon="pi pi-arrow-left" severity="secondary" @click="handleBack" />
-          <Button label="Edit" icon="pi pi-pencil" severity="success" @click="handleEdit" />
-          <Button label="Delete" icon="pi pi-trash" severity="danger" @click="handleDelete" />
+          <Button
+            label="Back"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            @click="handleBack"
+          />
+          <Button
+            label="Edit"
+            icon="pi pi-pencil"
+            severity="success"
+            @click="handleEdit"
+          />
+          <Button
+            label="Delete"
+            icon="pi pi-trash"
+            severity="danger"
+            @click="handleDelete"
+          />
         </div>
       </div>
 
       <!-- Invoice Header -->
       <div class="info-card">
-        <h2 class="section-title">Invoice Information</h2>
+        <h2 class="section-title">
+          Invoice Information
+        </h2>
         <div class="info-grid">
           <div class="info-item">
             <label>Invoice Number</label>
@@ -171,13 +205,18 @@ onMounted(() => {
 
           <div class="info-item">
             <label>Outlet</label>
-            <div class="value">{{ invoice.outlet?.name }} ({{ invoice.outlet?.code }})</div>
+            <div class="value">
+              {{ invoice.outlet?.name }} ({{ invoice.outlet?.code }})
+            </div>
           </div>
 
           <div class="info-item">
             <label>Sales Reference</label>
             <div class="value">
-              <Tag v-if="invoice.sales_ref" severity="info">
+              <Tag
+                v-if="invoice.sales_ref"
+                severity="info"
+              >
                 {{ invoice.sales_ref?.first_name }} {{ invoice.sales_ref?.last_name }}
               </Tag>
               <span v-else>-</span>
@@ -187,7 +226,10 @@ onMounted(() => {
           <div class="info-item">
             <label>Route</label>
             <div class="value">
-              <Tag v-if="invoice.route" severity="info">
+              <Tag
+                v-if="invoice.route"
+                severity="info"
+              >
                 {{ invoice.route?.name }}
               </Tag>
               <span v-else>-</span>
@@ -221,8 +263,13 @@ onMounted(() => {
         </div>
 
         <!-- Check Details (if applicable) -->
-        <div v-if="invoice.payment_method === 'check'" class="check-details">
-          <h3 class="subsection-title">Check Details</h3>
+        <div
+          v-if="invoice.payment_method === 'check'"
+          class="check-details"
+        >
+          <h3 class="subsection-title">
+            Check Details
+          </h3>
           <div class="info-grid">
             <div class="info-item">
               <label>Check Number</label>
@@ -248,8 +295,13 @@ onMounted(() => {
         </div>
 
         <!-- Notes -->
-        <div v-if="invoice.notes" class="notes-section">
-          <h3 class="subsection-title">Notes</h3>
+        <div
+          v-if="invoice.notes"
+          class="notes-section"
+        >
+          <h3 class="subsection-title">
+            Notes
+          </h3>
           <p class="notes-text">
             {{ invoice.notes }}
           </p>
@@ -258,13 +310,21 @@ onMounted(() => {
 
       <!-- Sales Items -->
       <div class="info-card">
-        <h2 class="section-title">Sales Items</h2>
+        <h2 class="section-title">
+          Sales Items
+        </h2>
         <DataTable :value="salesItems">
           <template #empty>
-            <div class="text-center p-4 text-gray-500">No sales items</div>
+            <div class="text-center p-4 text-gray-500">
+              No sales items
+            </div>
           </template>
 
-          <Column field="product_sku.product.name" header="Product" style="min-width: 200px">
+          <Column
+            field="product_sku.product.name"
+            header="Product"
+            style="min-width: 200px"
+          >
             <template #body="slotProps">
               <div>
                 <div class="font-semibold">
@@ -277,25 +337,45 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column field="quantity" header="Quantity" style="width: 100px" />
+          <Column
+            field="quantity"
+            header="Quantity"
+            style="width: 100px"
+          />
 
-          <Column field="unit_price" header="Unit Price" style="width: 140px">
+          <Column
+            field="unit_price"
+            header="Unit Price"
+            style="width: 140px"
+          >
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.unit_price) }}
             </template>
           </Column>
 
-          <Column field="discount_percent" header="Discount" style="width: 100px">
-            <template #body="slotProps"> {{ slotProps.data.discount_percent }}% </template>
+          <Column
+            field="discount_percent"
+            header="Discount"
+            style="width: 100px"
+          >
+            <template #body="slotProps">
+              {{ slotProps.data.discount_percent }}%
+            </template>
           </Column>
 
-          <Column header="Subtotal" style="width: 140px">
+          <Column
+            header="Subtotal"
+            style="width: 140px"
+          >
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.quantity * slotProps.data.unit_price) }}
             </template>
           </Column>
 
-          <Column header="Discount Amt" style="width: 140px">
+          <Column
+            header="Discount Amt"
+            style="width: 140px"
+          >
             <template #body="slotProps">
               {{
                 formatCurrency(
@@ -308,7 +388,10 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column header="Total" style="width: 140px">
+          <Column
+            header="Total"
+            style="width: 140px"
+          >
             <template #body="slotProps">
               <div class="font-semibold">
                 {{
@@ -317,7 +400,7 @@ onMounted(() => {
                       (slotProps.data.quantity *
                         slotProps.data.unit_price *
                         slotProps.data.discount_percent) /
-                        100
+                      100
                   )
                 }}
               </div>
@@ -327,10 +410,19 @@ onMounted(() => {
       </div>
 
       <!-- Return Items -->
-      <div v-if="returnItems.length > 0" class="info-card">
-        <h2 class="section-title">Return Items</h2>
+      <div
+        v-if="returnItems.length > 0"
+        class="info-card"
+      >
+        <h2 class="section-title">
+          Return Items
+        </h2>
         <DataTable :value="returnItems">
-          <Column field="product_sku.product.name" header="Product" style="min-width: 200px">
+          <Column
+            field="product_sku.product.name"
+            header="Product"
+            style="min-width: 200px"
+          >
             <template #body="slotProps">
               <div>
                 <div class="font-semibold">
@@ -343,19 +435,31 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column field="quantity" header="Quantity" style="width: 100px">
+          <Column
+            field="quantity"
+            header="Quantity"
+            style="width: 100px"
+          >
             <template #body="slotProps">
               {{ Math.abs(slotProps.data.quantity) }}
             </template>
           </Column>
 
-          <Column field="unit_price" header="Unit Price" style="width: 140px">
+          <Column
+            field="unit_price"
+            header="Unit Price"
+            style="width: 140px"
+          >
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.unit_price) }}
             </template>
           </Column>
 
-          <Column field="return_reason" header="Reason" style="width: 150px">
+          <Column
+            field="return_reason"
+            header="Reason"
+            style="width: 150px"
+          >
             <template #body="slotProps">
               <Tag severity="warning">
                 {{ slotProps.data.return_reason?.replace('_', ' ').toUpperCase() }}
@@ -363,14 +467,27 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column field="return_to_stock" header="To Stock" style="width: 100px">
+          <Column
+            field="return_to_stock"
+            header="To Stock"
+            style="width: 100px"
+          >
             <template #body="slotProps">
-              <i v-if="slotProps.data.return_to_stock" class="pi pi-check text-green-500" />
-              <i v-else class="pi pi-times text-red-500" />
+              <i
+                v-if="slotProps.data.return_to_stock"
+                class="pi pi-check text-green-500"
+              />
+              <i
+                v-else
+                class="pi pi-times text-red-500"
+              />
             </template>
           </Column>
 
-          <Column header="Total" style="width: 140px">
+          <Column
+            header="Total"
+            style="width: 140px"
+          >
             <template #body="slotProps">
               <div class="font-semibold text-red-500">
                 -{{ formatCurrency(Math.abs(slotProps.data.quantity) * slotProps.data.unit_price) }}
@@ -382,7 +499,9 @@ onMounted(() => {
 
       <!-- Totals -->
       <div class="totals-card">
-        <h2 class="section-title">Invoice Totals</h2>
+        <h2 class="section-title">
+          Invoice Totals
+        </h2>
         <div class="totals-grid">
           <div class="total-row">
             <span class="total-label">Subtotal:</span>
@@ -391,9 +510,7 @@ onMounted(() => {
 
           <div class="total-row">
             <span class="total-label">Total Discount:</span>
-            <span class="total-value text-red-500"
-              >-{{ formatCurrency(invoice.total_discount_amount) }}</span
-            >
+            <span class="total-value text-red-500">-{{ formatCurrency(invoice.total_discount_amount) }}</span>
           </div>
 
           <div class="total-row grand-total">
@@ -448,11 +565,6 @@ onMounted(() => {
 .page-subtitle {
   color: #6b7280;
   margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .info-card {

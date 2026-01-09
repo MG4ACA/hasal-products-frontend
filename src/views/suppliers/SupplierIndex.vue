@@ -5,19 +5,28 @@
         <h1>Suppliers</h1>
         <p>Manage your suppliers and their information</p>
       </div>
-      <Button
-        label="Add Supplier"
-        icon="pi pi-plus"
-        @click="() => router.push('/suppliers/create')"
-      />
+      <div class="header-actions">
+        <Button
+          v-tooltip="'Refresh'"
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchData"
+        />
+        <Button
+          label="Add Supplier"
+          icon="pi pi-plus"
+          @click="() => router.push('/suppliers/create')"
+        />
+      </div>
     </div>
 
     <div class="filters-section">
       <div class="search-box">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search" />
+        <IconField>
+          <InputIcon class="pi pi-search" />
           <InputText v-model="filters.search" placeholder="Search suppliers..." @input="onSearch" />
-        </span>
+        </IconField>
       </div>
 
       <div class="filter-controls">

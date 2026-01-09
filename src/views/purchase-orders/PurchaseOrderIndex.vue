@@ -6,12 +6,21 @@
         <h1 class="page-title">Purchase Orders</h1>
         <p class="page-subtitle">Manage purchase orders and inventory receipts</p>
       </div>
-      <Button
-        label="Create Purchase Order"
-        icon="pi pi-plus"
-        class="p-button-success"
-        @click="navigateToCreate"
-      />
+      <div class="header-actions">
+        <Button
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchPurchaseOrders"
+          v-tooltip="'Refresh'"
+        />
+        <Button
+          label="Create Purchase Order"
+          icon="pi pi-plus"
+          class="p-button-success"
+          @click="navigateToCreate"
+        />
+      </div>
     </div>
 
     <!-- Filters Section -->

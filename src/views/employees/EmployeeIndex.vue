@@ -126,19 +126,28 @@ onMounted(() => {
         <h1>Employees</h1>
         <p>Manage employees (Sales Reps, Drivers, Warehouse Staff)</p>
       </div>
-      <Button
-        label="Add Employee"
-        icon="pi pi-plus"
-        @click="() => router.push('/employees/create')"
-      />
+      <div class="header-actions gap-2">
+        <Button
+          v-tooltip="'Refresh'"
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchData"
+        />
+        <Button
+          label="Add Employee"
+          icon="pi pi-plus"
+          @click="() => router.push('/employees/create')"
+        />
+      </div>
     </div>
 
     <div class="filters-section">
       <div class="search-box">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search" />
+        <IconField>
+          <InputIcon class="pi pi-search" />
           <InputText v-model="filters.search" placeholder="Search employees..." @input="onSearch" />
-        </span>
+        </IconField>
       </div>
 
       <div class="filter-controls">

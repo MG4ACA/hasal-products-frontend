@@ -165,9 +165,18 @@ onMounted(() => {
       <!-- Assignment History Card -->
       <Card>
         <template #title>
-          <div class="flex align-items-center gap-2">
-            <i class="pi pi-history text-primary" />
-            <span>Route Assignment History</span>
+          <div class="flex align-items-center justify-content-between">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-history text-primary" />
+              <span>Route Assignment History</span>
+            </div>
+            <Button
+              icon="pi pi-refresh"
+              rounded
+              severity="primary"
+              @click="() => historyRef?.refresh()"
+              v-tooltip="'Refresh'"
+            />
           </div>
         </template>
         <template #content>

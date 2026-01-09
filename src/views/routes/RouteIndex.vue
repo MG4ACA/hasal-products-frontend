@@ -96,15 +96,24 @@ onMounted(() => {
         <h1>Routes</h1>
         <p>Manage delivery routes for your business</p>
       </div>
-      <Button label="Add Route" icon="pi pi-plus" @click="() => router.push('/routes/create')" />
+      <div class="header-actions">
+        <Button
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="fetchData"
+          v-tooltip="'Refresh'"
+        />
+        <Button label="Add Route" icon="pi pi-plus" @click="() => router.push('/routes/create')" />
+      </div>
     </div>
 
     <div class="filters-section">
       <div class="search-box">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search" />
+        <IconField>
+          <InputIcon class="pi pi-search" />
           <InputText v-model="filters.search" placeholder="Search routes..." @input="onSearch" />
-        </span>
+        </IconField>
       </div>
 
       <div class="filter-controls">
