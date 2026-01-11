@@ -23,8 +23,6 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
   });
 
   // Getters
-  const getPurchaseOrders = computed(() => purchaseOrders.value);
-  const getCurrentPurchaseOrder = computed(() => currentPurchaseOrder.value);
   const isLoading = computed(() => loading.value);
   const getError = computed(() => error.value);
   const getPagination = computed(() => pagination.value);
@@ -323,9 +321,6 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     error,
     pagination,
     filters,
-    // Getters
-    getPurchaseOrders,
-    getCurrentPurchaseOrder,
     isLoading,
     getError,
     getPagination,

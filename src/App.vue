@@ -10,16 +10,10 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue';
 import { useAuthStore } from '@/stores/auth';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
-
-onMounted(() => {
-  if (authStore.token) {
-    authStore.fetchCurrentUser();
-  }
-});
 </script>
 
 <style>

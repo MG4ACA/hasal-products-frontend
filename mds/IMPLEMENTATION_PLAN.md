@@ -182,6 +182,7 @@
 - [x] Create SupplierForm component (`components/suppliers/SupplierForm.vue`)
 - [x] Create SupplierCreate view (`views/suppliers/SupplierCreate.vue`)
 - [x] Create SupplierEdit view (`views/suppliers/SupplierEdit.vue`)
+- [x] Create SupplierView view (`views/suppliers/SupplierView.vue`) - Read-only supplier details with balance & POs
 - [x] Implement DataTable with pagination
 - [x] Implement search and filter functionality
 - [x] Implement form validation
@@ -655,8 +656,8 @@
 - [x] Removed invalid created_at ordering
 - [x] Fixed aliases: creator → createdBy
       **Effort:** 26 hours  
-      **Completion Date:** December 20, 2025  
-      **Documentation:** See WEEK8_IMPLEMENTATION.md
+       **Completion Date:** December 20, 2025  
+       **Documentation:** See WEEK8_IMPLEMENTATION.md
 
 ---
 

@@ -102,7 +102,7 @@ const loading = ref(false);
 const submitting = ref(false);
 const error = ref(null);
 
-const purchaseOrder = computed(() => purchaseOrderStore.getCurrentPurchaseOrder);
+const purchaseOrder = computed(() => purchaseOrderStore.currentPurchaseOrder);
 
 const getStatusSeverity = status => {
   const severities = {

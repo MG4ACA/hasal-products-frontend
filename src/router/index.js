@@ -10,6 +10,7 @@ const NotFound = () => import('@/views/NotFound.vue');
 const SupplierIndex = () => import('@/views/suppliers/SupplierIndex.vue');
 const SupplierCreate = () => import('@/views/suppliers/SupplierCreate.vue');
 const SupplierEdit = () => import('@/views/suppliers/SupplierEdit.vue');
+const SupplierView = () => import('@/views/suppliers/SupplierView.vue');
 
 // Raw Material views
 const RawMaterialIndex = () => import('@/views/raw-materials/RawMaterialIndex.vue');
@@ -102,6 +103,12 @@ const routes = [
     path: '/suppliers/:id/edit',
     name: 'SupplierEdit',
     component: SupplierEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/suppliers/:id',
+    name: 'SupplierView',
+    component: SupplierView,
     meta: { requiresAuth: true },
   },
   {
@@ -356,9 +363,18 @@ const router = createRouter({
   routes,
 });
 
+// Track if auth has been initialized
+let authInitialized = false;
+
 // Navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+
+  // Initialize auth on first navigation
+  if (!authInitialized) {
+    authInitialized = true;
+    await authStore.initializeAuth();
+  }
 
   if (to.meta.requiresAuth) {
     if (!authStore.isAuthenticated) {

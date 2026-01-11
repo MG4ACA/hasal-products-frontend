@@ -269,7 +269,7 @@ const purchaseOrderStore = usePurchaseOrderStore();
 const loading = ref(false);
 const error = ref(null);
 
-const purchaseOrder = computed(() => purchaseOrderStore.getCurrentPurchaseOrder);
+const purchaseOrder = computed(() => purchaseOrderStore.currentPurchaseOrder);
 
 const batches = computed(() => {
   // In a real implementation, this would come from the API

@@ -118,17 +118,24 @@ export const useAuthStore = defineStore('auth', () => {
         return;
       }
 
-      user.value = response.user;
+      // Response is already the user object from authService
+      user.value = response;
+      calculateTimeRemaining();
+      startExpiryCheck();
     } catch (err) {
+      console.error('Error fetching current user:', err);
       error.value = err.message;
       logout();
     }
   };
 
-  // Initialize user on store creation
-  if (token.value) {
-    fetchCurrentUser();
-  }
+  const initializeAuth = async () => {
+    if (token.value && !isTokenExpired()) {
+      await fetchCurrentUser();
+    } else if (token.value && isTokenExpired()) {
+      logout();
+    }
+  };
 
   return {
     user,
@@ -144,6 +151,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     fetchCurrentUser,
+    initializeAuth,
     isTokenExpired,
     calculateTimeRemaining,
     startExpiryCheck,

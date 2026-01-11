@@ -3,7 +3,7 @@
 **Module:** Supplier Management & Raw Material Inventory  
 **Test Date:** TBD  
 **Tester:** [Your Name]  
-**Status:** ⏳ Pending
+**Status:** 🔄 In Progress
 
 ---
 
@@ -50,7 +50,7 @@
 
 **Actual Results:**
 
-- [✅ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -92,7 +92,7 @@
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -113,7 +113,7 @@
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -134,7 +134,7 @@
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -154,7 +154,7 @@
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -303,7 +303,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass (defer to Week 4)
+- [✅] Pass (balance updates correctly when POs are created, and displays properly in supplier view)
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -328,7 +328,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -351,7 +351,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -374,7 +374,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -397,7 +397,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -418,7 +418,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -440,7 +440,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -470,7 +470,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -494,7 +494,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -516,7 +516,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -540,7 +540,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -562,13 +562,12 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
-### SF-12: Delete Supplier - Execute
-
+enm 
 **Objective:** Test supplier deletion
 
 **Test Steps:**
@@ -585,7 +584,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -1013,16 +1012,16 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 ### Supplier Backend Tests
 
 - Total: 9
-- Passed: \_\_\_
-- Failed: \_\_\_
-- Pass Rate: \_\_\_%
+- Passed: 6
+- Failed: 0
+- Pass Rate: 67%
 
 ### Supplier Frontend Tests
 
 - Total: 12
-- Passed: \_\_\_
-- Failed: \_\_\_
-- Pass Rate: \_\_\_%
+- Passed: 12
+- Failed: 0
+- Pass Rate: 100%
 
 ### Raw Material Backend Tests
 
@@ -1041,9 +1040,9 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 ### Overall
 
 - **Total Tests:** 39
-- **Passed:** \_\_\_
-- **Failed:** \_\_\_
-- **Pass Rate:** \_\_\_%
+- **Passed:** 18
+- **Failed:** 0
+- **Pass Rate:** 46%
 
 ---
 
@@ -1060,5 +1059,9 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 
 **Tested By:** **\*\***\_\_\_**\*\***  
 **Date:** **\*\***\_\_\_**\*\***  
-**Status:** ⏳ Pending / ✅ Approved / ❌ Rejected  
+**Status:** 🔄 In Progress / ✅ Approved / ❌ Rejected  
 **Notes:**
+- Supplier balance calculation and display fixes implemented
+- Backend API endpoints for suppliers verified working
+- Frontend supplier view purchase orders display fixed
+- Supplier frontend UI testing completed (all 12 tests passed)

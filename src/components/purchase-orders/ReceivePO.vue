@@ -304,7 +304,7 @@ const error = ref(null);
 const errors = ref({});
 const activeTab = ref(0);
 
-const purchaseOrder = computed(() => purchaseOrderStore.getCurrentPurchaseOrder);
+const purchaseOrder = computed(() => purchaseOrderStore.currentPurchaseOrder);
 
 const formData = ref({
   received_date: new Date(),

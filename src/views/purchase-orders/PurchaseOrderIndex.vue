@@ -8,11 +8,11 @@
       </div>
       <div class="header-actions">
         <Button
+          v-tooltip="'Refresh'"
           icon="pi pi-refresh"
           rounded
           severity="primary"
           @click="fetchPurchaseOrders"
-          v-tooltip="'Refresh'"
         />
         <Button
           label="Create Purchase Order"
@@ -105,7 +105,7 @@
     <Card class="list-card">
       <template #content>
         <PurchaseOrderList
-          :purchase-orders="purchaseOrderStore.getPurchaseOrders"
+          :purchase-orders="purchaseOrderStore.purchaseOrders"
           :loading="purchaseOrderStore.isLoading"
           @view="viewPurchaseOrder"
           @edit="editPurchaseOrder"
@@ -211,7 +211,11 @@ const statusOptions = [
   { label: 'Cancelled', value: 'cancelled' },
 ];
 
-const supplierOptions = computed(() => supplierStore.getSuppliers);
+const supplierOptions = computed(() => supplierStore.suppliers);
+
+const fetchPurchaseOrders = () => {
+  loadPurchaseOrders();
+};
 
 let searchTimeout = null;
 const debouncedSearch = () => {

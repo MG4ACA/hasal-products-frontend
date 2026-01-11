@@ -353,8 +353,8 @@ const currentItem = reactive({
   unit_cost: 0,
 });
 
-const supplierOptions = computed(() => supplierStore.getSuppliers);
-const rawMaterialOptions = computed(() => rawMaterialStore.getRawMaterials);
+const supplierOptions = computed(() => supplierStore.suppliers);
+const rawMaterialOptions = computed(() => rawMaterialStore.rawMaterials);
 
 const canAddItem = computed(() => {
   return currentItem.raw_material_id && currentItem.quantity > 0 && currentItem.unit_cost > 0;
@@ -365,6 +365,9 @@ const totalAmount = computed(() => {
 });
 
 const onMaterialSelect = () => {
+  if (!rawMaterialOptions.value || !Array.isArray(rawMaterialOptions.value)) {
+    return;
+  }
   const material = rawMaterialOptions.value.find(m => m.id === currentItem.raw_material_id);
   if (material) {
     currentItem.material_code = material.material_code;
@@ -413,6 +416,9 @@ const removeItem = index => {
 };
 
 const getSupplierName = supplierId => {
+  if (!supplierOptions.value || !Array.isArray(supplierOptions.value)) {
+    return 'Unknown';
+  }
   const supplier = supplierOptions.value.find(s => s.id === supplierId);
   return supplier ? supplier.name : 'Unknown';
 };
