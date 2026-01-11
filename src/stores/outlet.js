@@ -44,10 +44,17 @@ export const useOutletStore = defineStore('outlet', () => {
       };
 
       const response = await outletService.getAll(params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       outlets.value = response.outlets;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch outlets';
+      error.value = err.message || 'Failed to fetch outlets';
       throw err;
     } finally {
       loading.value = false;
@@ -59,10 +66,17 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentOutlet.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch outlet';
+      error.value = err.message || 'Failed to fetch outlet';
       throw err;
     } finally {
       loading.value = false;
@@ -74,10 +88,17 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.create(outletData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchOutlets();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create outlet';
+      error.value = err.message || 'Failed to create outlet';
       throw err;
     } finally {
       loading.value = false;
@@ -89,10 +110,17 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.update(id, outletData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchOutlets();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update outlet';
+      error.value = err.message || 'Failed to update outlet';
       throw err;
     } finally {
       loading.value = false;
@@ -103,10 +131,17 @@ export const useOutletStore = defineStore('outlet', () => {
     try {
       loading.value = true;
       error.value = null;
-      await outletService.delete(id);
+      const response = await outletService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchOutlets();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete outlet';
+      error.value = err.message || 'Failed to delete outlet';
       throw err;
     } finally {
       loading.value = false;
@@ -118,10 +153,17 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getBalance(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       outletBalance.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch outlet balance';
+      error.value = err.message || 'Failed to fetch outlet balance';
       throw err;
     } finally {
       loading.value = false;
@@ -133,10 +175,17 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getInvoices(id, params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       outletInvoices.value = response.invoices;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch outlet invoices';
+      error.value = err.message || 'Failed to fetch outlet invoices';
       throw err;
     } finally {
       loading.value = false;
@@ -148,10 +197,17 @@ export const useOutletStore = defineStore('outlet', () => {
       loading.value = true;
       error.value = null;
       const response = await outletService.getPayments(id, params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       outletPayments.value = response.payments;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch outlet payments';
+      error.value = err.message || 'Failed to fetch outlet payments';
       throw err;
     } finally {
       loading.value = false;

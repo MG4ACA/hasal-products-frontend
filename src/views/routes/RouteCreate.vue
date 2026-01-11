@@ -30,7 +30,7 @@ const handleSubmit = async data => {
     router.push('/routes');
   } catch (error) {
     console.error('Failed to create route:', error);
-    showError(error.response?.data?.message || 'Failed to create route');
+    showError(error.message || 'Failed to create route');
   }
 };
 

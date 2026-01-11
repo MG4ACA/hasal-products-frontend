@@ -33,11 +33,18 @@ export const useSalesStore = defineStore('sales', () => {
     error.value = null;
     try {
       const data = await salesService.getAllInvoices(params);
+
+      // Check for error response
+      if (data.error) {
+        error.value = data.message;
+        throw new Error(data.message);
+      }
+
       invoices.value = data.invoices;
       totalInvoices.value = data.total;
       return data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch invoices';
+      error.value = err.message || 'Failed to fetch invoices';
       throw err;
     } finally {
       loading.value = false;
@@ -49,10 +56,17 @@ export const useSalesStore = defineStore('sales', () => {
     error.value = null;
     try {
       const data = await salesService.getInvoiceById(id);
+
+      // Check for error response
+      if (data.error) {
+        error.value = data.message;
+        throw new Error(data.message);
+      }
+
       currentInvoice.value = data;
       return data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch invoice';
+      error.value = err.message || 'Failed to fetch invoice';
       throw err;
     } finally {
       loading.value = false;
@@ -64,11 +78,18 @@ export const useSalesStore = defineStore('sales', () => {
     error.value = null;
     try {
       const data = await salesService.createInvoice(invoiceData);
+
+      // Check for error response
+      if (data.error) {
+        error.value = data.message;
+        throw new Error(data.message);
+      }
+
       invoices.value.unshift(data);
       totalInvoices.value += 1;
       return data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create invoice';
+      error.value = err.message || 'Failed to create invoice';
       throw err;
     } finally {
       loading.value = false;
@@ -80,6 +101,13 @@ export const useSalesStore = defineStore('sales', () => {
     error.value = null;
     try {
       const data = await salesService.updateInvoice(id, invoiceData);
+
+      // Check for error response
+      if (data.error) {
+        error.value = data.message;
+        throw new Error(data.message);
+      }
+
       const index = invoices.value.findIndex(invoice => invoice.id === id);
       if (index !== -1) {
         invoices.value[index] = data;
@@ -89,7 +117,7 @@ export const useSalesStore = defineStore('sales', () => {
       }
       return data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update invoice';
+      error.value = err.message || 'Failed to update invoice';
       throw err;
     } finally {
       loading.value = false;
@@ -100,14 +128,21 @@ export const useSalesStore = defineStore('sales', () => {
     loading.value = true;
     error.value = null;
     try {
-      await salesService.deleteInvoice(id);
+      const response = await salesService.deleteInvoice(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       invoices.value = invoices.value.filter(invoice => invoice.id !== id);
       totalInvoices.value -= 1;
       if (currentInvoice.value?.id === id) {
         currentInvoice.value = null;
       }
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete invoice';
+      error.value = err.message || 'Failed to delete invoice';
       throw err;
     } finally {
       loading.value = false;

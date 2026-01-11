@@ -57,7 +57,7 @@ const handleSubmit = async formData => {
     router.push('/suppliers');
   } catch (error) {
     console.error('Failed to update supplier:', error);
-    showError(error.response?.data?.message || 'Failed to update supplier');
+    showError(error.message || 'Failed to update supplier');
   }
 };
 

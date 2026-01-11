@@ -37,7 +37,7 @@ const handleSubmit = async data => {
     router.push('/outlets');
   } catch (error) {
     console.error('Failed to create outlet:', error);
-    showError(error.response?.data?.message || 'Failed to create outlet');
+    showError(error.message || 'Failed to create outlet');
   }
 };
 

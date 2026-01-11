@@ -64,6 +64,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       const response = await purchaseOrderService.getAllPurchaseOrders(queryParams);
 
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       if (response.data.success) {
         purchaseOrders.value = response.data.data.data;
         pagination.value = {
@@ -85,7 +91,7 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       return response.data.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch purchase orders';
+      error.value = err.message || 'Failed to fetch purchase orders';
       throw err;
     } finally {
       loading.value = false;
@@ -99,13 +105,19 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     try {
       const response = await purchaseOrderService.getPurchaseOrderById(id);
 
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       if (response.data.success) {
         currentPurchaseOrder.value = response.data.data;
       }
 
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch purchase order';
+      error.value = err.message || 'Failed to fetch purchase order';
       currentPurchaseOrder.value = null;
       throw err;
     } finally {
@@ -120,6 +132,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     try {
       const response = await purchaseOrderService.createPurchaseOrder(data);
 
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       if (response.data.success) {
         // Add to list if we're on page 1
         if (pagination.value.page === 1) {
@@ -130,7 +148,7 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create purchase order';
+      error.value = err.message || 'Failed to create purchase order';
       throw err;
     } finally {
       loading.value = false;
@@ -143,6 +161,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
     try {
       const response = await purchaseOrderService.updatePurchaseOrder(id, data);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
 
       if (response.data.success) {
         // Update in list
@@ -159,7 +183,7 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update purchase order';
+      error.value = err.message || 'Failed to update purchase order';
       throw err;
     } finally {
       loading.value = false;
@@ -172,6 +196,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
     try {
       const response = await purchaseOrderService.deletePurchaseOrder(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
 
       if (response.data.success) {
         // Remove from list
@@ -186,7 +216,7 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete purchase order';
+      error.value = err.message || 'Failed to delete purchase order';
       throw err;
     } finally {
       loading.value = false;
@@ -199,6 +229,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
     try {
       const response = await purchaseOrderService.receivePurchaseOrder(id, data);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
 
       if (response.data.success) {
         // Update in list
@@ -215,7 +251,7 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to receive purchase order';
+      error.value = err.message || 'Failed to receive purchase order';
       throw err;
     } finally {
       loading.value = false;
@@ -228,6 +264,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
     try {
       const response = await purchaseOrderService.updatePurchaseOrderStatus(id, status);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
 
       if (response.data.success) {
         // Update in list
@@ -244,7 +286,7 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
 
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update purchase order status';
+      error.value = err.message || 'Failed to update purchase order status';
       throw err;
     } finally {
       loading.value = false;

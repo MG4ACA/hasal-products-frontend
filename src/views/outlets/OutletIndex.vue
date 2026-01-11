@@ -98,7 +98,7 @@ const confirmDelete = outlet => {
         showSuccess('Outlet deleted successfully');
         await fetchData();
       } catch (error) {
-        showError(error.response?.data?.message || 'Failed to delete outlet');
+        showError(error.message || 'Failed to delete outlet');
       }
     },
   });

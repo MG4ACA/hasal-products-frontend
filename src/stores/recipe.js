@@ -41,6 +41,12 @@ export const useRecipeStore = defineStore('recipe', () => {
 
       const response = await recipeService.getAll(params);
 
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       recipes.value = response.data;
       pagination.value = {
         page: response.page,
@@ -49,7 +55,7 @@ export const useRecipeStore = defineStore('recipe', () => {
         totalPages: response.totalPages,
       };
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch recipes';
+      error.value = err.message || 'Failed to fetch recipes';
       throw err;
     } finally {
       loading.value = false;
@@ -62,10 +68,17 @@ export const useRecipeStore = defineStore('recipe', () => {
 
     try {
       const response = await recipeService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentRecipe.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch recipe';
+      error.value = err.message || 'Failed to fetch recipe';
       throw err;
     } finally {
       loading.value = false;
@@ -78,10 +91,17 @@ export const useRecipeStore = defineStore('recipe', () => {
 
     try {
       const response = await recipeService.create(recipeData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRecipes();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create recipe';
+      error.value = err.message || 'Failed to create recipe';
       throw err;
     } finally {
       loading.value = false;
@@ -94,10 +114,17 @@ export const useRecipeStore = defineStore('recipe', () => {
 
     try {
       const response = await recipeService.update(id, recipeData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRecipes();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update recipe';
+      error.value = err.message || 'Failed to update recipe';
       throw err;
     } finally {
       loading.value = false;
@@ -109,10 +136,17 @@ export const useRecipeStore = defineStore('recipe', () => {
     error.value = null;
 
     try {
-      await recipeService.delete(id);
+      const response = await recipeService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRecipes();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete recipe';
+      error.value = err.message || 'Failed to delete recipe';
       throw err;
     } finally {
       loading.value = false;
@@ -125,10 +159,17 @@ export const useRecipeStore = defineStore('recipe', () => {
 
     try {
       const response = await recipeService.getVersions(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       versionHistory.value = response.data;
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch version history';
+      error.value = err.message || 'Failed to fetch version history';
       throw err;
     } finally {
       loading.value = false;
@@ -141,10 +182,17 @@ export const useRecipeStore = defineStore('recipe', () => {
 
     try {
       const response = await recipeService.addItem(recipeId, itemData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRecipeById(recipeId);
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to add item';
+      error.value = err.message || 'Failed to add item';
       throw err;
     } finally {
       loading.value = false;
@@ -157,10 +205,17 @@ export const useRecipeStore = defineStore('recipe', () => {
 
     try {
       const response = await recipeService.updateItem(recipeId, itemId, itemData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRecipeById(recipeId);
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update item';
+      error.value = err.message || 'Failed to update item';
       throw err;
     } finally {
       loading.value = false;
@@ -172,10 +227,17 @@ export const useRecipeStore = defineStore('recipe', () => {
     error.value = null;
 
     try {
-      await recipeService.deleteItem(recipeId, itemId);
+      const response = await recipeService.deleteItem(recipeId, itemId);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRecipeById(recipeId);
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete item';
+      error.value = err.message || 'Failed to delete item';
       throw err;
     } finally {
       loading.value = false;

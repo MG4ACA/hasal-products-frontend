@@ -40,10 +40,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       };
 
       const response = await vehicleService.getAll(params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       vehicles.value = response.vehicles;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch vehicles';
+      error.value = err.message || 'Failed to fetch vehicles';
       throw err;
     } finally {
       loading.value = false;
@@ -55,10 +62,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentVehicle.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch vehicle';
+      error.value = err.message || 'Failed to fetch vehicle';
       throw err;
     } finally {
       loading.value = false;
@@ -70,10 +84,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.create(vehicleData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchVehicles();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create vehicle';
+      error.value = err.message || 'Failed to create vehicle';
       throw err;
     } finally {
       loading.value = false;
@@ -85,10 +106,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.update(id, vehicleData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchVehicles();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update vehicle';
+      error.value = err.message || 'Failed to update vehicle';
       throw err;
     } finally {
       loading.value = false;
@@ -99,10 +127,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
     try {
       loading.value = true;
       error.value = null;
-      await vehicleService.delete(id);
+      const response = await vehicleService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchVehicles();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete vehicle';
+      error.value = err.message || 'Failed to delete vehicle';
       throw err;
     } finally {
       loading.value = false;
@@ -114,10 +149,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.assignToRoute(id, assignmentData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchVehicles();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to assign vehicle to route';
+      error.value = err.message || 'Failed to assign vehicle to route';
       throw err;
     } finally {
       loading.value = false;
@@ -129,10 +171,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.unassignFromRoute(id, unassignmentData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchVehicles();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to unassign vehicle from route';
+      error.value = err.message || 'Failed to unassign vehicle from route';
       throw err;
     } finally {
       loading.value = false;
@@ -144,10 +193,17 @@ export const useVehicleStore = defineStore('vehicle', () => {
       loading.value = true;
       error.value = null;
       const response = await vehicleService.getAssignmentHistory(id, params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       vehicleHistory.value = response.history || response.data.history;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch vehicle assignment history';
+      error.value = err.message || 'Failed to fetch vehicle assignment history';
       throw err;
     } finally {
       loading.value = false;

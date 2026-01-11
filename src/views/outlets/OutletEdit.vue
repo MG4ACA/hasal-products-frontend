@@ -53,7 +53,7 @@ const loadOutlet = async () => {
       status: data.status,
     };
   } catch (error) {
-    showError(error.response?.data?.message || 'Failed to load outlet');
+    showError(error.message || 'Failed to load outlet');
     router.push('/outlets');
   } finally {
     loading.value = false;
@@ -67,7 +67,7 @@ const handleSubmit = async data => {
     router.push('/outlets');
   } catch (error) {
     console.error('Failed to update outlet:', error);
-    showError(error.response?.data?.message || 'Failed to update outlet');
+    showError(error.message || 'Failed to update outlet');
   }
 };
 

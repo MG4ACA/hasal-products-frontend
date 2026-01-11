@@ -25,7 +25,7 @@ const handleSubmit = async formData => {
     router.push('/raw-materials');
   } catch (error) {
     console.error('Failed to create raw material:', error);
-    showError(error.response?.data?.message || 'Failed to create raw material');
+    showError(error.message || 'Failed to create raw material');
   }
 };
 

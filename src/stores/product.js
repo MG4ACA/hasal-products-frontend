@@ -38,6 +38,12 @@ export const useProductStore = defineStore('product', () => {
 
       const response = await productService.getAll(params);
 
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       products.value = response.data;
       pagination.value = {
         page: response.page,
@@ -46,7 +52,7 @@ export const useProductStore = defineStore('product', () => {
         totalPages: response.totalPages,
       };
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch products';
+      error.value = err.message || 'Failed to fetch products';
       throw err;
     } finally {
       loading.value = false;
@@ -59,10 +65,17 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const response = await productService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentProduct.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch product';
+      error.value = err.message || 'Failed to fetch product';
       throw err;
     } finally {
       loading.value = false;
@@ -75,10 +88,17 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const response = await productService.create(productData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProducts();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create product';
+      error.value = err.message || 'Failed to create product';
       throw err;
     } finally {
       loading.value = false;
@@ -91,10 +111,17 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const response = await productService.update(id, productData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProducts();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update product';
+      error.value = err.message || 'Failed to update product';
       throw err;
     } finally {
       loading.value = false;
@@ -106,10 +133,17 @@ export const useProductStore = defineStore('product', () => {
     error.value = null;
 
     try {
-      await productService.delete(id);
+      const response = await productService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProducts();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete product';
+      error.value = err.message || 'Failed to delete product';
       throw err;
     } finally {
       loading.value = false;
@@ -122,10 +156,17 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const response = await productService.addSku(productId, skuData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductById(productId);
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to add SKU';
+      error.value = err.message || 'Failed to add SKU';
       throw err;
     } finally {
       loading.value = false;
@@ -138,10 +179,17 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const response = await productService.updateSku(productId, skuId, skuData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductById(productId);
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update SKU';
+      error.value = err.message || 'Failed to update SKU';
       throw err;
     } finally {
       loading.value = false;
@@ -153,10 +201,17 @@ export const useProductStore = defineStore('product', () => {
     error.value = null;
 
     try {
-      await productService.deleteSku(productId, skuId);
+      const response = await productService.deleteSku(productId, skuId);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductById(productId);
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete SKU';
+      error.value = err.message || 'Failed to delete SKU';
       throw err;
     } finally {
       loading.value = false;
@@ -169,9 +224,16 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const response = await productService.getStock(productId);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch stock';
+      error.value = err.message || 'Failed to fetch stock';
       throw err;
     } finally {
       loading.value = false;

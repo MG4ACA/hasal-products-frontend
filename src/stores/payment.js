@@ -35,10 +35,17 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
     try {
       const response = await paymentService.getAllPayments(filters);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       payments.value = response.payments;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error fetching payments';
+      error.value = err.message || 'Error fetching payments';
       throw err;
     } finally {
       loading.value = false;
@@ -49,10 +56,18 @@ export const usePaymentStore = defineStore('payment', () => {
     loading.value = true;
     error.value = null;
     try {
-      currentPayment.value = await paymentService.getPaymentById(id);
+      const response = await paymentService.getPaymentById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
+      currentPayment.value = response;
       return currentPayment.value;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error fetching payment';
+      error.value = err.message || 'Error fetching payment';
       throw err;
     } finally {
       loading.value = false;
@@ -64,10 +79,17 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
     try {
       const newPayment = await paymentService.createPayment(paymentData);
+
+      // Check for error response
+      if (newPayment.error) {
+        error.value = newPayment.message;
+        throw new Error(newPayment.message);
+      }
+
       payments.value.unshift(newPayment);
       return newPayment;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error creating payment';
+      error.value = err.message || 'Error creating payment';
       throw err;
     } finally {
       loading.value = false;
@@ -79,6 +101,13 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
     try {
       const updatedPayment = await paymentService.updatePayment(id, updateData);
+
+      // Check for error response
+      if (updatedPayment.error) {
+        error.value = updatedPayment.message;
+        throw new Error(updatedPayment.message);
+      }
+
       const index = payments.value.findIndex(p => p.id === id);
       if (index !== -1) {
         payments.value[index] = updatedPayment;
@@ -88,7 +117,7 @@ export const usePaymentStore = defineStore('payment', () => {
       }
       return updatedPayment;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error updating payment';
+      error.value = err.message || 'Error updating payment';
       throw err;
     } finally {
       loading.value = false;
@@ -99,10 +128,17 @@ export const usePaymentStore = defineStore('payment', () => {
     loading.value = true;
     error.value = null;
     try {
-      await paymentService.deletePayment(id);
+      const response = await paymentService.deletePayment(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       payments.value = payments.value.filter(p => p.id !== id);
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error deleting payment';
+      error.value = err.message || 'Error deleting payment';
       throw err;
     } finally {
       loading.value = false;
@@ -114,10 +150,17 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
     try {
       const response = await paymentService.getOutstandingInvoices(outletId);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       outstandingInvoices.value = response.invoices;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error fetching outstanding invoices';
+      error.value = err.message || 'Error fetching outstanding invoices';
       throw err;
     } finally {
       loading.value = false;
@@ -128,9 +171,17 @@ export const usePaymentStore = defineStore('payment', () => {
     loading.value = true;
     error.value = null;
     try {
-      pendingChecks.value = await paymentService.getPendingChecks(overdueOnly);
+      const response = await paymentService.getPendingChecks(overdueOnly);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
+      pendingChecks.value = response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error fetching pending checks';
+      error.value = err.message || 'Error fetching pending checks';
       throw err;
     } finally {
       loading.value = false;
@@ -143,10 +194,17 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
     try {
       const response = await supplierPaymentService.getAllSupplierPayments(filters);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       supplierPayments.value = response.payments;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error fetching supplier payments';
+      error.value = err.message || 'Error fetching supplier payments';
       throw err;
     } finally {
       loading.value = false;
@@ -158,10 +216,17 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
     try {
       const response = await supplierPaymentService.getSupplierPayments(supplierId, filters);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       supplierPayments.value = response.payments;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error fetching supplier payments';
+      error.value = err.message || 'Error fetching supplier payments';
       throw err;
     } finally {
       loading.value = false;
@@ -176,10 +241,17 @@ export const usePaymentStore = defineStore('payment', () => {
         supplierId,
         paymentData
       );
+
+      // Check for error response
+      if (newPayment.error) {
+        error.value = newPayment.message;
+        throw new Error(newPayment.message);
+      }
+
       supplierPayments.value.unshift(newPayment);
       return newPayment;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error creating supplier payment';
+      error.value = err.message || 'Error creating supplier payment';
       throw err;
     } finally {
       loading.value = false;

@@ -1,9 +1,40 @@
+import { handleApiError } from '@/utils/errorHandler';
 import api from './api';
 
 export const authService = {
-  login: (username, password) =>
-    api.post('/auth/login', { username, password }).then(res => res.data),
-  register: data => api.post('/auth/register', data).then(res => res.data),
-  getCurrentUser: () => api.get('/auth/me').then(res => res.data),
-  logout: () => api.post('/auth/logout').then(res => res.data),
+  async login(username, password) {
+    try {
+      const response = await api.post('/auth/login', { username, password });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  async register(data) {
+    try {
+      const response = await api.post('/auth/register', data);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const response = await api.get('/auth/me');
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  async logout() {
+    try {
+      const response = await api.post('/auth/logout');
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };

@@ -1,43 +1,77 @@
+import { handleApiError } from '@/utils/errorHandler';
 import api from './api';
 
 const paymentService = {
   // Get all payments with filters
-  getAllPayments(params = {}) {
-    return api.get('/payments', { params }).then(res => res.data);
+  async getAllPayments(params = {}) {
+    try {
+      const response = await api.get('/payments', { params });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get payment by ID
-  getPaymentById(id) {
-    return api.get(`/payments/${id}`).then(res => res.data);
+  async getPaymentById(id) {
+    try {
+      const response = await api.get(`/payments/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Create new payment
-  createPayment(paymentData) {
-    return api.post('/payments', paymentData).then(res => res.data);
+  async createPayment(paymentData) {
+    try {
+      const response = await api.post('/payments', paymentData);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Update payment (add clearance date)
-  updatePayment(id, updateData) {
-    return api.put(`/payments/${id}`, updateData).then(res => res.data);
+  async updatePayment(id, updateData) {
+    try {
+      const response = await api.put(`/payments/${id}`, updateData);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Delete payment
-  deletePayment(id) {
-    return api.delete(`/payments/${id}`).then(res => res.data);
+  async deletePayment(id) {
+    try {
+      const response = await api.delete(`/payments/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get outstanding invoices for outlet
-  getOutstandingInvoices(outletId) {
-    return api.get(`/outlets/${outletId}/outstanding-invoices`).then(res => res.data);
+  async getOutstandingInvoices(outletId) {
+    try {
+      const response = await api.get(`/outlets/${outletId}/outstanding-invoices`);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get pending checks
-  getPendingChecks(overdueOnly = false) {
-    return api
-      .get('/payments/pending-checks', {
+  async getPendingChecks(overdueOnly = false) {
+    try {
+      const response = await api.get('/payments/pending-checks', {
         params: { overdue_only: overdueOnly },
-      })
-      .then(res => res.data);
+      });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 };
 

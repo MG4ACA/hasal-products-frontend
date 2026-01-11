@@ -25,11 +25,18 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.getAllSuppliers(params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       suppliers.value = response.suppliers;
       pagination.value = response.pagination;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch suppliers';
+      error.value = err.message || 'Failed to fetch suppliers';
       throw err;
     } finally {
       loading.value = false;
@@ -41,10 +48,17 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.getSupplierById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentSupplier.value = response.supplier;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch supplier';
+      error.value = err.message || 'Failed to fetch supplier';
       throw err;
     } finally {
       loading.value = false;
@@ -54,9 +68,16 @@ export const useSupplierStore = defineStore('supplier', () => {
   const getSupplierBalance = async id => {
     try {
       const response = await supplierService.getSupplierBalance(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       return response.balance;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch supplier balance';
+      error.value = err.message || 'Failed to fetch supplier balance';
       throw err;
     }
   };
@@ -66,10 +87,17 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.createSupplier(data);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       suppliers.value.unshift(response.supplier);
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create supplier';
+      error.value = err.message || 'Failed to create supplier';
       throw err;
     } finally {
       loading.value = false;
@@ -81,6 +109,13 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.updateSupplier(id, data);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       const index = suppliers.value.findIndex(s => s.id === id);
       if (index !== -1) {
         suppliers.value[index] = response.supplier;
@@ -90,7 +125,7 @@ export const useSupplierStore = defineStore('supplier', () => {
       }
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update supplier';
+      error.value = err.message || 'Failed to update supplier';
       throw err;
     } finally {
       loading.value = false;
@@ -102,13 +137,20 @@ export const useSupplierStore = defineStore('supplier', () => {
     error.value = null;
     try {
       const response = await supplierService.deleteSupplier(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       suppliers.value = suppliers.value.filter(s => s.id !== id);
       if (currentSupplier.value?.id === id) {
         currentSupplier.value = null;
       }
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete supplier';
+      error.value = err.message || 'Failed to delete supplier';
       throw err;
     } finally {
       loading.value = false;

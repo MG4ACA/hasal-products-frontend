@@ -25,19 +25,11 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   response => {
-    return response.data;
+    return response;
   },
   error => {
-    const status = error.response?.status;
-
-    if (status === 401) {
-      // Token expired or invalid
-      const authStore = useAuthStore();
-      authStore.logout();
-      window.location.href = '/login';
-    }
-
-    return Promise.reject(error.response?.data || error.message);
+    // Pass the error to service layer for handling
+    return Promise.reject(error);
   }
 );
 

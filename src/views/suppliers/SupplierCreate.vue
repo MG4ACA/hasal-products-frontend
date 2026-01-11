@@ -25,7 +25,7 @@ const handleSubmit = async formData => {
     router.push('/suppliers');
   } catch (error) {
     console.error('Failed to create supplier:', error);
-    showError(error.response?.data?.message || 'Failed to create supplier');
+    showError(error.message || 'Failed to create supplier');
   }
 };
 

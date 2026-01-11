@@ -39,10 +39,17 @@ export const useRouteStore = defineStore('route', () => {
       };
 
       const response = await routeService.getAll(params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       routes.value = response.routes;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch routes';
+      error.value = err.message || 'Failed to fetch routes';
       throw err;
     } finally {
       loading.value = false;
@@ -54,10 +61,17 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentRoute.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch route';
+      error.value = err.message || 'Failed to fetch route';
       throw err;
     } finally {
       loading.value = false;
@@ -69,10 +83,17 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.create(routeData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRoutes();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create route';
+      error.value = err.message || 'Failed to create route';
       throw err;
     } finally {
       loading.value = false;
@@ -84,10 +105,17 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.update(id, routeData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRoutes();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update route';
+      error.value = err.message || 'Failed to update route';
       throw err;
     } finally {
       loading.value = false;
@@ -98,10 +126,17 @@ export const useRouteStore = defineStore('route', () => {
     try {
       loading.value = true;
       error.value = null;
-      await routeService.delete(id);
+      const response = await routeService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchRoutes();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete route';
+      error.value = err.message || 'Failed to delete route';
       throw err;
     } finally {
       loading.value = false;
@@ -113,10 +148,17 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.getOutlets(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       routeOutlets.value = response.outlets || response.data;
       return response.outlets || response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch route outlets';
+      error.value = err.message || 'Failed to fetch route outlets';
       throw err;
     } finally {
       loading.value = false;
@@ -128,10 +170,17 @@ export const useRouteStore = defineStore('route', () => {
       loading.value = true;
       error.value = null;
       const response = await routeService.getEmployees(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       routeEmployees.value = response.employees || response.data;
       return response.employees || response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch route employees';
+      error.value = err.message || 'Failed to fetch route employees';
       throw err;
     } finally {
       loading.value = false;

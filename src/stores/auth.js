@@ -65,6 +65,13 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
     try {
       const response = await authService.login(username, password);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       token.value = response.token;
       user.value = response.user;
 
@@ -103,6 +110,14 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) return;
     try {
       const response = await authService.getCurrentUser();
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        logout();
+        return;
+      }
+
       user.value = response.user;
     } catch (err) {
       error.value = err.message;

@@ -46,6 +46,12 @@ export const useProductionStore = defineStore('production', () => {
 
       const response = await productionService.getAll(params);
 
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       productionRuns.value = response.data;
       pagination.value = {
         page: response.page,
@@ -54,7 +60,7 @@ export const useProductionStore = defineStore('production', () => {
         totalPages: response.totalPages,
       };
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch production runs';
+      error.value = err.message || 'Failed to fetch production runs';
       throw err;
     } finally {
       loading.value = false;
@@ -67,10 +73,17 @@ export const useProductionStore = defineStore('production', () => {
 
     try {
       const response = await productionService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentProductionRun.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch production run';
+      error.value = err.message || 'Failed to fetch production run';
       throw err;
     } finally {
       loading.value = false;
@@ -83,10 +96,17 @@ export const useProductionStore = defineStore('production', () => {
 
     try {
       const response = await productionService.create(productionData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductionRuns();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create production run';
+      error.value = err.message || 'Failed to create production run';
       throw err;
     } finally {
       loading.value = false;
@@ -99,10 +119,17 @@ export const useProductionStore = defineStore('production', () => {
 
     try {
       const response = await productionService.update(id, productionData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductionRuns();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update production run';
+      error.value = err.message || 'Failed to update production run';
       throw err;
     } finally {
       loading.value = false;
@@ -114,10 +141,17 @@ export const useProductionStore = defineStore('production', () => {
     error.value = null;
 
     try {
-      await productionService.delete(id);
+      const response = await productionService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductionRuns();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete production run';
+      error.value = err.message || 'Failed to delete production run';
       throw err;
     } finally {
       loading.value = false;
@@ -130,10 +164,17 @@ export const useProductionStore = defineStore('production', () => {
 
     try {
       const response = await productionService.complete(id, completionData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchProductionRuns();
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to complete production run';
+      error.value = err.message || 'Failed to complete production run';
       throw err;
     } finally {
       loading.value = false;
@@ -146,10 +187,17 @@ export const useProductionStore = defineStore('production', () => {
 
     try {
       const response = await productionService.checkMaterials(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       materialCheck.value = response.data;
       return response.data;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to check materials';
+      error.value = err.message || 'Failed to check materials';
       throw err;
     } finally {
       loading.value = false;

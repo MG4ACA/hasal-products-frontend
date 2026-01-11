@@ -45,10 +45,17 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
       };
 
       const response = await employeeService.getAll(params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       employees.value = response.employees;
       pagination.value = response.pagination;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch employees';
+      error.value = err.message || 'Failed to fetch employees';
       throw err;
     } finally {
       loading.value = false;
@@ -60,10 +67,17 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
       loading.value = true;
       error.value = null;
       const response = await employeeService.getById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentEmployee.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch employee';
+      error.value = err.message || 'Failed to fetch employee';
       throw err;
     } finally {
       loading.value = false;
@@ -75,10 +89,17 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
       loading.value = true;
       error.value = null;
       const response = await employeeService.create(employeeData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchEmployees();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create employee';
+      error.value = err.message || 'Failed to create employee';
       throw err;
     } finally {
       loading.value = false;
@@ -90,10 +111,17 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
       loading.value = true;
       error.value = null;
       const response = await employeeService.update(id, employeeData);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchEmployees();
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update employee';
+      error.value = err.message || 'Failed to update employee';
       throw err;
     } finally {
       loading.value = false;
@@ -104,10 +132,17 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
     try {
       loading.value = true;
       error.value = null;
-      await employeeService.delete(id);
+      const response = await employeeService.delete(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       await fetchEmployees();
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete employee';
+      error.value = err.message || 'Failed to delete employee';
       throw err;
     } finally {
       loading.value = false;
@@ -119,10 +154,17 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
       loading.value = true;
       error.value = null;
       const response = await employeeService.getPerformance(id, params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       employeePerformance.value = response;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch employee performance';
+      error.value = err.message || 'Failed to fetch employee performance';
       throw err;
     } finally {
       loading.value = false;

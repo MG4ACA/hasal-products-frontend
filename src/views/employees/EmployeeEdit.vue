@@ -45,7 +45,7 @@ const loadEmployee = async () => {
       status: data.status,
     };
   } catch (error) {
-    showError(error.response?.data?.message || 'Failed to load employee');
+    showError(error.message || 'Failed to load employee');
     router.push('/employees');
   } finally {
     loading.value = false;
@@ -59,7 +59,7 @@ const handleSubmit = async data => {
     router.push('/employees');
   } catch (error) {
     console.error('Failed to update employee:', error);
-    showError(error.response?.data?.message || 'Failed to update employee');
+    showError(error.message || 'Failed to update employee');
   }
 };
 

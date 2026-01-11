@@ -112,7 +112,7 @@ const handleDelete = rawMaterial => {
         loadRawMaterials(); // Reload list
       } catch (error) {
         console.error('Failed to delete raw material:', error);
-        showError(error.response?.data?.message || 'Failed to delete raw material');
+        showError(error.message || 'Failed to delete raw material');
       }
     },
   });

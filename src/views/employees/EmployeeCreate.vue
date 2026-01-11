@@ -33,7 +33,7 @@ const handleSubmit = async data => {
     router.push('/employees');
   } catch (error) {
     console.error('Failed to create employee:', error);
-    showError(error.response?.data?.message || 'Failed to create employee');
+    showError(error.message || 'Failed to create employee');
   }
 };
 

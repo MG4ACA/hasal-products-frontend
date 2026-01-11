@@ -78,7 +78,7 @@ const confirmDelete = route => {
         showSuccess('Route deleted successfully');
         await fetchData();
       } catch (error) {
-        showError(error.response?.data?.message || 'Failed to delete route');
+        showError(error.message || 'Failed to delete route');
       }
     },
   });

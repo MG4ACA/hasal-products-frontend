@@ -37,11 +37,18 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.getAllRawMaterials(params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       rawMaterials.value = response.raw_materials;
       pagination.value = response.pagination;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch raw materials';
+      error.value = err.message || 'Failed to fetch raw materials';
       throw err;
     } finally {
       loading.value = false;
@@ -53,10 +60,17 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.getRawMaterialById(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentRawMaterial.value = response.raw_material;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch raw material';
+      error.value = err.message || 'Failed to fetch raw material';
       throw err;
     } finally {
       loading.value = false;
@@ -68,10 +82,17 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.getRawMaterialBatches(id, params);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       batches.value = response.batches;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch batches';
+      error.value = err.message || 'Failed to fetch batches';
       throw err;
     } finally {
       loading.value = false;
@@ -81,10 +102,17 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
   const fetchRawMaterialStock = async id => {
     try {
       const response = await rawMaterialService.getRawMaterialStock(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       currentStock.value = response.stock;
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch stock';
+      error.value = err.message || 'Failed to fetch stock';
       throw err;
     }
   };
@@ -94,10 +122,17 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.createRawMaterial(data);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       rawMaterials.value.unshift(response.raw_material);
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create raw material';
+      error.value = err.message || 'Failed to create raw material';
       throw err;
     } finally {
       loading.value = false;
@@ -109,6 +144,13 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.updateRawMaterial(id, data);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       const index = rawMaterials.value.findIndex(rm => rm.id === id);
       if (index !== -1) {
         rawMaterials.value[index] = response.raw_material;
@@ -118,7 +160,7 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
       }
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update raw material';
+      error.value = err.message || 'Failed to update raw material';
       throw err;
     } finally {
       loading.value = false;
@@ -130,13 +172,20 @@ export const useRawMaterialStore = defineStore('rawMaterial', () => {
     error.value = null;
     try {
       const response = await rawMaterialService.deleteRawMaterial(id);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
       rawMaterials.value = rawMaterials.value.filter(rm => rm.id !== id);
       if (currentRawMaterial.value?.id === id) {
         currentRawMaterial.value = null;
       }
       return response;
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to delete raw material';
+      error.value = err.message || 'Failed to delete raw material';
       throw err;
     } finally {
       loading.value = false;

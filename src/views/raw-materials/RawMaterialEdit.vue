@@ -59,7 +59,7 @@ const handleSubmit = async formData => {
     router.push('/raw-materials');
   } catch (error) {
     console.error('Failed to update raw material:', error);
-    showError(error.response?.data?.message || 'Failed to update raw material');
+    showError(error.message || 'Failed to update raw material');
   }
 };
 

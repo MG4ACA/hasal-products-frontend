@@ -1,19 +1,35 @@
+import { handleApiError } from '@/utils/errorHandler';
 import api from './api';
 
 const supplierPaymentService = {
   // Get all supplier payments with filters
-  getAllSupplierPayments(params = {}) {
-    return api.get('/suppliers/payments', { params }).then(res => res.data);
+  async getAllSupplierPayments(params = {}) {
+    try {
+      const response = await api.get('/suppliers/payments', { params });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get payments for specific supplier
-  getSupplierPayments(supplierId, params = {}) {
-    return api.get(`/suppliers/${supplierId}/payments`, { params }).then(res => res.data);
+  async getSupplierPayments(supplierId, params = {}) {
+    try {
+      const response = await api.get(`/suppliers/${supplierId}/payments`, { params });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Create supplier payment
-  createSupplierPayment(supplierId, paymentData) {
-    return api.post(`/suppliers/${supplierId}/payments`, paymentData).then(res => res.data);
+  async createSupplierPayment(supplierId, paymentData) {
+    try {
+      const response = await api.post(`/suppliers/${supplierId}/payments`, paymentData);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 };
 

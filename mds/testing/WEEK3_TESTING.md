@@ -9,11 +9,11 @@
 
 ## 📋 Pre-Testing Checklist
 
-- [ ] Backend server running
-- [ ] Frontend dev server running
-- [ ] Database populated with seeders
-- [ ] User logged in (admin account)
-- [ ] Suppliers menu accessible in sidebar
+- [✅ ] Backend server running
+- [ ✅] Frontend dev server running
+- [ ✅] Database populated with seeders
+- [ ✅] User logged in (admin account)
+- [ ✅] Suppliers menu accessible in sidebar
 
 ---
 
@@ -50,8 +50,8 @@
 
 **Actual Results:**
 
-- [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [✅ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -67,12 +67,54 @@
 
 - ✅ Returns only suppliers matching search term
 - ✅ Case-insensitive search
-- ✅ Searches in name, contact_person, phone
+- ✅ Searches in name, code, contact_person, email, and phone
 
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### SB-02a: GET /api/suppliers - Search by Phone
+
+**Objective:** Test phone number search
+
+**Test Steps:**
+
+1. GET `/api/suppliers?search=0771111111`
+
+**Expected Results:**
+
+- ✅ Returns suppliers matching phone number
+- ✅ Partial phone number search works
+- ✅ Finds suppliers with matching phone
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### SB-02b: GET /api/suppliers - Search by Email
+
+**Objective:** Test email search
+
+**Test Steps:**
+
+1. GET `/api/suppliers?search=freshspices`
+
+**Expected Results:**
+
+- ✅ Returns suppliers matching email domain/address
+- ✅ Case-insensitive search
+- ✅ Partial email search works
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -93,7 +135,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -113,7 +155,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -154,7 +196,7 @@ SELECT * FROM suppliers ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -174,7 +216,7 @@ SELECT * FROM suppliers ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -210,7 +252,7 @@ SELECT * FROM suppliers WHERE id = 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -239,7 +281,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -262,7 +304,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass (defer to Week 4)
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -287,7 +329,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -310,7 +352,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -333,7 +375,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -356,7 +398,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -377,7 +419,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -399,7 +441,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -429,7 +471,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -453,7 +495,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -475,7 +517,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -499,7 +541,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -521,7 +563,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -544,7 +586,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -568,7 +610,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -588,7 +630,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -608,7 +650,7 @@ SELECT * FROM suppliers WHERE id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -646,7 +688,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -667,7 +709,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -689,7 +731,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -709,7 +751,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -730,7 +772,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -754,7 +796,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -776,7 +818,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -798,7 +840,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -827,7 +869,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -850,7 +892,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -872,7 +914,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -894,7 +936,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -917,7 +959,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -939,7 +981,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -962,7 +1004,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1016,7 +1058,7 @@ SELECT * FROM raw_materials ORDER BY id DESC LIMIT 1;
 
 ## ✅ Sign-off
 
-**Tested By:** ******\_\_\_******  
-**Date:** ******\_\_\_******  
+**Tested By:** **\*\***\_\_\_**\*\***  
+**Date:** **\*\***\_\_\_**\*\***  
 **Status:** ⏳ Pending / ✅ Approved / ❌ Rejected  
 **Notes:**

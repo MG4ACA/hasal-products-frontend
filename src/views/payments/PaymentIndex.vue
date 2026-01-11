@@ -246,7 +246,7 @@ const fetchPayments = async () => {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.response?.data?.message || 'Failed to fetch payments',
+      detail: error.message || 'Failed to fetch payments',
       life: 3000,
     });
   }
@@ -287,7 +287,7 @@ const submitClearCheck = async () => {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.response?.data?.message || 'Failed to clear check',
+      detail: error.message || 'Failed to clear check',
       life: 3000,
     });
   }
@@ -314,7 +314,7 @@ const confirmDelete = payment => {
         toast.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.response?.data?.message || 'Failed to delete payment',
+          detail: error.message || 'Failed to delete payment',
           life: 3000,
         });
       }

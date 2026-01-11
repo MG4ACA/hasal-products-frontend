@@ -1,33 +1,64 @@
+import { handleApiError } from '@/utils/errorHandler';
 import api from './api';
 
 export const supplierService = {
   // Get all suppliers with pagination and filters
-  getAllSuppliers(params = {}) {
-    return api.get('/suppliers', { params }).then(res => res.data);
+  async getAllSuppliers(params = {}) {
+    try {
+      const response = await api.get('/suppliers', { params });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get supplier by ID
-  getSupplierById(id) {
-    return api.get(`/suppliers/${id}`).then(res => res.data);
+  async getSupplierById(id) {
+    try {
+      const response = await api.get(`/suppliers/${id}`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get supplier balance
-  getSupplierBalance(id) {
-    return api.get(`/suppliers/${id}/balance`).then(res => res.data);
+  async getSupplierBalance(id) {
+    try {
+      const response = await api.get(`/suppliers/${id}/balance`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Create new supplier
-  createSupplier(data) {
-    return api.post('/suppliers', data).then(res => res.data);
+  async createSupplier(data) {
+    try {
+      const response = await api.post('/suppliers', data);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Update supplier
-  updateSupplier(id, data) {
-    return api.put(`/suppliers/${id}`, data).then(res => res.data);
+  async updateSupplier(id, data) {
+    try {
+      const response = await api.put(`/suppliers/${id}`, data);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Delete supplier (soft delete)
-  deleteSupplier(id) {
-    return api.delete(`/suppliers/${id}`).then(res => res.data);
+  async deleteSupplier(id) {
+    try {
+      const response = await api.delete(`/suppliers/${id}`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 };

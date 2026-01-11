@@ -107,7 +107,7 @@ const confirmDelete = employee => {
         showSuccess('Employee deleted successfully');
         await fetchData();
       } catch (error) {
-        showError(error.response?.data?.message || 'Failed to delete employee');
+        showError(error.message || 'Failed to delete employee');
       }
     },
   });

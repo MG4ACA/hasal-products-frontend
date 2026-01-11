@@ -1,38 +1,74 @@
+import { handleApiError } from '@/utils/errorHandler';
 import api from './api';
 
 export const rawMaterialService = {
   // Get all raw materials with pagination and filters
-  getAllRawMaterials(params = {}) {
-    return api.get('/raw-materials', { params }).then(res => res.data);
+  async getAllRawMaterials(params = {}) {
+    try {
+      const response = await api.get('/raw-materials', { params });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get raw material by ID
-  getRawMaterialById(id) {
-    return api.get(`/raw-materials/${id}`).then(res => res.data);
+  async getRawMaterialById(id) {
+    try {
+      const response = await api.get(`/raw-materials/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get raw material batches
-  getRawMaterialBatches(id, params = {}) {
-    return api.get(`/raw-materials/${id}/batches`, { params }).then(res => res.data);
+  async getRawMaterialBatches(id, params = {}) {
+    try {
+      const response = await api.get(`/raw-materials/${id}/batches`, { params });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Get raw material stock
-  getRawMaterialStock(id) {
-    return api.get(`/raw-materials/${id}/stock`).then(res => res.data);
+  async getRawMaterialStock(id) {
+    try {
+      const response = await api.get(`/raw-materials/${id}/stock`);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Create new raw material
-  createRawMaterial(data) {
-    return api.post('/raw-materials', data).then(res => res.data);
+  async createRawMaterial(data) {
+    try {
+      const response = await api.post('/raw-materials', data);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Update raw material
-  updateRawMaterial(id, data) {
-    return api.put(`/raw-materials/${id}`, data).then(res => res.data);
+  async updateRawMaterial(id, data) {
+    try {
+      const response = await api.put(`/raw-materials/${id}`, data);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 
   // Delete raw material (soft delete)
-  deleteRawMaterial(id) {
-    return api.delete(`/raw-materials/${id}`).then(res => res.data);
+  async deleteRawMaterial(id) {
+    try {
+      const response = await api.delete(`/raw-materials/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
   },
 };

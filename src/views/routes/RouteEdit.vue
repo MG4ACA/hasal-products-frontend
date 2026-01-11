@@ -39,7 +39,7 @@ const loadRoute = async () => {
       status: data.status,
     };
   } catch (error) {
-    showError(error.response?.data?.message || 'Failed to load route');
+    showError(error.message || 'Failed to load route');
     router.push('/routes');
   } finally {
     loading.value = false;
@@ -53,7 +53,7 @@ const handleSubmit = async data => {
     router.push('/routes');
   } catch (error) {
     console.error('Failed to update route:', error);
-    showError(error.response?.data?.message || 'Failed to update route');
+    showError(error.message || 'Failed to update route');
   }
 };
 
