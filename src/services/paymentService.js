@@ -6,7 +6,7 @@ const paymentService = {
   async getAllPayments(params = {}) {
     try {
       const response = await api.get('/payments', { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -16,7 +16,7 @@ const paymentService = {
   async getPaymentById(id) {
     try {
       const response = await api.get(`/payments/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -26,7 +26,7 @@ const paymentService = {
   async createPayment(paymentData) {
     try {
       const response = await api.post('/payments', paymentData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -36,7 +36,7 @@ const paymentService = {
   async updatePayment(id, updateData) {
     try {
       const response = await api.put(`/payments/${id}`, updateData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -46,7 +46,7 @@ const paymentService = {
   async deletePayment(id) {
     try {
       const response = await api.delete(`/payments/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -56,7 +56,7 @@ const paymentService = {
   async getOutstandingInvoices(outletId) {
     try {
       const response = await api.get(`/outlets/${outletId}/outstanding-invoices`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ const paymentService = {
       const response = await api.get('/payments/pending-checks', {
         params: { overdue_only: overdueOnly },
       });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

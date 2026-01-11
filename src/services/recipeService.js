@@ -8,7 +8,7 @@ export const recipeService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(RECIPE_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const recipeService = {
   async getById(id) {
     try {
       const response = await api.get(`${RECIPE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const recipeService = {
   async create(recipeData) {
     try {
       const response = await api.post(RECIPE_BASE_URL, recipeData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const recipeService = {
   async update(id, recipeData) {
     try {
       const response = await api.put(`${RECIPE_BASE_URL}/${id}`, recipeData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const recipeService = {
   async delete(id) {
     try {
       const response = await api.delete(`${RECIPE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const recipeService = {
   async getVersions(id) {
     try {
       const response = await api.get(`${RECIPE_BASE_URL}/${id}/versions`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ export const recipeService = {
   async addItem(recipeId, itemData) {
     try {
       const response = await api.post(`${RECIPE_BASE_URL}/${recipeId}/items`, itemData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -78,7 +78,7 @@ export const recipeService = {
   async updateItem(recipeId, itemId, itemData) {
     try {
       const response = await api.put(`${RECIPE_BASE_URL}/${recipeId}/items/${itemId}`, itemData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -88,7 +88,7 @@ export const recipeService = {
   async deleteItem(recipeId, itemId) {
     try {
       const response = await api.delete(`${RECIPE_BASE_URL}/${recipeId}/items/${itemId}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

@@ -1,4 +1,3 @@
-import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 
 // Create axios instance
@@ -10,10 +9,10 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   config => {
-    // Add JWT token to headers
-    const authStore = useAuthStore();
-    if (authStore.token) {
-      config.headers.Authorization = `Bearer ${authStore.token}`;
+    // Add JWT token to headers - read from sessionStorage directly
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

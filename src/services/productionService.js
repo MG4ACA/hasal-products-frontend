@@ -8,7 +8,7 @@ export const productionService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(PRODUCTION_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const productionService = {
   async getById(id) {
     try {
       const response = await api.get(`${PRODUCTION_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const productionService = {
   async create(productionData) {
     try {
       const response = await api.post(PRODUCTION_BASE_URL, productionData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const productionService = {
   async update(id, productionData) {
     try {
       const response = await api.put(`${PRODUCTION_BASE_URL}/${id}`, productionData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const productionService = {
   async delete(id) {
     try {
       const response = await api.delete(`${PRODUCTION_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const productionService = {
   async complete(id, completionData) {
     try {
       const response = await api.post(`${PRODUCTION_BASE_URL}/${id}/complete`, completionData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ export const productionService = {
   async checkMaterials(id) {
     try {
       const response = await api.get(`${PRODUCTION_BASE_URL}/${id}/check-materials`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

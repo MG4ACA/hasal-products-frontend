@@ -8,7 +8,7 @@ export const outletService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(OUTLET_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const outletService = {
   async getById(id) {
     try {
       const response = await api.get(`${OUTLET_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const outletService = {
   async create(outletData) {
     try {
       const response = await api.post(OUTLET_BASE_URL, outletData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const outletService = {
   async update(id, outletData) {
     try {
       const response = await api.put(`${OUTLET_BASE_URL}/${id}`, outletData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const outletService = {
   async delete(id) {
     try {
       const response = await api.delete(`${OUTLET_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const outletService = {
   async getBalance(id) {
     try {
       const response = await api.get(`${OUTLET_BASE_URL}/${id}/balance`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ export const outletService = {
   async getInvoices(id, params = {}) {
     try {
       const response = await api.get(`${OUTLET_BASE_URL}/${id}/invoices`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -78,7 +78,7 @@ export const outletService = {
   async getPayments(id, params = {}) {
     try {
       const response = await api.get(`${OUTLET_BASE_URL}/${id}/payments`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

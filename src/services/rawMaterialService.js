@@ -6,7 +6,7 @@ export const rawMaterialService = {
   async getAllRawMaterials(params = {}) {
     try {
       const response = await api.get('/raw-materials', { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -16,7 +16,7 @@ export const rawMaterialService = {
   async getRawMaterialById(id) {
     try {
       const response = await api.get(`/raw-materials/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -26,7 +26,7 @@ export const rawMaterialService = {
   async getRawMaterialBatches(id, params = {}) {
     try {
       const response = await api.get(`/raw-materials/${id}/batches`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -36,7 +36,7 @@ export const rawMaterialService = {
   async getRawMaterialStock(id) {
     try {
       const response = await api.get(`/raw-materials/${id}/stock`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -46,7 +46,7 @@ export const rawMaterialService = {
   async createRawMaterial(data) {
     try {
       const response = await api.post('/raw-materials', data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -56,7 +56,7 @@ export const rawMaterialService = {
   async updateRawMaterial(id, data) {
     try {
       const response = await api.put(`/raw-materials/${id}`, data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -66,7 +66,7 @@ export const rawMaterialService = {
   async deleteRawMaterial(id) {
     try {
       const response = await api.delete(`/raw-materials/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

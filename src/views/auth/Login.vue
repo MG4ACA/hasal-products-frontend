@@ -60,9 +60,7 @@ const handleLogin = async () => {
     showSuccess('Logged in successfully!', 'Login Successful');
     router.push('/');
   } catch (err) {
-    const errorMessage =
-      err.response?.data?.message || err.message || 'Login failed. Please try again.';
-    showError(errorMessage, 'Login Failed');
+    showError(err.message || 'Login failed. Please try again.', 'Login Failed');
   } finally {
     loading.value = false;
   }

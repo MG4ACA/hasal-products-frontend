@@ -8,7 +8,7 @@ export const routeService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(ROUTE_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const routeService = {
   async getById(id) {
     try {
       const response = await api.get(`${ROUTE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const routeService = {
   async create(routeData) {
     try {
       const response = await api.post(ROUTE_BASE_URL, routeData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const routeService = {
   async update(id, routeData) {
     try {
       const response = await api.put(`${ROUTE_BASE_URL}/${id}`, routeData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const routeService = {
   async delete(id) {
     try {
       const response = await api.delete(`${ROUTE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const routeService = {
   async getOutlets(id) {
     try {
       const response = await api.get(`${ROUTE_BASE_URL}/${id}/outlets`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ export const routeService = {
   async getEmployees(id) {
     try {
       const response = await api.get(`${ROUTE_BASE_URL}/${id}/employees`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

@@ -6,7 +6,7 @@ const supplierPaymentService = {
   async getAllSupplierPayments(params = {}) {
     try {
       const response = await api.get('/suppliers/payments', { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -16,7 +16,7 @@ const supplierPaymentService = {
   async getSupplierPayments(supplierId, params = {}) {
     try {
       const response = await api.get(`/suppliers/${supplierId}/payments`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -26,7 +26,7 @@ const supplierPaymentService = {
   async createSupplierPayment(supplierId, paymentData) {
     try {
       const response = await api.post(`/suppliers/${supplierId}/payments`, paymentData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

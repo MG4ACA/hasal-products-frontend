@@ -8,7 +8,7 @@ export const vehicleService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(VEHICLE_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const vehicleService = {
   async getById(id) {
     try {
       const response = await api.get(`${VEHICLE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const vehicleService = {
   async create(vehicleData) {
     try {
       const response = await api.post(VEHICLE_BASE_URL, vehicleData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const vehicleService = {
   async update(id, vehicleData) {
     try {
       const response = await api.put(`${VEHICLE_BASE_URL}/${id}`, vehicleData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const vehicleService = {
   async delete(id) {
     try {
       const response = await api.delete(`${VEHICLE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const vehicleService = {
   async assignToRoute(id, assignmentData) {
     try {
       const response = await api.post(`${VEHICLE_BASE_URL}/${id}/assign`, assignmentData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ export const vehicleService = {
   async unassignFromRoute(id, unassignmentData = {}) {
     try {
       const response = await api.post(`${VEHICLE_BASE_URL}/${id}/unassign`, unassignmentData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -78,7 +78,7 @@ export const vehicleService = {
   async getAssignmentHistory(id, params = {}) {
     try {
       const response = await api.get(`${VEHICLE_BASE_URL}/${id}/history`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

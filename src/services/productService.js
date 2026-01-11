@@ -8,7 +8,7 @@ export const productService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(PRODUCT_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const productService = {
   async getById(id) {
     try {
       const response = await api.get(`${PRODUCT_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const productService = {
   async create(productData) {
     try {
       const response = await api.post(PRODUCT_BASE_URL, productData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const productService = {
   async update(id, productData) {
     try {
       const response = await api.put(`${PRODUCT_BASE_URL}/${id}`, productData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const productService = {
   async delete(id) {
     try {
       const response = await api.delete(`${PRODUCT_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const productService = {
   async addSku(productId, skuData) {
     try {
       const response = await api.post(`${PRODUCT_BASE_URL}/${productId}/skus`, skuData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -68,7 +68,7 @@ export const productService = {
   async updateSku(productId, skuId, skuData) {
     try {
       const response = await api.put(`${PRODUCT_BASE_URL}/${productId}/skus/${skuId}`, skuData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -78,7 +78,7 @@ export const productService = {
   async deleteSku(productId, skuId) {
     try {
       const response = await api.delete(`${PRODUCT_BASE_URL}/${productId}/skus/${skuId}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -88,7 +88,7 @@ export const productService = {
   async getStock(productId) {
     try {
       const response = await api.get(`${PRODUCT_BASE_URL}/${productId}/stock`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

@@ -8,7 +8,7 @@ export const employeeService = {
   async getAll(params = {}) {
     try {
       const response = await api.get(EMPLOYEE_BASE_URL, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -18,7 +18,7 @@ export const employeeService = {
   async getById(id) {
     try {
       const response = await api.get(`${EMPLOYEE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -28,7 +28,7 @@ export const employeeService = {
   async create(employeeData) {
     try {
       const response = await api.post(EMPLOYEE_BASE_URL, employeeData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -38,7 +38,7 @@ export const employeeService = {
   async update(id, employeeData) {
     try {
       const response = await api.put(`${EMPLOYEE_BASE_URL}/${id}`, employeeData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -48,7 +48,7 @@ export const employeeService = {
   async delete(id) {
     try {
       const response = await api.delete(`${EMPLOYEE_BASE_URL}/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ export const employeeService = {
   async getPerformance(id, params = {}) {
     try {
       const response = await api.get(`${EMPLOYEE_BASE_URL}/${id}/performance`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

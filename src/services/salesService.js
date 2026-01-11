@@ -6,7 +6,7 @@ const salesService = {
   async getAllInvoices(params = {}) {
     try {
       const response = await api.get('/sales-invoices', { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -16,7 +16,7 @@ const salesService = {
   async getInvoiceById(id) {
     try {
       const response = await api.get(`/sales-invoices/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -26,7 +26,7 @@ const salesService = {
   async createInvoice(invoiceData) {
     try {
       const response = await api.post('/sales-invoices', invoiceData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -36,7 +36,7 @@ const salesService = {
   async updateInvoice(id, invoiceData) {
     try {
       const response = await api.put(`/sales-invoices/${id}`, invoiceData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -46,7 +46,7 @@ const salesService = {
   async deleteInvoice(id) {
     try {
       const response = await api.delete(`/sales-invoices/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -58,7 +58,7 @@ const salesService = {
       const response = await api.get(`/sales-invoices/${id}/pdf`, {
         responseType: 'blob',
       });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }

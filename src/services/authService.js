@@ -5,7 +5,7 @@ export const authService = {
   async login(username, password) {
     try {
       const response = await api.post('/auth/login', { username, password });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -14,7 +14,7 @@ export const authService = {
   async register(data) {
     try {
       const response = await api.post('/auth/register', data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -23,7 +23,7 @@ export const authService = {
   async getCurrentUser() {
     try {
       const response = await api.get('/auth/me');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
@@ -32,7 +32,7 @@ export const authService = {
   async logout() {
     try {
       const response = await api.post('/auth/logout');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return handleApiError(error);
     }
