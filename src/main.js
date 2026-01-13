@@ -66,7 +66,6 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Breadcrumb', Breadcrumb);
 app.component('ProgressSpinner', ProgressSpinner);
 app.component('Textarea', Textarea);
-app.component('Dialog', Dialog);
 app.component('Card', Card);
 app.component('Tag', Tag);
 app.component('Divider', Divider);

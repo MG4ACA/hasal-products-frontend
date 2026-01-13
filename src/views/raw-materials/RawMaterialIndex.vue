@@ -89,8 +89,7 @@ const handleCreate = () => {
 
 // Navigate to view page
 const handleView = rawMaterial => {
-  // For now, redirect to edit. Later we can create a dedicated view page
-  router.push(`/raw-materials/${rawMaterial.id}/edit`);
+  router.push(`/raw-materials/${rawMaterial.id}`);
 };
 
 // Navigate to edit page

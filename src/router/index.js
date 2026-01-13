@@ -16,6 +16,7 @@ const SupplierView = () => import('@/views/suppliers/SupplierView.vue');
 const RawMaterialIndex = () => import('@/views/raw-materials/RawMaterialIndex.vue');
 const RawMaterialCreate = () => import('@/views/raw-materials/RawMaterialCreate.vue');
 const RawMaterialEdit = () => import('@/views/raw-materials/RawMaterialEdit.vue');
+const RawMaterialView = () => import('@/views/raw-materials/RawMaterialView.vue');
 
 // Purchase Order views
 const PurchaseOrderIndex = () => import('@/views/purchase-orders/PurchaseOrderIndex.vue');
@@ -127,6 +128,12 @@ const routes = [
     path: '/raw-materials/:id/edit',
     name: 'RawMaterialEdit',
     component: RawMaterialEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/raw-materials/:id',
+    name: 'RawMaterialView',
+    component: RawMaterialView,
     meta: { requiresAuth: true },
   },
   {

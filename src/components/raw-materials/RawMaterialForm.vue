@@ -73,6 +73,10 @@ watch(
   newData => {
     if (newData) {
       Object.assign(formData, newData);
+      // Convert reorder_level to number for InputNumber component
+      if (formData.reorder_level !== null && formData.reorder_level !== undefined) {
+        formData.reorder_level = Number(formData.reorder_level);
+      }
     }
   },
   { immediate: true }
