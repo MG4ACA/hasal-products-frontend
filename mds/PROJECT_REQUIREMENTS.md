@@ -459,8 +459,12 @@ Hasal_Products requires a comprehensive web-based POS and inventory management s
 6. Enter quantities received
 7. System updates raw material inventory
 8. PO status changes to Received
-
-**For Returns:** 9. If returning defective items, edit PO to add return items (negative quantities) 10. System reduces stock and reduces supplier balance
+9. **Returns & Traceability:** Return items can be processed through the same receive endpoint:
+   - Link returns to their source receipt batch via `source_batch_id`
+   - Specify return reason and disposition (stock/dispose)
+   - System tracks genealogy (all returns from a receipt batch)
+   - Query return origin to trace batch back to source
+   - Get material returns summary (total in/out/net)
 
 ### 6.2 Production Workflow
 
@@ -474,7 +478,7 @@ Hasal_Products requires a comprehensive web-based POS and inventory management s
 
 ### 6.3 Sales Workflow (Updated)
 
-**Phase 1: Order Collection**
+**Order Collection & Processing:**
 
 1. Sales ref visits outlets on assigned route
 2. Sales ref collects orders manually (paper/notepad)

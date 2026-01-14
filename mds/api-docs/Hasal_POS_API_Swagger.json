@@ -1,151 +1,62 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.0",
   "info": {
     "title": "Hasal POS API",
-    "description": "API documentation for Hasal Products Point of Sale System",
-    "version": "1.0.0",
+    "description": "Complete API for Hasal Products POS System - Purchase Order Management with integrated return batch traceability",
+    "version": "2.1.0",
     "contact": {
-      "name": "Hasal POS Development Team"
+      "name": "API Support",
+      "email": "support@hasal.com"
     }
   },
   "servers": [
     {
       "url": "http://localhost:3000",
-      "description": "Development server"
+      "description": "Development Server"
     }
   ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    },
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "username": { "type": "string" },
-          "role": { "type": "string", "enum": ["admin", "cashier"] },
-          "full_name": { "type": "string" },
-          "email": { "type": "string" },
-          "status": { "type": "string", "enum": ["active", "inactive"] }
-        }
-      },
-      "Supplier": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "code": { "type": "string" },
-          "name": { "type": "string" },
-          "contact_person": { "type": "string" },
-          "phone": { "type": "string" },
-          "email": { "type": "string" },
-          "address": { "type": "string" },
-          "credit_limit": { "type": "number" },
-          "balance": { "type": "number" },
-          "status": { "type": "string" }
-        }
-      },
-      "RawMaterial": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "code": { "type": "string" },
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "unit": { "type": "string" },
-          "current_stock": { "type": "number" },
-          "reorder_level": { "type": "number" },
-          "average_cost": { "type": "number" },
-          "status": { "type": "string" }
-        }
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "success": { "type": "boolean", "example": false },
-          "message": { "type": "string" },
-          "error": { "type": "string" }
-        }
-      },
-      "Success": {
-        "type": "object",
-        "properties": {
-          "success": { "type": "boolean", "example": true },
-          "message": { "type": "string" },
-          "data": { "type": "object" }
-        }
-      }
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "apiKey",
+      "scheme": "bearer",
+      "bearerFormat": "JWT",
+      "in": "header",
+      "name": "Authorization"
     }
   },
   "paths": {
     "/health": {
       "get": {
-        "summary": "Health check",
+        "tags": ["System"],
+        "summary": "Health Check",
+        "description": "Check if server is running",
         "responses": {
           "200": {
-            "description": "Server is running",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
-                    "timestamp": { "type": "string" },
-                    "environment": { "type": "string" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api": {
-      "get": {
-        "summary": "API information",
-        "responses": {
-          "200": {
-            "description": "API info",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
-                    "version": { "type": "string" }
-                  }
-                }
-              }
-            }
+            "description": "Server is healthy"
           }
         }
       }
     },
     "/api/auth/login": {
       "post": {
-        "summary": "User login",
-        "security": [],
+        "tags": ["Authentication"],
+        "summary": "Login",
+        "description": "Authenticate user and get JWT token",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["username", "password"],
                 "properties": {
-                  "username": { "type": "string" },
-                  "password": { "type": "string" }
+                  "username": {
+                    "type": "string",
+                    "example": "admin"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "admin123"
+                  }
                 }
               }
             }
@@ -159,115 +70,73 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
+                    "success": {
+                      "type": "boolean"
+                    },
                     "data": {
                       "type": "object",
                       "properties": {
-                        "user": { "$ref": "#/components/schemas/User" },
-                        "token": { "type": "string" }
+                        "token": {
+                          "type": "string"
+                        }
                       }
                     }
                   }
                 }
               }
             }
-          },
-          "401": {
-            "description": "Invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Error" }
-              }
-            }
           }
         }
       }
     },
-    "/api/auth/me": {
-      "get": {
-        "summary": "Get current user",
-        "responses": {
-          "200": {
-            "description": "Current user info",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "data": { "$ref": "#/components/schemas/User" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/suppliers": {
-      "get": {
-        "summary": "Get all suppliers",
-        "parameters": [
+    "/api/purchase-orders": {
+      "post": {
+        "tags": ["Purchase Orders"],
+        "summary": "Create Purchase Order",
+        "description": "Create new purchase order with items",
+        "security": [
           {
-            "name": "page",
-            "in": "query",
-            "schema": { "type": "integer", "default": 1 }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": { "type": "integer", "default": 10 }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "schema": { "type": "string" }
+            "bearerAuth": []
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Suppliers list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "suppliers": {
-                          "type": "array",
-                          "items": { "$ref": "#/components/schemas/Supplier" }
-                        },
-                        "total": { "type": "integer" },
-                        "page": { "type": "integer" },
-                        "limit": { "type": "integer" }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create supplier",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name"],
                 "properties": {
-                  "name": { "type": "string" },
-                  "contact_person": { "type": "string" },
-                  "phone": { "type": "string" },
-                  "email": { "type": "string" },
-                  "address": { "type": "string" },
-                  "credit_limit": { "type": "number" }
+                  "supplier_id": {
+                    "type": "integer"
+                  },
+                  "order_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "expected_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "notes": {
+                    "type": "string"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "raw_material_id": {
+                          "type": "integer"
+                        },
+                        "quantity": {
+                          "type": "number"
+                        },
+                        "unit_cost": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -275,62 +144,59 @@
         },
         "responses": {
           "201": {
-            "description": "Supplier created",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Error" }
-              }
-            }
+            "description": "Purchase order created successfully"
           }
         }
       }
     },
-    "/api/suppliers/{id}": {
+    "/api/purchase-orders/{id}": {
       "get": {
-        "summary": "Get supplier by ID",
+        "tags": ["Purchase Orders"],
+        "summary": "Get Purchase Order",
+        "description": "Retrieve specific purchase order with items and status",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Supplier details",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
+            "description": "Purchase order details"
           },
           "404": {
-            "description": "Supplier not found",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Error" }
-              }
-            }
+            "description": "Purchase order not found"
           }
         }
-      },
-      "put": {
-        "summary": "Update supplier",
+      }
+    },
+    "/api/purchase-orders/{id}/receive": {
+      "post": {
+        "tags": ["Purchase Orders"],
+        "summary": "Receive Purchase Order",
+        "description": "Receive items for PO - supports partial receipts and returns with source_batch_id tracking",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "requestBody": {
@@ -340,151 +206,84 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "contact_person": { "type": "string" },
-                  "phone": { "type": "string" },
-                  "email": { "type": "string" },
-                  "address": { "type": "string" },
-                  "credit_limit": { "type": "number" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Supplier updated",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete supplier",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "integer" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Supplier deleted",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/raw-materials": {
-      "get": {
-        "summary": "Get all raw materials",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "schema": { "type": "integer", "default": 1 }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": { "type": "integer", "default": 10 }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Raw materials list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "data": {
-                      "type": "array",
-                      "items": { "$ref": "#/components/schemas/RawMaterial" }
+                  "received_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "received_items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "raw_material_id": {
+                          "type": "integer"
+                        },
+                        "quantity_received": {
+                          "type": "number"
+                        },
+                        "expiry_date": {
+                          "type": "string",
+                          "format": "date"
+                        }
+                      }
+                    }
+                  },
+                  "return_items": {
+                    "type": "array",
+                    "description": "Phase 2: Return items with source batch tracking",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "raw_material_id": {
+                          "type": "integer"
+                        },
+                        "quantity_returned": {
+                          "type": "number"
+                        },
+                        "return_reason": {
+                          "type": "string"
+                        },
+                        "disposition": {
+                          "type": "string",
+                          "enum": ["stock", "dispose"]
+                        },
+                        "source_batch_id": {
+                          "type": "integer",
+                          "description": "Batch this return originated from"
+                        }
+                      }
                     }
                   }
                 }
               }
             }
           }
-        }
-      },
-      "post": {
-        "summary": "Create raw material",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["name", "unit"],
-                "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string" },
-                  "unit": { "type": "string" },
-                  "reorder_level": { "type": "number" }
-                }
-              }
-            }
-          }
         },
         "responses": {
-          "201": {
-            "description": "Raw material created",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
+          "200": {
+            "description": "Items received successfully"
           }
         }
       }
     },
-    "/api/raw-materials/{id}": {
-      "get": {
-        "summary": "Get raw material by ID",
-        "parameters": [
+    "/api/purchase-orders/{id}/cancel": {
+      "patch": {
+        "tags": ["Purchase Orders"],
+        "summary": "Cancel Purchase Order",
+        "description": "Cancel pending purchase order only",
+        "security": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "integer" }
+            "bearerAuth": []
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Raw material details",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update raw material",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "requestBody": {
@@ -494,10 +293,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string" },
-                  "unit": { "type": "string" },
-                  "reorder_level": { "type": "number" }
+                  "cancellation_reason": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -505,56 +303,157 @@
         },
         "responses": {
           "200": {
-            "description": "Raw material updated",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete raw material",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "integer" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Raw material deleted",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
-            }
+            "description": "Purchase order cancelled"
           }
         }
       }
     },
-    "/api/raw-materials/{id}/batches": {
-      "get": {
-        "summary": "Get batches for raw material",
+    "/api/raw-material-batches/{id}/inspect": {
+      "patch": {
+        "tags": ["Purchase Orders"],
+        "summary": "Approve Batch Inspection",
+        "description": "Perform QC inspection and approve/reject batch",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "inspection_status": {
+                    "type": "string",
+                    "enum": ["approved", "rejected"]
+                  },
+                  "accepted_quantity": {
+                    "type": "number"
+                  },
+                  "rejected_quantity": {
+                    "type": "number"
+                  },
+                  "inspection_notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch inspection completed"
+          }
+        }
+      }
+    },
+    "/api/batches/{id}/genealogy": {
+      "get": {
+        "tags": ["Batch Traceability Queries"],
+        "summary": "Get Batch Genealogy",
+        "description": "Get receipt batch with all associated returns and summary information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Receipt batch ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "Material batches",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Success" }
-              }
+            "description": "Batch genealogy with returns"
+          },
+          "400": {
+            "description": "Only receipt batches supported"
+          },
+          "404": {
+            "description": "Batch not found"
+          }
+        }
+      }
+    },
+    "/api/batches/{id}/origin": {
+      "get": {
+        "tags": ["Batch Traceability Queries"],
+        "summary": "Get Return Origin",
+        "description": "Trace return batch back to its source receipt batch",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Return batch ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return origin details"
+          },
+          "400": {
+            "description": "Only return batches supported"
+          },
+          "404": {
+            "description": "Batch not found"
+          }
+        }
+      }
+    },
+    "/api/batches/materials/{materialId}/returns-summary": {
+      "get": {
+        "tags": ["Batch Traceability Queries"],
+        "summary": "Material Returns Summary",
+        "description": "Get aggregated returns summary for material (total received, returned, net available)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "materialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Material returns summary with totals"
+          },
+          "404": {
+            "description": "Material not found"
           }
         }
       }

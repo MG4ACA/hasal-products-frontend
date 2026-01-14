@@ -326,22 +326,42 @@ CREATE TABLE raw_material_batches (
     material_id INT NOT NULL,
     supplier_id INT NOT NULL,
     batch_number VARCHAR(50) NOT NULL, -- System-generated (e.g., RM-MAT001-20251218-001)
+    batch_type ENUM('receipt', 'return') DEFAULT 'receipt', -- receipt=from PO, return=returned stock
     quantity DECIMAL(10,2) NOT NULL,
     unit_cost DECIMAL(10,2) NOT NULL,
     purchase_date DATE NOT NULL,
     expiry_date DATE,
+    source_batch_id INT, -- Self-referential: for returns, points to source receipt batch
+    return_reason VARCHAR(100), -- e.g., 'excess stock', 'damaged', 'quality issue'
+    disposition ENUM('stock', 'dispose'), -- 'stock'=back to inventory, 'dispose'=discard
+    inspection_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    inspection_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (material_id) REFERENCES raw_materials(id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    FOREIGN KEY (source_batch_id) REFERENCES raw_material_batches(id),
     UNIQUE KEY unique_batch (batch_number),
     INDEX idx_material (material_id),
     INDEX idx_batch (batch_number),
     INDEX idx_supplier (supplier_id),
-    INDEX idx_purchase_date (purchase_date)
+    INDEX idx_purchase_date (purchase_date),
+    INDEX idx_batch_type (batch_type),
+    INDEX idx_source_batch (source_batch_id)
 );
 ```
 
----
+**Batch Traceability Features:**
+
+- **batch_type:** Distinguishes between receipt batches (from PO) and return batches
+- **source_batch_id:** Self-referential foreign key - enables genealogy tracking
+  - Receipt batches: source_batch_id = NULL
+  - Return batches: source_batch_id = ID of the receipt batch being returned
+- **Return Tracking:** return_reason and disposition fields document why material was returned
+- **QC Workflow:** inspection_status and inspection_notes support batch approval process
+- **Genealogy Queries:**
+  - Find all returns from a receipt batch: `SELECT * FROM raw_material_batches WHERE source_batch_id = ?`
+  - Trace return to source: `SELECT source_batch_id FROM raw_material_batches WHERE id = ? AND batch_type = 'return'`
+  - Material summary: `SUM(quantity) WHERE material_id = ? AND batch_type = 'receipt'` minus `SUM(quantity) WHERE material_id = ? AND batch_type = 'return'`
 
 ### 2.4 Products & SKUs
 
@@ -389,8 +409,6 @@ CREATE TABLE product_skus (
 ```
 
 ---
-
-<!-- need to add 2nd phase -->
 
 ### 2.5 Recipes & Production
 

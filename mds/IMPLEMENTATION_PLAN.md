@@ -572,9 +572,11 @@
 
 ---
 
-## 💰 Phase 3: Payments & Reporting (Week 8-9)
+## � Core Modules: Purchase Orders & Batch Traceability (Week 5)
 
-### Week 8: Payment Collection & Credit Management
+---
+
+## 💰 Payments & Reporting Module (Week 8-9)
 
 #### Payment Module - Backend
 
@@ -778,7 +780,7 @@
 
 ---
 
-## 🧪 Phase 4: Testing & Deployment (Week 10-12)
+## 🧪 Testing, Documentation & Deployment (Week 10-12)
 
 ### Week 10: Testing & Bug Fixes
 
