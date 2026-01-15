@@ -34,7 +34,7 @@ const formatCurrency = amount => {
 </script>
 
 <template>
-  <DataTable :value="outlets" :loading="loading" paginator :rows="10" responsive-layout="scroll">
+  <DataTable :value="outlets" :loading="loading" responsive-layout="scroll">
     <template #empty>
       <div class="empty-state">
         <i class="pi pi-info-circle" style="font-size: 3rem" />

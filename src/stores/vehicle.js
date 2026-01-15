@@ -157,6 +157,10 @@ export const useVehicleStore = defineStore('vehicle', () => {
       }
 
       await fetchVehicles();
+      // Also refresh currentVehicle if it's the same vehicle
+      if (currentVehicle.value?.id === id) {
+        await fetchVehicleById(id);
+      }
       return response;
     } catch (err) {
       error.value = err.message || 'Failed to assign vehicle to route';
@@ -179,6 +183,10 @@ export const useVehicleStore = defineStore('vehicle', () => {
       }
 
       await fetchVehicles();
+      // Also refresh currentVehicle if it's the same vehicle
+      if (currentVehicle.value?.id === id) {
+        await fetchVehicleById(id);
+      }
       return response;
     } catch (err) {
       error.value = err.message || 'Failed to unassign vehicle from route';

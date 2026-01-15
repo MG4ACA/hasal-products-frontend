@@ -30,14 +30,6 @@ watch(
   { deep: true }
 );
 
-watch(
-  formData,
-  newVal => {
-    emit('update:modelValue', newVal);
-  },
-  { deep: true }
-);
-
 const statusOptions = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },

@@ -23,7 +23,7 @@ const getStatusSeverity = status => {
 </script>
 
 <template>
-  <DataTable :value="routes" :loading="loading" paginator :rows="10" responsive-layout="scroll">
+  <DataTable :value="routes" :loading="loading" responsive-layout="scroll">
     <template #empty>
       <div class="empty-state">
         <i class="pi pi-info-circle" style="font-size: 3rem" />

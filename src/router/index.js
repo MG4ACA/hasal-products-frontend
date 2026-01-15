@@ -52,16 +52,19 @@ const ProductionView = () => import('@/views/production/ProductionView.vue');
 const RouteIndex = () => import('@/views/routes/RouteIndex.vue');
 const RouteCreate = () => import('@/views/routes/RouteCreate.vue');
 const RouteEdit = () => import('@/views/routes/RouteEdit.vue');
+const RouteView = () => import('@/views/routes/RouteView.vue');
 
 // Outlet views
 const OutletIndex = () => import('@/views/outlets/OutletIndex.vue');
 const OutletCreate = () => import('@/views/outlets/OutletCreate.vue');
 const OutletEdit = () => import('@/views/outlets/OutletEdit.vue');
+const OutletView = () => import('@/views/outlets/OutletView.vue');
 
 // Employee views
 const EmployeeIndex = () => import('@/views/employees/EmployeeIndex.vue');
 const EmployeeCreate = () => import('@/views/employees/EmployeeCreate.vue');
 const EmployeeEdit = () => import('@/views/employees/EmployeeEdit.vue');
+const EmployeeView = () => import('@/views/employees/EmployeeView.vue');
 
 // Vehicle views
 const VehicleIndex = () => import('@/views/vehicles/VehicleIndex.vue');
@@ -270,6 +273,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/routes/:id',
+    name: 'RouteView',
+    component: RouteView,
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/routes/:id/edit',
     name: 'RouteEdit',
     component: RouteEdit,
@@ -288,6 +297,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/outlets/:id',
+    name: 'OutletView',
+    component: OutletView,
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/outlets/:id/edit',
     name: 'OutletEdit',
     component: OutletEdit,
@@ -303,6 +318,12 @@ const routes = [
     path: '/employees/create',
     name: 'EmployeeCreate',
     component: EmployeeCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/employees/:id',
+    name: 'EmployeeView',
+    component: EmployeeView,
     meta: { requiresAuth: true },
   },
   {

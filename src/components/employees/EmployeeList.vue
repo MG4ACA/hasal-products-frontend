@@ -43,7 +43,7 @@ const formatType = type => {
 </script>
 
 <template>
-  <DataTable :value="employees" :loading="loading" paginator :rows="10" responsive-layout="scroll">
+  <DataTable :value="employees" :loading="loading" responsive-layout="scroll">
     <template #empty>
       <div class="empty-state">
         <i class="pi pi-info-circle" style="font-size: 3rem" />
@@ -83,13 +83,12 @@ const formatType = type => {
 
     <Column field="assigned_route" header="Assigned Route">
       <template #body="{ data }">
-        <span v-if="data.assigned_route" class="route-badge">
-          {{ data.assigned_route.name }}
+        <span v-if="data.assignedRoute" class="route-badge">
+          {{ data.assignedRoute.name }}
         </span>
         <span v-else class="text-gray-400">-</span>
       </template>
     </Column>
-
     <Column field="status" header="Status" sortable>
       <template #body="{ data }">
         <Tag

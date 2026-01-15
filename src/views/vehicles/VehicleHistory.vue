@@ -86,78 +86,56 @@ onMounted(() => {
       <!-- Vehicle Info Card -->
       <Card class="mb-4">
         <template #title>
-          <div class="flex justify-content-between align-items-center">
+          <div class="flex justify-content-between align-items-center w-full">
             <div class="flex align-items-center gap-3">
               <i class="pi pi-car text-primary" style="font-size: 2rem" />
               <div>
-                <div class="text-2xl font-bold">
-                  {{ vehicle.vehicle_number }}
-                </div>
-                <div class="text-sm text-600 font-normal">
-                  {{ vehicle.vehicle_type }}
+                <div class="text-xl font-bold">{{ vehicle.code }} - {{ vehicle.name }}</div>
+                <div class="text-sm text-600">
+                  Registration: {{ vehicle.registration_number || 'N/A' }}
                 </div>
               </div>
             </div>
             <div class="flex gap-2">
               <Button
-                label="Manage Assignment"
+                label="Assign"
                 icon="pi pi-sitemap"
                 severity="info"
+                size="small"
                 @click="handleAssignRoute"
               />
-              <Button label="Back" icon="pi pi-arrow-left" outlined @click="handleBack" />
+              <Button
+                label="Back"
+                icon="pi pi-arrow-left"
+                severity="secondary"
+                size="small"
+                outlined
+                @click="handleBack"
+              />
             </div>
           </div>
         </template>
         <template #content>
-          <div class="grid">
-            <div class="col-12 md:col-3">
-              <div class="text-600 text-sm mb-1">Registration Number</div>
-              <div class="text-900 font-semibold">
-                {{ vehicle.registration_number || 'N/A' }}
-              </div>
+          <div class="flex align-items-center justify-content-between gap-3">
+            <div class="flex align-items-center gap-3">
+              <span class="text-600 text-sm">Status:</span>
+              <Tag
+                :value="vehicle.status"
+                :severity="vehicle.status === 'active' ? 'success' : 'danger'"
+              />
             </div>
-            <div class="col-12 md:col-3">
-              <div class="text-600 text-sm mb-1">Vehicle Type</div>
-              <div class="text-900 font-semibold">
-                {{ vehicle.vehicle_type || 'N/A' }}
-              </div>
+            <div v-if="vehicle.currentAssignment" class="flex align-items-center gap-2">
+              <i class="pi pi-map-marker text-primary" style="font-size: 0.9rem" />
+              <span class="text-sm">
+                <strong>Assigned to:</strong>
+                {{ vehicle.currentAssignment?.route?.name || 'Unknown' }}
+                ({{ vehicle.currentAssignment?.route?.code || '' }})
+              </span>
             </div>
-            <div class="col-12 md:col-3">
-              <div class="text-600 text-sm mb-1">Capacity</div>
-              <div class="text-900 font-semibold">
-                {{ vehicle.capacity ? `${vehicle.capacity} kg` : 'N/A' }}
-              </div>
+            <div v-else class="text-sm text-orange-600">
+              <i class="pi pi-exclamation-circle mr-2" />
+              <strong>Not assigned to any route</strong>
             </div>
-            <div class="col-12 md:col-3">
-              <div class="text-600 text-sm mb-1">Status</div>
-              <div>
-                <Tag
-                  :value="vehicle.status"
-                  :severity="vehicle.status === 'active' ? 'success' : 'danger'"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div v-if="vehicle.current_route_id" class="mt-4 p-3 surface-100 border-round">
-            <div class="flex align-items-center gap-2 mb-2">
-              <i class="pi pi-map-marker text-primary" />
-              <span class="font-semibold text-900">Currently Assigned To:</span>
-            </div>
-            <div class="ml-4">
-              <div class="text-900 font-semibold">
-                {{ vehicle.Route?.route_name || 'Unknown Route' }}
-              </div>
-              <div class="text-600 text-sm">
-                {{ vehicle.Route?.route_code || '' }}
-              </div>
-            </div>
-          </div>
-
-          <div v-else class="mt-4 p-3 surface-100 border-round text-center">
-            <i class="pi pi-info-circle text-600 mb-2" style="font-size: 2rem" />
-            <p class="text-600 m-0">This vehicle is not currently assigned to any route</p>
           </div>
         </template>
       </Card>
@@ -171,11 +149,11 @@ onMounted(() => {
               <span>Route Assignment History</span>
             </div>
             <Button
+              v-tooltip="'Refresh'"
               icon="pi pi-refresh"
               rounded
               severity="primary"
               @click="() => historyRef?.refresh()"
-              v-tooltip="'Refresh'"
             />
           </div>
         </template>

@@ -1,9 +1,4 @@
 <script setup>
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Tag from 'primevue/tag';
-
 defineProps({
   vehicles: {
     type: Array,
@@ -23,7 +18,7 @@ const getStatusSeverity = status => {
 </script>
 
 <template>
-  <DataTable :value="vehicles" :loading="loading" paginator :rows="10" responsive-layout="scroll">
+  <DataTable :value="vehicles" :loading="loading" responsive-layout="scroll">
     <template #empty>
       <div class="empty-state">
         <i class="pi pi-info-circle" style="font-size: 3rem" />
@@ -52,7 +47,7 @@ const getStatusSeverity = status => {
     <Column field="currentAssignment" header="Current Assignment">
       <template #body="{ data }">
         <span v-if="data.currentAssignment" class="route-badge">
-          {{ data.currentAssignment.route_name }}
+          {{ data.currentAssignment.route?.name || 'Unknown' }}
         </span>
         <Tag v-else value="Unassigned" severity="secondary" />
       </template>

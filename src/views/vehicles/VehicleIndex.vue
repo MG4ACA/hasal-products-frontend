@@ -44,12 +44,13 @@ watch([statusFilter], () => {
 const fetchVehicles = async () => {
   loading.value = true;
   try {
-    await vehicleStore.fetchVehicles({
-      search: searchQuery.value,
-      status: statusFilter.value,
-      page: currentPage.value,
-      limit: pageSize.value,
-    });
+    // Update store filters and pagination
+    vehicleStore.pagination.page = currentPage.value;
+    vehicleStore.pagination.limit = pageSize.value;
+    vehicleStore.filters.search = searchQuery.value;
+    vehicleStore.filters.status = statusFilter.value;
+
+    await vehicleStore.fetchVehicles();
   } catch (error) {
     showError('Failed to fetch vehicles');
   } finally {
@@ -122,11 +123,11 @@ onMounted(() => {
       </div>
       <div class="header-actions">
         <Button
+          v-tooltip="'Refresh'"
           icon="pi pi-refresh"
           rounded
           severity="primary"
           @click="fetchVehicles"
-          v-tooltip="'Refresh'"
         />
         <Button label="Add Vehicle" icon="pi pi-plus" @click="handleCreate" />
       </div>
@@ -165,11 +166,11 @@ onMounted(() => {
         @edit="handleEdit"
         @delete="handleDelete"
       />
-
+    </div>
+    <div v-if="!loading && vehicleStore.vehicles.length > 0" class="pagination-container">
       <Paginator
-        v-if="vehicleStore.totalVehicles > pageSize"
         :rows="pageSize"
-        :total-records="vehicleStore.totalVehicles"
+        :total-records="vehicleStore.pagination.total"
         @page="handlePageChange"
       />
     </div>
@@ -233,6 +234,14 @@ onMounted(() => {
   background: white;
   border-radius: 8px;
   padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-container {
+  margin-top: 1.5rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 

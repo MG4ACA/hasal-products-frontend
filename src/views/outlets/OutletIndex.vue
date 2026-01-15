@@ -49,7 +49,14 @@ const onSearch = () => {
 const fetchData = async () => {
   loading.value = true;
   try {
-    await outletStore.fetchOutlets(filters);
+    // Update store filters and pagination
+    outletStore.pagination.page = filters.page;
+    outletStore.pagination.limit = filters.limit;
+    outletStore.filters.search = filters.search;
+    outletStore.filters.status = filters.status;
+    outletStore.filters.route_id = filters.route_id;
+
+    await outletStore.fetchOutlets();
     pagination.value = outletStore.pagination;
   } catch (err) {
     showError(err.message || 'Failed to load outlets');
@@ -119,11 +126,11 @@ onMounted(() => {
       </div>
       <div class="header-actions">
         <Button
+          v-tooltip="'Refresh'"
           icon="pi pi-refresh"
           rounded
           severity="primary"
           @click="fetchData"
-          v-tooltip="'Refresh'"
         />
         <Button
           label="Add Outlet"

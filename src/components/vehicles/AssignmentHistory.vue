@@ -53,7 +53,7 @@ const loadHistory = async () => {
   try {
     loading.value = true;
     const response = await vehicleStore.fetchAssignmentHistory(props.vehicleId);
-    assignmentHistory.value = response.data || response || [];
+    assignmentHistory.value = response.history || [];
   } catch (error) {
     showError('Failed to load assignment history');
     console.error(error);
@@ -96,10 +96,10 @@ defineExpose({
         <template #body="{ data }">
           <div>
             <div class="font-semibold text-900">
-              {{ data.Route?.route_name || 'N/A' }}
+              {{ data.route?.name || 'N/A' }}
             </div>
             <div class="text-sm text-600">
-              {{ data.Route?.route_code || '' }}
+              {{ data.route?.code || '' }}
             </div>
           </div>
         </template>

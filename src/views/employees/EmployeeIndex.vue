@@ -58,7 +58,15 @@ const onSearch = () => {
 const fetchData = async () => {
   loading.value = true;
   try {
-    await employeeStore.fetchEmployees(filters);
+    // Update store filters and pagination
+    employeeStore.pagination.page = filters.page;
+    employeeStore.pagination.limit = filters.limit;
+    employeeStore.filters.search = filters.search;
+    employeeStore.filters.status = filters.status;
+    employeeStore.filters.type = filters.type;
+    employeeStore.filters.route_id = filters.route_id;
+
+    await employeeStore.fetchEmployees();
     pagination.value = employeeStore.pagination;
   } catch (err) {
     showError(err.message || 'Failed to load employees');

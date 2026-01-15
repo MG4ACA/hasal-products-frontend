@@ -31,12 +31,14 @@ const selectedRoute = ref(null);
 const vehicle = ref(null);
 
 const isAssigned = computed(() => {
-  return vehicle.value?.current_route_id !== null;
+  return (
+    vehicle.value?.currentAssignment !== null && vehicle.value?.currentAssignment !== undefined
+  );
 });
 
 const currentRoute = computed(() => {
-  if (!vehicle.value?.current_route_id || !routeStore.routes) return null;
-  return routeStore.routes.find(r => r.id === vehicle.value.current_route_id);
+  if (!vehicle.value?.currentAssignment) return null;
+  return vehicle.value.currentAssignment.route;
 });
 
 const availableRoutes = computed(() => {
@@ -142,67 +144,97 @@ onMounted(() => {
 
     <div v-else-if="vehicle" class="p-fluid">
       <!-- Vehicle Info -->
-      <div class="mb-4 p-3 surface-100 border-round">
-        <h4 class="mt-0 mb-2">
-          {{ vehicle.vehicle_number }}
-        </h4>
-        <div class="text-600">
-          <div><strong>Type:</strong> {{ vehicle.vehicle_type }}</div>
+      <div class="mb-4">
+        <div class="flex align-items-center gap-3 mb-3">
+          <i class="pi pi-car text-primary" style="font-size: 1.5rem" />
           <div>
-            <strong>Status:</strong>
-            <Tag
-              :value="vehicle.status"
-              :severity="vehicle.status === 'active' ? 'success' : 'danger'"
-            />
+            <div class="text-xl font-bold text-900">
+              {{ vehicle.name }}
+            </div>
+            <div class="text-sm text-600">
+              {{ vehicle.code }}
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-content-between">
+          <div class="">
+            <div class="text-600 text-sm mb-1">Registration Number</div>
+            <div class="text-900 font-semibold">
+              {{ vehicle.registration_number || 'N/A' }}
+            </div>
+          </div>
+          <div class="">
+            <div class="text-600 text-sm mb-1">Status</div>
+            <div>
+              <Tag
+                :value="vehicle.status"
+                :severity="vehicle.status === 'active' ? 'success' : 'danger'"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Current Assignment -->
       <div v-if="isAssigned" class="mb-4">
-        <h5 class="mb-2">Current Assignment</h5>
-        <div class="p-3 surface-card border-round border-1 border-300">
-          <div class="flex justify-content-between align-items-center">
-            <div>
-              <div class="font-semibold text-900">
-                {{ currentRoute?.route_name || 'N/A' }}
-              </div>
-              <div class="text-600 text-sm">
-                {{ currentRoute?.route_code || '' }}
+        <div class="text-600 text-sm mb-2 font-semibold">Current Assignment</div>
+        <div class="p-3 bg-blue-50 border-round border-1 border-blue-200">
+          <div class="flex align-items-center justify-content-between">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-map-marker text-primary" />
+              <div>
+                <div class="font-semibold text-900">
+                  {{ currentRoute?.name || 'N/A' }}
+                </div>
+                <div class="text-600 text-sm">
+                  {{ currentRoute?.code || '' }}
+                </div>
               </div>
             </div>
-            <Tag value="Assigned" severity="success" />
+            <Tag value="Active" severity="success" />
           </div>
         </div>
       </div>
 
       <div v-else class="mb-4">
-        <div class="p-3 surface-card border-round border-1 border-300 text-center">
-          <i class="pi pi-info-circle text-600 mb-2" style="font-size: 2rem" />
-          <p class="text-600 m-0">This vehicle is not currently assigned to any route</p>
+        <div class="p-3 bg-orange-50 border-round border-1 border-orange-200 text-center">
+          <i class="pi pi-exclamation-circle text-orange-600 mb-2" style="font-size: 2rem" />
+          <p class="text-orange-700 m-0 font-semibold">Not Currently Assigned</p>
+          <p class="text-orange-600 text-sm mt-1 m-0">Assign a route to this vehicle</p>
         </div>
       </div>
 
       <!-- Assign New Route -->
       <div v-if="!isAssigned" class="mb-3">
-        <label for="route" class="block mb-2 font-semibold">Assign to Route</label>
+        <label for="route" class="block mb-2 text-600 text-sm font-semibold">
+          <i class="pi pi-sitemap mr-2" />
+          Select Route to Assign
+        </label>
         <Dropdown
           id="route"
           v-model="selectedRoute"
           :options="availableRoutes"
-          option-label="route_name"
-          placeholder="Select a route"
+          option-label="name"
+          placeholder="Choose a route..."
           :filter="true"
           class="w-full"
         >
           <template #option="slotProps">
-            <div>
-              <div class="font-semibold">
-                {{ slotProps.option.route_name }}
+            <div class="flex align-items-center justify-content-between">
+              <div class="mr-4">
+                <div class="font-semibold text-900">
+                  {{ slotProps.option.name }}
+                </div>
+                <div class="text-sm text-600">
+                  {{ slotProps.option.code }}
+                </div>
               </div>
-              <div class="text-sm text-600">
-                {{ slotProps.option.route_code }}
-              </div>
+              <Tag
+                v-if="slotProps.option.status === 'active'"
+                value="Active"
+                severity="success"
+                style="font-size: 0.75rem"
+              />
             </div>
           </template>
         </Dropdown>

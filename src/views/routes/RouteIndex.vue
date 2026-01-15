@@ -11,7 +11,6 @@ const routeStore = useRouteStore();
 const { showSuccess, showError } = useToastNotification();
 const confirm = useConfirm();
 
-const loading = ref(false);
 const filters = reactive({
   search: '',
   status: '',
@@ -42,19 +41,23 @@ const onSearch = () => {
 };
 
 const fetchData = async () => {
-  loading.value = true;
   try {
-    await routeStore.fetchRoutes(filters);
+    // Update store filters and pagination
+    routeStore.pagination.page = filters.page;
+    routeStore.pagination.limit = filters.limit;
+    routeStore.filters.search = filters.search;
+    routeStore.filters.status = filters.status;
+
+    await routeStore.fetchRoutes();
     pagination.value = routeStore.pagination;
   } catch (err) {
     showError(err.message || 'Failed to load routes');
-  } finally {
-    loading.value = false;
   }
 };
 
 const onPageChange = event => {
   filters.page = event.page + 1;
+  routeStore.pagination.page = filters.page;
   fetchData();
 };
 
@@ -98,11 +101,11 @@ onMounted(() => {
       </div>
       <div class="header-actions">
         <Button
+          v-tooltip="'Refresh'"
           icon="pi pi-refresh"
           rounded
           severity="primary"
           @click="fetchData"
-          v-tooltip="'Refresh'"
         />
         <Button label="Add Route" icon="pi pi-plus" @click="() => router.push('/routes/create')" />
       </div>
@@ -128,20 +131,20 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="loading" class="loading-container">
+    <div v-if="routeStore.loading" class="loading-container">
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
     </div>
 
     <RouteList
       v-else
       :routes="routeStore.routes"
-      :loading="loading"
+      :loading="routeStore.loading"
       @view="viewRoute"
       @edit="editRoute"
       @delete="confirmDelete"
     />
 
-    <div v-if="!loading && routeStore.routes.length > 0" class="pagination-container">
+    <div v-if="!routeStore.loading && routeStore.routes.length > 0" class="pagination-container">
       <Paginator
         :rows="pagination.limit"
         :total-records="pagination.total"

@@ -31,14 +31,6 @@ watch(
   { deep: true }
 );
 
-watch(
-  formData,
-  newVal => {
-    emit('update:modelValue', newVal);
-  },
-  { deep: true }
-);
-
 const statusOptions = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
@@ -47,6 +39,10 @@ const statusOptions = [
 const paymentTermsOptions = [
   { label: 'Cash', value: 'cash' },
   { label: 'Credit', value: 'credit' },
+  { label: 'Cheque', value: 'cheque' },
+  { label: 'Bank Transfer', value: 'bank_transfer' },
+  { label: 'Card', value: 'card' },
+  { label: 'Mixed', value: 'mixed' },
 ];
 
 const handleSubmit = () => {
