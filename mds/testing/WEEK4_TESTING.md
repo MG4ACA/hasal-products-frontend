@@ -38,7 +38,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -60,7 +60,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -80,7 +80,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -100,7 +100,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -123,7 +123,7 @@
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -177,7 +177,7 @@ SELECT SUM(quantity * unit_cost) AS total FROM po_items WHERE po_id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -200,7 +200,7 @@ SELECT SUM(quantity * unit_cost) AS total FROM po_items WHERE po_id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -224,7 +224,7 @@ SELECT SUM(quantity * unit_cost) AS total FROM po_items WHERE po_id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -245,7 +245,7 @@ SELECT SUM(quantity * unit_cost) AS total FROM po_items WHERE po_id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -267,7 +267,7 @@ SELECT SUM(quantity * unit_cost) AS total FROM po_items WHERE po_id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -297,7 +297,7 @@ SELECT * FROM po_items WHERE po_id = <id>;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -360,7 +360,7 @@ SELECT balance FROM suppliers WHERE id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -421,7 +421,7 @@ SELECT current_stock FROM raw_materials WHERE id = 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -454,7 +454,7 @@ SELECT current_stock FROM raw_materials WHERE id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -486,7 +486,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -508,7 +508,348 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-17: POST /api/purchase-orders/:id/receive - Multiple Partial Receives (Phase 2)
+
+**Objective:** Test receiving items in multiple transactions - supplier delivers in 3 shipments
+
+**Test Steps:**
+
+1. Create PO with 3 items (RM001: 100kg, RM002: 50kg, RM003: 30kg)
+2. First receive call: receive only RM001 (100kg)
+3. POST `/api/purchase-orders/:id/receive`
+
+```json
+{
+  "received_date": "2025-12-20",
+  "received_items": [
+    {
+      "material_id": 1,
+      "quantity_received": 100,
+      "expiry_date": "2026-12-31"
+    }
+  ]
+}
+```
+
+4. Verify PO status = "partial"
+5. Second receive call: receive RM002 (50kg)
+6. POST `/api/purchase-orders/:id/receive`
+
+```json
+{
+  "received_date": "2025-12-21",
+  "received_items": [
+    {
+      "material_id": 2,
+      "quantity_received": 50,
+      "expiry_date": "2026-12-31"
+    }
+  ]
+}
+```
+
+7. Verify PO status still = "partial"
+8. Third receive call: receive RM003 (30kg) - final delivery
+9. POST `/api/purchase-orders/:id/receive`
+
+```json
+{
+  "received_date": "2025-12-22",
+  "received_items": [
+    {
+      "material_id": 3,
+      "quantity_received": 30,
+      "expiry_date": "2026-12-31"
+    }
+  ]
+}
+```
+
+10. Verify PO status = "received"
+
+**Expected Results:**
+
+- ✅ First receive: Status → "partial", received_quantity[RM001] = 100
+- ✅ Second receive: Status → "partial", received_quantity[RM002] = 50
+- ✅ Third receive: Status → "received" (all items complete), received_quantity[RM003] = 30
+- ✅ Each batch created separately: 3 batches total
+- ✅ Supplier balance updated after each receive
+- ✅ No errors or duplicate entries
+
+**SQL Verification:**
+
+```sql
+-- Verify received quantities cumulative
+SELECT material_id, received_quantity FROM po_items WHERE po_id = ?;
+-- Should show: RM001: 100, RM002: 50, RM003: 30
+
+-- Verify PO status progression
+SELECT status, updated_at FROM purchase_orders WHERE id = ? ORDER BY updated_at;
+
+-- Verify all 3 batches created
+SELECT batch_number, material_id, initial_quantity, created_at
+FROM raw_material_batches WHERE po_id = ? ORDER BY created_at;
+```
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-18: POST /api/purchase-orders/:id/receive - Quantity Validation (Phase 2)
+
+**Objective:** Test prevention of over-receiving items - ensure cumulative quantities are tracked
+
+**Test Steps:**
+
+1. Create PO with item: RM001 (10kg total)
+2. First receive: 7kg
+3. Verify received_quantity = 7kg, remaining = 3kg
+4. Second receive attempt: try to receive 5kg (exceeds remaining)
+
+**Request:**
+
+```json
+{
+  "received_date": "2025-12-21",
+  "received_items": [
+    {
+      "material_id": 1,
+      "quantity_received": 5,
+      "expiry_date": "2026-12-31"
+    }
+  ]
+}
+```
+
+**Expected Results:**
+
+- ✅ Error response: 400 Bad Request
+- ✅ Error message: "Cannot receive 5kg for material RM001. Already received 7kg of 10kg ordered. Only 3kg remaining."
+- ✅ PO not updated
+- ✅ No batch created
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-19: POST /api/purchase-orders/:id/receive - Receive Exact Remaining (Phase 2)
+
+**Objective:** Test receiving exact remaining quantity after partial receives
+
+**Test Steps:**
+
+1. Create PO with item: RM001 (10kg total)
+2. First receive: 7kg (received_quantity = 7, remaining = 3)
+3. Second receive: exactly 3kg
+4. POST `/api/purchase-orders/:id/receive`
+
+```json
+{
+  "received_date": "2025-12-21",
+  "received_items": [
+    {
+      "material_id": 1,
+      "quantity_received": 3,
+      "expiry_date": "2026-12-31"
+    }
+  ]
+}
+```
+
+**Expected Results:**
+
+- ✅ Success: 200 OK
+- ✅ received_quantity updated to 10kg
+- ✅ PO status changed to "received"
+- ✅ Second batch created (3kg)
+- ✅ Supplier balance fully updated
+
+**SQL Verification:**
+
+```sql
+SELECT received_quantity, status FROM po_items WHERE po_id = ? AND material_id = 1;
+-- Should show: 10, PO status = "received"
+```
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-20: Frontend - Receive Items Tab Validation (Phase 2)
+
+**Objective:** Test UI validation for partial receives
+
+**Test Steps:**
+
+1. Open Receive PO dialog
+2. See 3 items in table
+3. Leave Item 1 and Item 3 with 0 quantity
+4. Enter 25 for Item 2
+5. Try to submit
+
+**Expected Results:**
+
+- ✅ Only Item 2 included in payload (items with 0 qty skipped)
+- ✅ No errors for items with 0 quantity
+- ✅ Submission succeeds
+- ✅ Server only processes Item 2
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-21: Frontend - Receive Empty Submission Prevention (Phase 2)
+
+**Objective:** Test that all 0 quantities cannot be submitted
+
+**Test Steps:**
+
+1. Open Receive PO dialog
+2. Leave all items with 0 quantity
+3. Click "Receive Purchase Order" button
+
+**Expected Results:**
+
+- ✅ Error message: "Please enter quantity for at least one item"
+- ✅ Tab switches to "Receive Items"
+- ✅ Submit is prevented
+- ✅ API is not called
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-22: Frontend - Quantity Exceeds Remaining Validation (Phase 2)
+
+**Objective:** Test frontend validation when user tries to exceed remaining quantity
+
+**Test Steps:**
+
+1. Open Receive PO for item with 10kg ordered, 7kg already received
+2. Try to enter 5kg in quantity field (exceeds 3kg remaining)
+3. Observe input validation
+
+**Expected Results:**
+
+- ✅ Input max set to remaining quantity (3kg)
+- ✅ User cannot enter 5 in field
+- ✅ Shows hint: "7kg already received"
+- ✅ Validation error if max is bypassed: "Cannot receive 5kg... Only 3kg remaining"
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-23: GET /api/purchase-orders/:id - Batches Array Included (NEW - Week 10)
+
+**Objective:** Test that batches array is included in purchase order response
+
+**Test Steps:**
+
+1. GET `/api/purchase-orders/1`
+2. Check response for batches array
+3. Verify batches include material and supplier info
+
+**Expected Results:**
+
+- ✅ Status: 200 OK
+- ✅ Response includes `batches` array
+- ✅ Batches are fetched from RawMaterialBatch table
+- ✅ Each batch includes:
+  - batch_number
+  - quantity
+  - unit_cost
+  - expiry_date
+  - batch_type (receipt/return)
+  - return_reason (for returns)
+  - return_disposition (stock/dispose for returns)
+  - material (with name, code)
+- ✅ Batches filtered by material_id (items in PO) and supplier_id (PO supplier)
+- ✅ Sorted by created_at DESC (newest first)
+
+**Example Response:**
+
+```json
+{
+  "po_number": "PO-0001",
+  "supplier_id": 1,
+  "batches": [
+    {
+      "batch_number": "RM-0001-26010152",
+      "quantity": 500,
+      "unit_cost": 50,
+      "expiry_date": "2026-07-15",
+      "batch_type": "receipt",
+      "return_reason": null,
+      "return_disposition": null,
+      "material": {
+        "id": 1,
+        "name": "Turmeric",
+        "code": "RM-0001"
+      }
+    }
+  ]
+}
+```
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PB-24: GET /api/purchase-orders/:id - Batches with Multiple Types (NEW - Week 10)
+
+**Objective:** Test that batches array includes both receipt and return batches
+
+**Test Steps:**
+
+1. GET `/api/purchase-orders/1` where PO has receipts + returns
+2. Check batches array for type diversity
+3. Verify return batches include return_reason and return_disposition
+
+**Expected Results:**
+
+- ✅ Batches array includes both receipt and return type batches
+- ✅ Receipt batches: batch_type = "receipt", return fields empty
+- ✅ Return batches: batch_type = "return", return_reason populated, return_disposition = "stock" or "dispose"
+- ✅ Can distinguish types easily
+- ✅ Quantities shown correctly (positive for receipt, positive for return quantity)
+
+**Example:**
+
+```
+Receipt Batch:  RM-0001-26010152 | Receipt | 500 kg | 50/kg | 2026-07-15
+Return Batch:   RM-0001-26010153 | Return  | 50 kg  | 50/kg | 2026-01-15 | Expired | Stock
+```
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -531,7 +872,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -554,7 +895,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -579,7 +920,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -600,7 +941,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -636,7 +977,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -660,7 +1001,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -684,7 +1025,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -708,7 +1049,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -729,7 +1070,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -754,7 +1095,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -777,7 +1118,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -800,7 +1141,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -823,7 +1164,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -852,7 +1193,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -886,7 +1227,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -909,7 +1250,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -932,7 +1273,129 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PF-18: PO Detail View - Received Batches Section Displays (NEW - Week 10)
+
+**Objective:** Test that Received Batches section appears in PO detail view when batches exist
+
+**Test Steps:**
+
+1. Navigate to Purchase Order detail view
+2. Open a PO that has received batches
+3. Scroll to find "Received Batches" section
+4. Verify section is visible with batch data
+
+**Expected Results:**
+
+- ✅ "Received Batches" section visible in PO detail
+- ✅ Section appears only when batches exist (hidden for pending POs with no receipts)
+- ✅ Shows info card with message "No batches have been received..." when empty
+- ✅ Batches displayed in DataTable format
+- ✅ All batch columns present: Batch #, Type, Material, Quantity, Expiry Date, [Returns]
+- ✅ No console errors
+- ✅ Smooth component rendering
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PF-19: PO Detail View - Received Batches Table Content (NEW - Week 10)
+
+**Objective:** Test that Received Batches table displays accurate batch information
+
+**Test Steps:**
+
+1. Open PO detail with received batches
+2. Review each column in the batches table
+3. Verify data accuracy and formatting
+
+**Expected Results:**
+
+- ✅ Batch # column shows batch_number (e.g., RM-0001-26010152)
+- ✅ Type column shows tag: "Receipt" (green) or "Return" (orange)
+- ✅ Material column shows material name and code
+- ✅ Quantity column shows numeric value with unit
+- ✅ Expiry Date column formatted as date (e.g., 15 Jul 2026)
+- ✅ All batches sorted by creation date (newest first)
+- ✅ Currency values formatted with Rs. symbol
+- ✅ No null/undefined values in cells
+
+**Example Table:**
+
+```
+[Batch # | Type | Material | Quantity | Expiry Date]
+[RM-0001-26010152 | Receipt | Turmeric (RM-0001) | 500 kg | 15 Jul 2026]
+[RM-0001-26010153 | Return | Turmeric (RM-0001) | 50 kg | 15 Jan 2026]
+```
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PF-20: PO Detail View - Batch Type Color Coding (NEW - Week 10)
+
+**Objective:** Test that batch types are color-coded appropriately
+
+**Test Steps:**
+
+1. Open PO with both receipt and return batches
+2. Check Type column for color-coded badges
+3. Verify visual distinction
+
+**Expected Results:**
+
+- ✅ Receipt batches show green badge/tag
+- ✅ Return batches show orange/warning badge/tag
+- ✅ Color coding consistent across all batches
+- ✅ Badge text clearly readable
+- ✅ Visual distinction immediately apparent
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
+
+---
+
+### PF-21: PO Detail View - Return Batch Details Display (NEW - Week 10)
+
+**Objective:** Test that return batch details (reason, disposition) are displayed
+
+**Test Steps:**
+
+1. Open PO with return batches
+2. Locate return batch rows in Received Batches table
+3. Check for return reason and disposition columns
+4. Verify data is populated for returns
+
+**Expected Results:**
+
+- ✅ Return batches show return_reason column (e.g., "Expired", "Damaged", "Wrong Item")
+- ✅ Return batches show return_disposition column (e.g., "Stock", "Dispose")
+- ✅ Receipt batches show "-" in return columns
+- ✅ Return information clearly visible and readable
+- ✅ No missing or null values for return batches
+
+**Example Display:**
+
+```
+Return Row:
+[RM-0001-26010153 | Return | Turmeric | 50 kg | 15 Jan 2026 | Expired | Stock]
+```
+
+**Actual Results:**
+
+- [ ] Pass
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -957,7 +1420,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -979,7 +1442,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1002,7 +1465,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1024,7 +1487,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1049,7 +1512,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1071,7 +1534,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1092,7 +1555,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1114,7 +1577,7 @@ ORDER BY created_at DESC LIMIT 5;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1164,7 +1627,7 @@ SELECT balance FROM suppliers WHERE id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1211,7 +1674,7 @@ SELECT balance FROM suppliers WHERE id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1247,7 +1710,7 @@ SELECT current_stock FROM raw_materials WHERE id = ?;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1279,7 +1742,7 @@ HAVING COUNT(*) > 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1302,7 +1765,7 @@ HAVING COUNT(*) > 1;
 **Actual Results:**
 
 - [ ] Pass
-- [ ] Fail (describe issue): ******\_\_\_******
+- [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1310,13 +1773,13 @@ HAVING COUNT(*) > 1;
 
 ### Backend Tests
 
-- Total: 16
+- Total: 24 (was 22 + 2 new for batches)
 - Passed: \_\_\_
 - Failed: \_\_\_
 
 ### Frontend Tests
 
-- Total: 17
+- Total: 21 (was 17 + 4 new for received batches)
 - Passed: \_\_\_
 - Failed: \_\_\_
 
@@ -1334,7 +1797,7 @@ HAVING COUNT(*) > 1;
 
 ### Overall
 
-- **Total Tests:** 46
+- **Total Tests:** 58 (was 46 + 12 new tests for stock tracking and batches)
 - **Passed:** \_\_\_
 - **Failed:** \_\_\_
 - **Pass Rate:** \_\_\_%
@@ -1351,7 +1814,14 @@ HAVING COUNT(*) > 1;
 
 ## ✅ Sign-off
 
-**Tested By:** ******\_\_\_******  
-**Date:** ******\_\_\_******  
+**Tested By:** **\*\***\_\_\_**\*\***  
+**Date:** January 15, 2026  
 **Status:** ⏳ Pending / ✅ Approved / ❌ Rejected  
 **Notes:**
+
+- Added tests for Purchase Order batches array in API response (PB-23, PB-24)
+- Added tests for Received Batches section display in PO detail view (PF-18 through PF-21)
+- Tests verify batch type color coding (Receipt green, Return orange)
+- Tests verify return batch details (reason, disposition) are displayed
+- Tests ensure empty state card shows when no batches received
+- Integration with Week 10 stock tracking and batch display features
