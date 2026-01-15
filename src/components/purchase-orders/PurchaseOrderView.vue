@@ -197,10 +197,10 @@
                 <span>{{ data.material?.name }}</span>
               </template>
             </Column>
-            <Column field="initial_quantity" header="Quantity">
+            <Column field="quantity" header="Quantity">
               <template #body="{ data }">
-                <span :class="{ 'negative-qty': data.initial_quantity < 0 }">
-                  {{ formatNumber(data.initial_quantity) }} {{ data.material?.unit }}
+                <span :class="{ 'negative-qty': data.quantity < 0 }">
+                  {{ formatNumber(data.quantity) }} {{ data.material?.unit }}
                 </span>
               </template>
             </Column>
@@ -226,6 +226,16 @@
               </template>
             </Column>
           </DataTable>
+        </template>
+      </Card>
+
+      <!-- No Batches Info -->
+      <Card v-else-if="purchaseOrder.status !== 'pending'" class="info-card">
+        <template #content>
+          <div class="empty-state">
+            <i class="pi pi-inbox" />
+            <p>No batches have been received for this purchase order yet.</p>
+          </div>
         </template>
       </Card>
 
@@ -274,9 +284,7 @@ const error = ref(null);
 const purchaseOrder = computed(() => purchaseOrderStore.currentPurchaseOrder);
 
 const batches = computed(() => {
-  // In a real implementation, this would come from the API
-  // For now, we'll return an empty array as batches are tracked separately
-  return [];
+  return purchaseOrder.value?.batches || [];
 });
 
 const hasReturns = computed(() => {
@@ -551,6 +559,27 @@ onMounted(() => {
 
 .audit-item i {
   color: #a0aec0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #718096;
+}
+
+.empty-state i {
+  font-size: 2rem;
+  color: #cbd5e0;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 :deep(.p-card-content) {

@@ -307,6 +307,7 @@
 import { useRawMaterialStore } from '@/stores/rawMaterial';
 import { useSupplierStore } from '@/stores/supplier';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/formatters';
+import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, reactive, ref } from 'vue';
 
 const props = defineProps({
@@ -328,7 +329,7 @@ const emit = defineEmits(['submit', 'cancel']);
 
 const supplierStore = useSupplierStore();
 const rawMaterialStore = useRawMaterialStore();
-
+const toast = useToast();
 const activeStep = ref(0);
 const errors = ref({});
 
@@ -382,21 +383,30 @@ const addItem = () => {
     item => item.raw_material_id === currentItem.raw_material_id
   );
 
-  const newItem = {
-    raw_material_id: currentItem.raw_material_id,
-    material_code: currentItem.material_code,
-    material_name: currentItem.material_name,
-    quantity: currentItem.quantity,
-    unit: currentItem.unit,
-    unit_cost: currentItem.unit_cost,
-    total_cost: currentItem.quantity * currentItem.unit_cost,
-  };
-
   if (existingIndex >= 0) {
-    // Update existing item
-    formData.items[existingIndex] = newItem;
+    // Material already exists - increase quantity
+    const existingItem = formData.items[existingIndex];
+    existingItem.quantity += currentItem.quantity;
+    existingItem.total_cost = existingItem.quantity * existingItem.unit_cost;
+
+    // Show toast notification
+    toast.add({
+      severity: 'info',
+      summary: 'Quantity Updated',
+      detail: `${existingItem.material_name} quantity increased to ${existingItem.quantity} ${existingItem.unit}`,
+      life: 2000,
+    });
   } else {
     // Add new item
+    const newItem = {
+      raw_material_id: currentItem.raw_material_id,
+      material_code: currentItem.material_code,
+      material_name: currentItem.material_name,
+      quantity: currentItem.quantity,
+      unit: currentItem.unit,
+      unit_cost: currentItem.unit_cost,
+      total_cost: currentItem.quantity * currentItem.unit_cost,
+    };
     formData.items.push(newItem);
   }
 

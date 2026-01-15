@@ -269,6 +269,33 @@
 - [x] Calculate total amounts
 - [ ] Test full PO workflow (create → receive → update stock)
 
+#### Phase 2 Enhancements - Partial Receives & Quantity Validation
+
+- [x] **Multiple Partial Receives**: Support cumulative receiving across multiple transactions
+  - [x] Backend: Track `received_quantity` per item cumulatively
+  - [x] Backend: Auto-transition PO status (pending → partial → received)
+  - [x] Frontend: Display already-received quantity per item
+  - [x] Frontend: Calculate remaining quantity to receive
+
+- [x] **Quantity Validation & Constraints**:
+  - [x] Backend: Prevent over-receiving (reject if total_received > ordered)
+  - [x] Backend: Clear error messages with cumulative tracking
+  - [x] Frontend: Set InputNumber max constraint to remaining quantity
+  - [x] Frontend: Show "X already received" hint below each quantity field
+  - [x] Frontend: Display detailed validation errors with breakdown
+
+- [x] **Selective Item Receiving**:
+  - [x] Frontend: Allow leaving items at 0 quantity (items skipped)
+  - [x] Backend: Only include items with quantity > 0 in payload
+  - [x] Validation: Require at least 1 item with quantity > 0
+  - [x] Error: "Please enter quantity for at least one item"
+
+- [x] **Bug Fixes & Alignment**:
+  - [x] Fixed formatDate to handle null/invalid dates gracefully
+  - [x] Fixed PurchaseOrderList supplier display (lowercase property names)
+  - [x] Fixed store action to extract `po` from response wrapper
+  - [x] Added back button to PurchaseOrderView
+
 #### Batch Management
 
 - [x] Create batch list view for raw materials

@@ -18,6 +18,7 @@ import Breadcrumb from 'primevue/breadcrumb';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Card from 'primevue/card';
+import Checkbox from 'primevue/checkbox';
 import Column from 'primevue/column';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -82,5 +83,6 @@ app.component('Steps', Steps);
 app.component('IconField', IconField);
 app.component('InputIcon', InputIcon);
 app.component('TabPanel', TabPanel);
+app.component('Checkbox', Checkbox);
 
 app.mount('#app');

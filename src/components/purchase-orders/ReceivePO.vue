@@ -53,7 +53,21 @@
           <div class="items-section">
             <h4>Items to Receive</h4>
             <div class="items-table">
-              <DataTable :value="formData.received_items" responsive-layout="scroll">
+              <DataTable
+                :value="formData.received_items"
+                responsive-layout="scroll"
+                :row-class="item => ({ 'fully-received-row': item.isFullyReceived })"
+              >
+                <Column header="Receive?" style="width: 8%">
+                  <template #body="{ data }">
+                    <Checkbox
+                      v-model="data.receive"
+                      :binary="true"
+                      :disabled="data.isFullyReceived"
+                      class="receive-checkbox"
+                    />
+                  </template>
+                </Column>
                 <Column field="material_name" header="Material">
                   <template #body="{ data }">
                     <div class="material-cell">
@@ -71,7 +85,7 @@
                 </Column>
                 <Column field="quantity_received" header="Received Qty">
                   <template #body="{ data }">
-                    <div class="quantity-input-group">
+                    <div class="quantity-input-group" :class="{ disabled: !data.receive }">
                       <InputNumber
                         v-model="data.quantity_received"
                         :min="0.01"
@@ -81,6 +95,7 @@
                         :suffix="' ' + data.unit"
                         :class="{ 'p-invalid': data.error }"
                         class="quantity-input"
+                        :disabled="!data.receive"
                         @input="validateItem(data)"
                       />
                       <small v-if="data.already_received > 0" class="quantity-hint">
@@ -98,6 +113,7 @@
                       :min-date="new Date()"
                       placeholder="Select expiry date"
                       :class="{ 'p-invalid': data.error }"
+                      :disabled="!data.receive"
                       @date-select="validateItem(data)"
                     />
                     <small v-if="data.expiryWarning" class="expiry-warning">
@@ -255,7 +271,9 @@
       <div class="receive-summary">
         <div class="summary-item">
           <span class="summary-label">Total Items to Receive:</span>
-          <span class="summary-value">{{ formData.received_items.length }}</span>
+          <span class="summary-value"
+            >{{ itemsToReceiveCount }} / {{ formData.received_items.length }}</span
+          >
         </div>
         <div v-if="formData.return_items.length > 0" class="summary-item">
           <span class="summary-label">Total Returns:</span>
@@ -407,6 +425,10 @@ const canAddReturn = computed(() => {
   );
 });
 
+const itemsToReceiveCount = computed(() => {
+  return formData.value.received_items.filter(item => item.receive).length;
+});
+
 const initializeForm = () => {
   const items = purchaseOrder.value?.items;
   if (!purchaseOrder.value || !items || items.length === 0) {
@@ -414,19 +436,26 @@ const initializeForm = () => {
     return;
   }
 
-  formData.value.received_items = items.map(item => ({
-    raw_material_id: item.material_id,
-    material_name: item.material?.name || 'Unknown',
-    material_code: item.material?.material_code || 'N/A',
-    unit: item.material?.unit || 'kg',
-    ordered_quantity: parseFloat(item.quantity),
-    already_received: parseFloat(item.received_quantity || 0), // Track what's already been received
-    quantity_to_receive: parseFloat(item.quantity) - parseFloat(item.received_quantity || 0), // Remaining to receive
-    quantity_received: parseFloat(item.quantity) - parseFloat(item.received_quantity || 0), // Default to remaining
-    expiry_date: null,
-    error: false,
-    expiryWarning: false,
-  }));
+  formData.value.received_items = items.map(item => {
+    const quantityToReceive = parseFloat(item.quantity) - parseFloat(item.received_quantity || 0);
+    const isFullyReceived = quantityToReceive <= 0;
+
+    return {
+      raw_material_id: item.material_id,
+      material_name: item.material?.name || 'Unknown',
+      material_code: item.material?.material_code || 'N/A',
+      unit: item.material?.unit || 'kg',
+      ordered_quantity: parseFloat(item.quantity),
+      already_received: parseFloat(item.received_quantity || 0), // Track what's already been received
+      quantity_to_receive: quantityToReceive, // Remaining to receive
+      quantity_received: isFullyReceived ? 0 : quantityToReceive, // Default to remaining, 0 if fully received
+      expiry_date: null,
+      error: false,
+      expiryWarning: false,
+      receive: !isFullyReceived, // Default: only include non-fully-received items
+      isFullyReceived, // Track if fully received (for disabling checkbox)
+    };
+  });
 
   formData.value.return_items = [];
 };
@@ -522,14 +551,14 @@ const validateForm = () => {
     isValid = false;
   }
 
-  // Filter items that will actually be received (quantity > 0)
+  // Filter items that will actually be received (checkbox checked AND quantity > 0)
   const itemsToReceive = formData.value.received_items.filter(
-    item => parseFloat(item.quantity_received) > 0
+    item => item.receive && parseFloat(item.quantity_received) > 0
   );
 
   // Require at least one item with quantity > 0
   if (itemsToReceive.length === 0) {
-    errors.value.items = 'Please enter quantity for at least one item';
+    errors.value.items = 'Please select and enter quantity for at least one item';
     isValid = false;
     activeTab.value = 0; // Switch to Receive Items tab
     return isValid;
@@ -579,9 +608,9 @@ const handleSubmit = async () => {
 
     const receivedDate = formatDateForAPI(formData.value.received_date);
 
-    // Only include items with quantity > 0
+    // Only include items that are checked AND have quantity > 0
     const receivedItems = formData.value.received_items
-      .filter(item => parseFloat(item.quantity_received) > 0)
+      .filter(item => item.receive && parseFloat(item.quantity_received) > 0)
       .map(item => ({
         raw_material_id: item.raw_material_id,
         quantity_received: item.quantity_received,
@@ -877,5 +906,23 @@ onMounted(async () => {
 
 :deep(.p-dropdown) {
   width: 100%;
+}
+
+.quantity-input-group.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+:deep(.fully-received-row) {
+  opacity: 0.6;
+  background-color: #f5f5f5;
+}
+
+:deep(.fully-received-row td) {
+  color: #999;
+}
+
+.receive-checkbox {
+  cursor: pointer;
 }
 </style>

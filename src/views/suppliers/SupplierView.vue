@@ -213,7 +213,7 @@ const handleBack = () => {
             </Column>
             <Column header="Action" style="width: 15%">
               <template #body="{ data }">
-                <router-link :to="`/purchase-orders/${data.id}`" class="action-link">
+                <router-link :to="`/purchase-orders/${data.id}/view`" class="action-link">
                   <i class="pi pi-eye" /> View
                 </router-link>
               </template>

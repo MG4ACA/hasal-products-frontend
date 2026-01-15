@@ -227,13 +227,22 @@ const isLowStock = () => {
             responsive-layout="scroll"
             style-class="p-datatable-striped"
           >
-            <Column field="batch_number" header="Batch Number" style="width: 15%" />
-            <Column field="received_date" header="Received Date" style="width: 15%">
+            <Column field="batch_number" header="Batch Number" style="width: 12%" />
+            <Column field="supplier.name" header="Supplier" style="width: 15%">
               <template #body="{ data }">
-                {{ new Date(data.received_date).toLocaleDateString() }}
+                <div v-if="data.supplier" class="supplier-info">
+                  <span class="supplier-name">{{ data.supplier.name }}</span>
+                  <span class="supplier-code">{{ data.supplier.code }}</span>
+                </div>
+                <span v-else>-</span>
               </template>
             </Column>
-            <Column field="expiry_date" header="Expiry Date" style="width: 15%">
+            <Column field="received_date" header="Received Date" style="width: 12%">
+              <template #body="{ data }">
+                {{ new Date(data.purchase_date).toLocaleDateString() }}
+              </template>
+            </Column>
+            <Column field="expiry_date" header="Expiry Date" style="width: 12%">
               <template #body="{ data }">
                 <span
                   v-if="data.expiry_date"
@@ -250,12 +259,12 @@ const isLowStock = () => {
                 <span v-else>-</span>
               </template>
             </Column>
-            <Column field="current_quantity" header="Quantity" style="width: 15%">
+            <Column field="quantity" header="Quantity" style="width: 12%">
               <template #body="{ data }">
-                {{ data.current_quantity }} {{ rawMaterialStore.currentRawMaterial?.unit }}
+                {{ data.quantity }} {{ rawMaterialStore.currentRawMaterial?.unit }}
               </template>
             </Column>
-            <Column field="unit_cost" header="Unit Cost" style="width: 15%">
+            <Column field="unit_cost" header="Unit Cost" style="width: 12%">
               <template #body="{ data }">
                 Rs.
                 {{ (data.unit_cost || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
@@ -568,6 +577,23 @@ const isLowStock = () => {
 .expiry-expired {
   color: #ef4444;
   font-weight: 600;
+}
+
+.supplier-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.supplier-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.supplier-code {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-family: 'Courier New', monospace;
 }
 
 @media (max-width: 768px) {
