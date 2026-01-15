@@ -26,6 +26,12 @@
         </div>
         <div class="header-right">
           <Button
+            label="Back"
+            icon="pi pi-arrow-left"
+            class="p-button-text p-button-sm"
+            @click="$emit('close')"
+          />
+          <Button
             v-if="purchaseOrder.status === 'pending'"
             label="Edit"
             icon="pi pi-pencil"
@@ -50,7 +56,7 @@
               <label>Supplier</label>
               <div class="info-value">
                 <strong>{{ purchaseOrder.supplier?.name }}</strong>
-                <span class="supplier-code">{{ purchaseOrder.supplier?.supplier_code }}</span>
+                <span class="supplier-code">{{ purchaseOrder.supplier?.code }}</span>
               </div>
             </div>
 
@@ -85,11 +91,7 @@
             <div class="info-item">
               <label>Expected Delivery</label>
               <div class="info-value">
-                {{
-                  purchaseOrder.expected_delivery_date
-                    ? formatDate(purchaseOrder.expected_delivery_date)
-                    : 'N/A'
-                }}
+                {{ purchaseOrder.expected_date ? formatDate(purchaseOrder.expected_date) : 'N/A' }}
               </div>
             </div>
 
@@ -131,9 +133,9 @@
         </template>
         <template #content>
           <DataTable :value="purchaseOrder.items" responsive-layout="scroll">
-            <Column field="material.material_code" header="Material Code">
+            <Column field="material.code" header="Material Code">
               <template #body="{ data }">
-                <span class="material-code">{{ data.material?.material_code }}</span>
+                <span class="material-code">{{ data.material?.code }}</span>
               </template>
             </Column>
             <Column field="material.name" header="Material Name">
@@ -155,7 +157,7 @@
             </Column>
             <Column field="total_cost" header="Total Cost">
               <template #body="{ data }">
-                <span class="total-cost">{{ formatCurrency(data.total_cost) }}</span>
+                <span class="total-cost">{{ formatCurrency(data.quantity * data.unit_cost) }}</span>
               </template>
             </Column>
           </DataTable>

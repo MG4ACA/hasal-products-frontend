@@ -40,10 +40,10 @@
             </div>
 
             <div class="form-field">
-              <label for="expectedDelivery">Expected Delivery Date</label>
+              <label for="expectedDate">Expected Delivery Date</label>
               <Calendar
-                id="expectedDelivery"
-                v-model="formData.expected_delivery_date"
+                id="expectedDate"
+                v-model="formData.expected_date"
                 date-format="yy-mm-dd"
                 show-icon
                 :min-date="formData.order_date || new Date()"
@@ -212,9 +212,7 @@
                   <span class="review-label">Expected Delivery:</span>
                   <span class="review-value">
                     {{
-                      formData.expected_delivery_date
-                        ? formatDate(formData.expected_delivery_date)
-                        : 'Not specified'
+                      formData.expected_date ? formatDate(formData.expected_date) : 'Not specified'
                     }}
                   </span>
                 </div>
@@ -339,7 +337,7 @@ const steps = [{ label: 'PO Details' }, { label: 'Add Items' }, { label: 'Review
 const formData = reactive({
   supplier_id: null,
   order_date: new Date(),
-  expected_delivery_date: null,
+  expected_date: null,
   notes: '',
   items: [],
 });
@@ -464,9 +462,7 @@ const handleSubmit = () => {
   const submitData = {
     supplier_id: formData.supplier_id,
     order_date: formatDateForAPI(formData.order_date),
-    expected_delivery_date: formData.expected_delivery_date
-      ? formatDateForAPI(formData.expected_delivery_date)
-      : null,
+    expected_date: formData.expected_date ? formatDateForAPI(formData.expected_date) : null,
     notes: formData.notes,
     items: formData.items.map(item => ({
       raw_material_id: item.raw_material_id,
@@ -491,18 +487,18 @@ const initializeForm = () => {
   if (props.initialData) {
     formData.supplier_id = props.initialData.supplier_id;
     formData.order_date = new Date(props.initialData.order_date);
-    formData.expected_delivery_date = props.initialData.expected_delivery_date
-      ? new Date(props.initialData.expected_delivery_date)
+    formData.expected_date = props.initialData.expected_date
+      ? new Date(props.initialData.expected_date)
       : null;
     formData.notes = props.initialData.notes || '';
 
-    if (props.initialData.PoItems) {
-      formData.items = props.initialData.PoItems.map(item => ({
-        raw_material_id: item.raw_material_id,
-        material_code: item.RawMaterial?.material_code || '',
-        material_name: item.RawMaterial?.name || '',
+    if (props.initialData.items) {
+      formData.items = props.initialData.items.map(item => ({
+        raw_material_id: item.material_id,
+        material_code: item.material?.material_code || '',
+        material_name: item.material?.name || '',
         quantity: parseFloat(item.quantity),
-        unit: item.RawMaterial?.unit || '',
+        unit: item.material?.unit || '',
         unit_cost: parseFloat(item.unit_cost),
         total_cost: parseFloat(item.quantity) * parseFloat(item.unit_cost),
       }));

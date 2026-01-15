@@ -71,17 +71,22 @@
                 </Column>
                 <Column field="quantity_received" header="Received Qty">
                   <template #body="{ data }">
-                    <InputNumber
-                      v-model="data.quantity_received"
-                      :min="0.01"
-                      :max="data.ordered_quantity * 1.1"
-                      :min-fraction-digits="2"
-                      :max-fraction-digits="2"
-                      :suffix="' ' + data.unit"
-                      :class="{ 'p-invalid': data.error }"
-                      class="quantity-input"
-                      @input="validateItem(data)"
-                    />
+                    <div class="quantity-input-group">
+                      <InputNumber
+                        v-model="data.quantity_received"
+                        :min="0.01"
+                        :max="data.quantity_to_receive"
+                        :min-fraction-digits="2"
+                        :max-fraction-digits="2"
+                        :suffix="' ' + data.unit"
+                        :class="{ 'p-invalid': data.error }"
+                        class="quantity-input"
+                        @input="validateItem(data)"
+                      />
+                      <small v-if="data.already_received > 0" class="quantity-hint">
+                        {{ formatNumber(data.already_received) }} already received
+                      </small>
+                    </div>
                   </template>
                 </Column>
                 <Column field="expiry_date" header="Expiry Date">
@@ -124,6 +129,20 @@
                     placeholder="Select material"
                     @change="onReturnMaterialSelect"
                   />
+                </div>
+                <div class="form-field">
+                  <label>Source Batch <span class="required">*</span></label>
+                  <Dropdown
+                    v-model="currentReturn.source_batch_id"
+                    :options="availableSourceBatches"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Select batch to return from"
+                    :disabled="!currentReturn.raw_material_id"
+                  />
+                  <small v-if="!currentReturn.raw_material_id" class="p-hint">
+                    Select a material first to see available batches
+                  </small>
                 </div>
                 <div class="form-field">
                   <label>Quantity Returned <span class="required">*</span></label>
@@ -321,6 +340,7 @@ const currentReturn = reactive({
   unit_cost: 0,
   return_reason: null,
   disposition: null,
+  source_batch_id: null,
   expiry_date: null,
 });
 
@@ -339,23 +359,48 @@ const dispositionOptions = [
 ];
 
 const availableMaterials = computed(() => {
-  if (!purchaseOrder.value || !purchaseOrder.value.PoItems) {
+  const items = purchaseOrder.value?.items;
+  if (!purchaseOrder.value || !items) {
     return [];
   }
 
-  return purchaseOrder.value.PoItems.map(item => ({
-    label: `${item.RawMaterial?.name} (${item.RawMaterial?.material_code})`,
-    value: item.raw_material_id,
-    material_code: item.RawMaterial?.material_code || 'N/A',
-    material_name: item.RawMaterial?.name || 'Unknown',
-    unit: item.RawMaterial?.unit || 'kg',
+  return items.map(item => ({
+    label: `${item.material?.name} (${item.material?.material_code})`,
+    value: item.material_id,
+    material_code: item.material?.material_code || 'N/A',
+    material_name: item.material?.name || 'Unknown',
+    unit: item.material?.unit || 'kg',
     unit_cost: parseFloat(item.unit_cost || 0),
   }));
+});
+
+const availableSourceBatches = computed(() => {
+  // Get batches from the PO's received items (receipt batches only)
+  const items = purchaseOrder.value?.items;
+  if (!currentReturn.raw_material_id || !purchaseOrder.value || !items) {
+    return [];
+  }
+
+  // Find all received items for this material from the PO
+  const poItem = items.find(item => item.material_id === currentReturn.raw_material_id);
+
+  if (!poItem || !poItem.material?.RawMaterialBatches) {
+    return [];
+  }
+
+  // Filter for receipt batches only (not return batches)
+  return poItem.material.RawMaterialBatches.filter(batch => batch.batch_type === 'receipt').map(
+    batch => ({
+      label: `${batch.batch_number} (${batch.quantity} ${poItem.material?.unit || 'kg'})`,
+      value: batch.id,
+    })
+  );
 });
 
 const canAddReturn = computed(() => {
   return (
     currentReturn.raw_material_id &&
+    currentReturn.source_batch_id &&
     currentReturn.quantity_returned > 0 &&
     currentReturn.return_reason &&
     currentReturn.disposition
@@ -363,18 +408,21 @@ const canAddReturn = computed(() => {
 });
 
 const initializeForm = () => {
-  if (!purchaseOrder.value || !purchaseOrder.value.PoItems) {
-    error.value = 'Purchase order data not found';
+  const items = purchaseOrder.value?.items;
+  if (!purchaseOrder.value || !items || items.length === 0) {
+    error.value = 'Purchase order has no items to receive';
     return;
   }
 
-  formData.value.received_items = purchaseOrder.value.PoItems.map(item => ({
-    raw_material_id: item.raw_material_id,
-    material_name: item.RawMaterial?.name || 'Unknown',
-    material_code: item.RawMaterial?.material_code || 'N/A',
-    unit: item.RawMaterial?.unit || 'kg',
+  formData.value.received_items = items.map(item => ({
+    raw_material_id: item.material_id,
+    material_name: item.material?.name || 'Unknown',
+    material_code: item.material?.material_code || 'N/A',
+    unit: item.material?.unit || 'kg',
     ordered_quantity: parseFloat(item.quantity),
-    quantity_received: parseFloat(item.quantity), // Default to ordered quantity
+    already_received: parseFloat(item.received_quantity || 0), // Track what's already been received
+    quantity_to_receive: parseFloat(item.quantity) - parseFloat(item.received_quantity || 0), // Remaining to receive
+    quantity_received: parseFloat(item.quantity) - parseFloat(item.received_quantity || 0), // Default to remaining
     expiry_date: null,
     error: false,
     expiryWarning: false,
@@ -405,6 +453,7 @@ const addReturnItem = () => {
     unit_cost: currentReturn.unit_cost,
     return_reason: currentReturn.return_reason,
     disposition: currentReturn.disposition,
+    source_batch_id: currentReturn.source_batch_id,
     expiry_date: currentReturn.expiry_date ? formatDateForAPI(currentReturn.expiry_date) : null,
   });
 
@@ -417,6 +466,7 @@ const addReturnItem = () => {
   currentReturn.unit_cost = 0;
   currentReturn.return_reason = null;
   currentReturn.disposition = null;
+  currentReturn.source_batch_id = null;
   currentReturn.expiry_date = null;
 };
 
@@ -439,10 +489,17 @@ const validateItem = item => {
   item.error = false;
   item.expiryWarning = false;
 
+  // Validate quantity is received
   if (!item.quantity_received || item.quantity_received <= 0) {
     item.error = true;
   }
 
+  // Validate quantity doesn't exceed remaining to receive
+  if (item.quantity_received > item.quantity_to_receive) {
+    item.error = true;
+  }
+
+  // Validate expiry date
   if (item.expiry_date) {
     const expiryDate = new Date(item.expiry_date);
     const today = new Date();
@@ -465,11 +522,33 @@ const validateForm = () => {
     isValid = false;
   }
 
+  // Filter items that will actually be received (quantity > 0)
+  const itemsToReceive = formData.value.received_items.filter(
+    item => parseFloat(item.quantity_received) > 0
+  );
+
+  // Require at least one item with quantity > 0
+  if (itemsToReceive.length === 0) {
+    errors.value.items = 'Please enter quantity for at least one item';
+    isValid = false;
+    activeTab.value = 0; // Switch to Receive Items tab
+    return isValid;
+  }
+
   let hasInvalidItems = false;
-  formData.value.received_items.forEach(item => {
-    if (!item.quantity_received || item.quantity_received <= 0) {
+  let quantityErrors = [];
+
+  // Validate only items that will be received
+  itemsToReceive.forEach(item => {
+    if (item.quantity_received > item.quantity_to_receive) {
       item.error = true;
       hasInvalidItems = true;
+      quantityErrors.push(
+        `Cannot receive ${formatNumber(item.quantity_received)}${item.unit} for ${item.material_name}. ` +
+          `Already received ${formatNumber(item.already_received)}${item.unit} of ` +
+          `${formatNumber(item.ordered_quantity)}${item.unit} ordered. ` +
+          `Only ${formatNumber(item.quantity_to_receive)}${item.unit} remaining.`
+      );
     }
     if (!item.expiry_date) {
       item.error = true;
@@ -478,7 +557,11 @@ const validateForm = () => {
   });
 
   if (hasInvalidItems) {
-    errors.value.items = 'All items must have a valid received quantity and expiry date';
+    if (quantityErrors.length > 0) {
+      errors.value.items = quantityErrors.join(' | ');
+    } else {
+      errors.value.items = 'All received items must have an expiry date';
+    }
     isValid = false;
     activeTab.value = 0; // Switch to Receive Items tab to show errors
   }
@@ -495,11 +578,15 @@ const handleSubmit = async () => {
     submitting.value = true;
 
     const receivedDate = formatDateForAPI(formData.value.received_date);
-    const receivedItems = formData.value.received_items.map(item => ({
-      raw_material_id: item.raw_material_id,
-      quantity_received: item.quantity_received,
-      expiry_date: formatDateForAPI(item.expiry_date),
-    }));
+
+    // Only include items with quantity > 0
+    const receivedItems = formData.value.received_items
+      .filter(item => parseFloat(item.quantity_received) > 0)
+      .map(item => ({
+        raw_material_id: item.raw_material_id,
+        quantity_received: item.quantity_received,
+        expiry_date: formatDateForAPI(item.expiry_date),
+      }));
 
     const payload = {
       received_date: receivedDate,
@@ -513,6 +600,7 @@ const handleSubmit = async () => {
         quantity_returned: item.quantity_returned,
         return_reason: item.return_reason,
         disposition: item.disposition,
+        source_batch_id: item.source_batch_id,
         expiry_date: item.expiry_date,
       }));
     }
@@ -536,9 +624,26 @@ const formatDateForAPI = date => {
   return `${year}-${month}-${day}`;
 };
 
-onMounted(() => {
-  if (purchaseOrder.value) {
-    initializeForm();
+onMounted(async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+
+    // Fetch the purchase order if not already loaded
+    if (!purchaseOrder.value || purchaseOrder.value.id !== props.purchaseOrderId) {
+      await purchaseOrderStore.fetchPurchaseOrderById(props.purchaseOrderId);
+    }
+
+    // Initialize form after PO is loaded
+    if (purchaseOrder.value) {
+      initializeForm();
+    } else {
+      error.value = 'Purchase order data not found';
+    }
+  } catch (err) {
+    error.value = err.message || 'Failed to load purchase order';
+  } finally {
+    loading.value = false;
   }
 });
 </script>
@@ -654,6 +759,18 @@ onMounted(() => {
 
 .quantity-input {
   width: 100%;
+}
+
+.quantity-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quantity-hint {
+  font-size: 0.75rem;
+  color: #718096;
+  font-style: italic;
 }
 
 .expiry-warning {

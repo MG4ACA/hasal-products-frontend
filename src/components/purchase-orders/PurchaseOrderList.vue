@@ -23,14 +23,14 @@
         </template>
       </Column>
 
-      <Column field="Supplier.name" header="Supplier" :sortable="true" style="min-width: 180px">
+      <Column field="supplier.name" header="Supplier" :sortable="true" style="min-width: 180px">
         <template #body="{ data }">
           <div class="supplier-cell">
             <div class="supplier-name">
-              {{ data.Supplier?.name || 'N/A' }}
+              {{ data.supplier?.name || 'N/A' }}
             </div>
             <div class="supplier-code">
-              {{ data.Supplier?.supplier_code || '' }}
+              {{ data.supplier?.code || '' }}
             </div>
           </div>
         </template>
@@ -43,13 +43,13 @@
       </Column>
 
       <Column
-        field="expected_delivery_date"
+        field="expected_date"
         header="Expected Delivery"
         :sortable="true"
         style="min-width: 150px"
       >
         <template #body="{ data }">
-          {{ data.expected_delivery_date ? formatDate(data.expected_delivery_date) : 'N/A' }}
+          {{ data.expected_date ? formatDate(data.expected_date) : 'N/A' }}
         </template>
       </Column>
 
@@ -82,7 +82,7 @@
               @click="$emit('edit', data.id)"
             />
             <Button
-              v-if="data.status === 'approved'"
+              v-if="data.status === 'pending' || data.status === 'partial'"
               v-tooltip.top="'Receive PO'"
               icon="pi pi-check"
               class="p-button-rounded p-button-text p-button-sm p-button-success"

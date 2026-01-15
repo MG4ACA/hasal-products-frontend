@@ -97,6 +97,19 @@ const handleEdit = rawMaterial => {
   router.push(`/raw-materials/${rawMaterial.id}/edit`);
 };
 
+// Navigate to traceability views
+const navigateToBatchGenealogy = () => {
+  router.push('/batch-traceability/genealogy');
+};
+
+const navigateToReturnOrigin = () => {
+  router.push('/batch-traceability/return-origin');
+};
+
+const navigateToMaterialSummary = () => {
+  router.push('/batch-traceability/material-summary');
+};
+
 // Handle delete with confirmation
 const handleDelete = rawMaterial => {
   confirm.require({
@@ -141,6 +154,45 @@ onMounted(() => {
             @click="loadRawMaterials"
           />
           <Button label="Add Raw Material" icon="pi pi-plus" @click="handleCreate" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch Traceability Quick Access -->
+    <div class="traceability-menu">
+      <h3>Batch Traceability Tools</h3>
+      <div class="traceability-cards">
+        <div class="traceability-card" @click="navigateToBatchGenealogy">
+          <div class="card-icon">
+            <i class="pi pi-sitemap"></i>
+          </div>
+          <div class="card-content">
+            <h4>Batch Genealogy</h4>
+            <p>Trace all returns from a receipt batch</p>
+          </div>
+          <i class="pi pi-arrow-right"></i>
+        </div>
+
+        <div class="traceability-card" @click="navigateToReturnOrigin">
+          <div class="card-icon">
+            <i class="pi pi-arrow-up-left"></i>
+          </div>
+          <div class="card-content">
+            <h4>Return Origin Tracer</h4>
+            <p>Trace a return batch back to source</p>
+          </div>
+          <i class="pi pi-arrow-right"></i>
+        </div>
+
+        <div class="traceability-card" @click="navigateToMaterialSummary">
+          <div class="card-icon">
+            <i class="pi pi-chart-bar"></i>
+          </div>
+          <div class="card-content">
+            <h4>Material Returns Summary</h4>
+            <p>View comprehensive returns by material</p>
+          </div>
+          <i class="pi pi-arrow-right"></i>
         </div>
       </div>
     </div>
@@ -236,6 +288,96 @@ onMounted(() => {
   font-size: 0.875rem;
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Traceability Menu */
+.traceability-menu {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  border-top: 4px solid #2563eb;
+}
+
+.traceability-menu h3 {
+  margin: 0 0 1.2rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.traceability-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+.traceability-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.traceability-card:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 8px;
+  color: #2563eb;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-content h4 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.traceability-card i:last-child {
+  color: #d1d5db;
+  font-size: 1.2rem;
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
+}
+
+.traceability-card:hover i:last-child {
+  color: #2563eb;
+  transform: translateX(4px);
+}
+
 .filters-section {
   background: white;
   padding: 1.5rem;
@@ -285,6 +427,14 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
+  }
+
+  .traceability-menu {
+    padding: 1rem;
+  }
+
+  .traceability-cards {
+    grid-template-columns: 1fr;
   }
 
   .filters-section {

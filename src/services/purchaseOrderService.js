@@ -109,6 +109,48 @@ const purchaseOrderService = {
       return handleApiError(error);
     }
   },
+
+  /**
+   * Get batch genealogy - traces all returns from a receipt batch
+   * @param {number} batchId - Batch ID (receipt batch)
+   * @returns {Promise} - Object with receipt batch and array of return batches
+   */
+  async getBatchGenealogy(batchId) {
+    try {
+      const response = await api.get(`/batches/${batchId}/genealogy`);
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  /**
+   * Get return origin - traces a return batch back to its source receipt batch
+   * @param {number} returnBatchId - Return batch ID
+   * @returns {Promise} - Object with return batch and source receipt batch
+   */
+  async getReturnOrigin(returnBatchId) {
+    try {
+      const response = await api.get(`/batches/${returnBatchId}/origin`);
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  /**
+   * Get material returns summary - aggregates all receipts and returns for a material
+   * @param {number} materialId - Raw material ID
+   * @returns {Promise} - Object with material info and summary of stock, returns, disposal
+   */
+  async getMaterialReturnsSummary(materialId) {
+    try {
+      const response = await api.get(`/batches/materials/${materialId}/returns-summary`);
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default purchaseOrderService;

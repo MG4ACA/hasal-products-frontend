@@ -22,6 +22,13 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     end_date: '',
   });
 
+  // Batch Traceability State (NEW)
+  const batchGenealogy = ref(null);
+  const returnOrigin = ref(null);
+  const materialReturnsSummary = ref(null);
+  const traceabilityLoading = ref(false);
+  const traceabilityError = ref(null);
+
   // Getters
   const isLoading = computed(() => loading.value);
   const getError = computed(() => error.value);
@@ -29,19 +36,26 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
   const getFilters = computed(() => filters.value);
 
   const getCurrentPoItems = computed(() => {
-    return currentPurchaseOrder.value?.PoItems || [];
+    return currentPurchaseOrder.value?.items || [];
   });
 
   const getCurrentPoTotal = computed(() => {
-    if (!currentPurchaseOrder.value?.PoItems) return 0;
-    return currentPurchaseOrder.value.PoItems.reduce((sum, item) => {
-      return sum + parseFloat(item.total_cost || 0);
+    if (!currentPurchaseOrder.value?.items) return 0;
+    return currentPurchaseOrder.value.items.reduce((sum, item) => {
+      return sum + parseFloat(item.total_amount || 0);
     }, 0);
   });
 
   const getPurchaseOrdersByStatus = computed(() => status => {
     return purchaseOrders.value.filter(po => po.status === status);
   });
+
+  // Batch Traceability Getters (NEW)
+  const isTraceabilityLoading = computed(() => traceabilityLoading.value);
+  const getTraceabilityError = computed(() => traceabilityError.value);
+  const getBatchGenealogy = computed(() => batchGenealogy.value);
+  const getReturnOrigin = computed(() => returnOrigin.value);
+  const getMaterialReturnsSummary = computed(() => materialReturnsSummary.value);
 
   // Actions
   const fetchPurchaseOrders = async (params = {}) => {
@@ -235,15 +249,18 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
       }
 
       if (response.data.success) {
+        // Backend returns { po: updatedPo, batches: createdBatches }
+        const updatedPo = response.data.data.po;
+
         // Update in list
         const index = purchaseOrders.value.findIndex(po => po.id === id);
         if (index !== -1) {
-          purchaseOrders.value[index] = response.data.data;
+          purchaseOrders.value[index] = updatedPo;
         }
 
         // Update current PO
         if (currentPurchaseOrder.value?.id === id) {
-          currentPurchaseOrder.value = response.data.data;
+          currentPurchaseOrder.value = updatedPo;
         }
       }
 
@@ -313,6 +330,104 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     error.value = null;
   };
 
+  // Batch Traceability Actions (NEW)
+  const fetchBatchGenealogy = async batchId => {
+    traceabilityLoading.value = true;
+    traceabilityError.value = null;
+
+    try {
+      const response = await purchaseOrderService.getBatchGenealogy(batchId);
+
+      // Check for error response
+      if (response.error) {
+        traceabilityError.value = response.message;
+        throw new Error(response.message);
+      }
+
+      if (response.data.success) {
+        batchGenealogy.value = response.data.data;
+      }
+
+      return response.data;
+    } catch (err) {
+      traceabilityError.value = err.message || 'Failed to fetch batch genealogy';
+      batchGenealogy.value = null;
+      throw err;
+    } finally {
+      traceabilityLoading.value = false;
+    }
+  };
+
+  const fetchReturnOrigin = async returnBatchId => {
+    traceabilityLoading.value = true;
+    traceabilityError.value = null;
+
+    try {
+      const response = await purchaseOrderService.getReturnOrigin(returnBatchId);
+
+      // Check for error response
+      if (response.error) {
+        traceabilityError.value = response.message;
+        throw new Error(response.message);
+      }
+
+      if (response.data.success) {
+        returnOrigin.value = response.data.data;
+      }
+
+      return response.data;
+    } catch (err) {
+      traceabilityError.value = err.message || 'Failed to fetch return origin';
+      returnOrigin.value = null;
+      throw err;
+    } finally {
+      traceabilityLoading.value = false;
+    }
+  };
+
+  const fetchMaterialReturnsSummary = async materialId => {
+    traceabilityLoading.value = true;
+    traceabilityError.value = null;
+
+    try {
+      const response = await purchaseOrderService.getMaterialReturnsSummary(materialId);
+
+      // Check for error response
+      if (response.error) {
+        traceabilityError.value = response.message;
+        throw new Error(response.message);
+      }
+
+      if (response.data.success) {
+        materialReturnsSummary.value = response.data.data;
+      }
+
+      return response.data;
+    } catch (err) {
+      traceabilityError.value = err.message || 'Failed to fetch material returns summary';
+      materialReturnsSummary.value = null;
+      throw err;
+    } finally {
+      traceabilityLoading.value = false;
+    }
+  };
+
+  const clearTraceabilityError = () => {
+    traceabilityError.value = null;
+  };
+
+  const clearBatchGenealogy = () => {
+    batchGenealogy.value = null;
+  };
+
+  const clearReturnOrigin = () => {
+    returnOrigin.value = null;
+  };
+
+  const clearMaterialReturnsSummary = () => {
+    materialReturnsSummary.value = null;
+  };
+
   return {
     // State
     purchaseOrders,
@@ -321,6 +436,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     error,
     pagination,
     filters,
+    batchGenealogy,
+    returnOrigin,
+    materialReturnsSummary,
+    traceabilityLoading,
+    traceabilityError,
+    // Getters
     isLoading,
     getError,
     getPagination,
@@ -328,6 +449,11 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     getCurrentPoItems,
     getCurrentPoTotal,
     getPurchaseOrdersByStatus,
+    isTraceabilityLoading,
+    getTraceabilityError,
+    getBatchGenealogy,
+    getReturnOrigin,
+    getMaterialReturnsSummary,
     // Actions
     fetchPurchaseOrders,
     fetchPurchaseOrderById,
@@ -340,5 +466,12 @@ export const usePurchaseOrderStore = defineStore('purchaseOrder', () => {
     resetFilters,
     clearCurrentPurchaseOrder,
     clearError,
+    fetchBatchGenealogy,
+    fetchReturnOrigin,
+    fetchMaterialReturnsSummary,
+    clearTraceabilityError,
+    clearBatchGenealogy,
+    clearReturnOrigin,
+    clearMaterialReturnsSummary,
   };
 });

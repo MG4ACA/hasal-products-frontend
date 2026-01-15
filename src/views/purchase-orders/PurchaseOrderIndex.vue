@@ -206,7 +206,7 @@ const deleting = ref(false);
 const statusOptions = [
   { label: 'All Statuses', value: '' },
   { label: 'Pending', value: 'pending' },
-  { label: 'Approved', value: 'approved' },
+  { label: 'Partial', value: 'partial' },
   { label: 'Received', value: 'received' },
   { label: 'Cancelled', value: 'cancelled' },
 ];

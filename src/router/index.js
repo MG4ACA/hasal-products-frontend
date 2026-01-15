@@ -24,6 +24,12 @@ const PurchaseOrderCreate = () => import('@/views/purchase-orders/PurchaseOrderC
 const PurchaseOrderEdit = () => import('@/views/purchase-orders/PurchaseOrderEdit.vue');
 const PurchaseOrderView = () => import('@/views/purchase-orders/PurchaseOrderView.vue');
 
+// Batch Traceability views (NEW)
+const BatchGenealogy = () => import('@/views/batch-traceability/BatchGenealogy.vue');
+const ReturnOriginTracer = () => import('@/views/batch-traceability/ReturnOriginTracer.vue');
+const MaterialReturnsSummary = () =>
+  import('@/views/batch-traceability/MaterialReturnsSummary.vue');
+
 // Product views
 const ProductIndex = () => import('@/views/products/ProductIndex.vue');
 const ProductCreate = () => import('@/views/products/ProductCreate.vue');
@@ -158,6 +164,25 @@ const routes = [
     path: '/purchase-orders/:id/view',
     name: 'PurchaseOrderView',
     component: PurchaseOrderView,
+    meta: { requiresAuth: true },
+  },
+  // Batch Traceability routes (NEW)
+  {
+    path: '/batch-traceability/genealogy',
+    name: 'BatchGenealogy',
+    component: BatchGenealogy,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/batch-traceability/return-origin',
+    name: 'ReturnOriginTracer',
+    component: ReturnOriginTracer,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/batch-traceability/material-summary',
+    name: 'MaterialReturnsSummary',
+    component: MaterialReturnsSummary,
     meta: { requiresAuth: true },
   },
   {
