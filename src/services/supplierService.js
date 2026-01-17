@@ -61,4 +61,16 @@ export const supplierService = {
       return handleApiError(error);
     }
   },
+
+  // Get purchase orders for supplier
+  async getSupplierPurchaseOrders(id, status = 'pending,partial,received') {
+    try {
+      const response = await api.get(`/suppliers/${id}/purchase-orders`, {
+        params: { status },
+      });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };

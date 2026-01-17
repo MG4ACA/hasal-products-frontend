@@ -338,7 +338,7 @@ const steps = [{ label: 'PO Details' }, { label: 'Add Items' }, { label: 'Review
 const formData = reactive({
   supplier_id: null,
   order_date: new Date(),
-  expected_date: null,
+  expected_date: new Date(),
   notes: '',
   items: [],
 });

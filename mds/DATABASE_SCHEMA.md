@@ -276,6 +276,7 @@ CREATE TABLE suppliers (
 CREATE TABLE supplier_payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     supplier_id INT NOT NULL,
+    purchase_order_id INT NULL, -- Links payment to specific PO (nullable for general payments)
     payment_date DATE NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
     payment_method ENUM('cash', 'credit', 'bank_transfer', 'check') NOT NULL,
@@ -287,12 +288,21 @@ CREATE TABLE supplier_payments (
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id),
     INDEX idx_supplier (supplier_id),
+    INDEX idx_purchase_order (purchase_order_id),
     INDEX idx_payment_date (payment_date),
     INDEX idx_check_number (check_number)
 );
 ```
+
+**Payment-PO Linking (Added Jan 17, 2026):**
+
+- `purchase_order_id` (nullable): Links payment to specific PO
+- NULL value indicates general payment not allocated to specific PO
+- Enables PO-specific payment tracking and reporting
+- ON DELETE SET NULL: If PO deleted, payment remains with NULL reference
 
 ---
 
@@ -325,6 +335,7 @@ CREATE TABLE raw_material_batches (
     id INT AUTO_INCREMENT PRIMARY KEY,
     material_id INT NOT NULL,
     supplier_id INT NOT NULL,
+    purchase_order_id INT NULL, -- Links batch to the PO it was received from
     batch_number VARCHAR(50) NOT NULL, -- System-generated (e.g., RM-MAT001-20251218-001)
     batch_type ENUM('receipt', 'return') DEFAULT 'receipt', -- receipt=from PO, return=returned stock
     quantity DECIMAL(10,2) NOT NULL,
@@ -339,11 +350,13 @@ CREATE TABLE raw_material_batches (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (material_id) REFERENCES raw_materials(id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id) ON DELETE SET NULL,
     FOREIGN KEY (source_batch_id) REFERENCES raw_material_batches(id),
     UNIQUE KEY unique_batch (batch_number),
     INDEX idx_material (material_id),
     INDEX idx_batch (batch_number),
     INDEX idx_supplier (supplier_id),
+    INDEX idx_purchase_order (purchase_order_id),
     INDEX idx_purchase_date (purchase_date),
     INDEX idx_batch_type (batch_type),
     INDEX idx_source_batch (source_batch_id)
@@ -353,12 +366,16 @@ CREATE TABLE raw_material_batches (
 **Batch Traceability Features:**
 
 - **batch_type:** Distinguishes between receipt batches (from PO) and return batches
+- **purchase_order_id (Added Jan 17, 2026):** Links batch to specific PO for complete traceability
+  - NULL for legacy batches or non-PO related stock adjustments
+  - Enables PO-specific batch filtering in PurchaseOrderView
 - **source_batch_id:** Self-referential foreign key - enables genealogy tracking
   - Receipt batches: source_batch_id = NULL
   - Return batches: source_batch_id = ID of the receipt batch being returned
 - **Return Tracking:** return_reason and disposition fields document why material was returned
 - **QC Workflow:** inspection_status and inspection_notes support batch approval process
 - **Genealogy Queries:**
+  - Find all batches from a PO: `SELECT * FROM raw_material_batches WHERE purchase_order_id = ?`
   - Find all returns from a receipt batch: `SELECT * FROM raw_material_batches WHERE source_batch_id = ?`
   - Trace return to source: `SELECT source_batch_id FROM raw_material_batches WHERE id = ? AND batch_type = 'return'`
   - Material summary: `SUM(quantity) WHERE material_id = ? AND batch_type = 'receipt'` minus `SUM(quantity) WHERE material_id = ? AND batch_type = 'return'`

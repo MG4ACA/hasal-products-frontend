@@ -31,6 +31,16 @@ const supplierPaymentService = {
       return handleApiError(error);
     }
   },
+
+  // Delete supplier payment
+  async deleteSupplierPayment(supplierId, paymentId) {
+    try {
+      const response = await api.delete(`/suppliers/${supplierId}/payments/${paymentId}`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default supplierPaymentService;

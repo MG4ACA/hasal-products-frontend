@@ -258,6 +258,28 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   };
 
+  const deleteSupplierPayment = async (supplierId, paymentId) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await supplierPaymentService.deleteSupplierPayment(supplierId, paymentId);
+
+      // Check for error response
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
+      supplierPayments.value = supplierPayments.value.filter(p => p.id !== paymentId);
+      return response;
+    } catch (err) {
+      error.value = err.message || 'Error deleting supplier payment';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   // Reset
   const resetState = () => {
     payments.value = [];
@@ -302,6 +324,7 @@ export const usePaymentStore = defineStore('payment', () => {
     fetchSupplierPayments,
     fetchSupplierPaymentsBySupplierId,
     createSupplierPayment,
+    deleteSupplierPayment,
     resetState,
   };
 });

@@ -16,35 +16,36 @@
 
     <!-- Receive Form -->
     <div v-else class="receive-content">
-      <!-- PO Summary -->
-      <div class="po-summary">
-        <div class="summary-row">
-          <span class="label">PO Number:</span>
-          <span class="value po-number">{{ purchaseOrder?.po_number }}</span>
+      <!-- Receive Form -->
+      <div class="receive-form">
+        <!-- PO Summary & Received Date - Optimized Grid -->
+        <div class="po-summary-grid">
+          <div class="summary-card">
+            <span class="label">PO Number:</span>
+            <span class="value po-number">{{ purchaseOrder?.po_number }}</span>
+          </div>
+          <div class="summary-card">
+            <span class="label">Supplier:</span>
+            <span class="value">{{ purchaseOrder?.supplier?.name }}</span>
+          </div>
+          <div class="summary-card flex-column">
+            <span class="label">Order Date:</span>
+            <span class="value">{{ formatDate(purchaseOrder?.order_date) }}</span>
+          </div>
+          <div class="summary-card flex-column form-field-inline">
+            <label for="received_date">Received Date <span class="required">*</span></label>
+            <Calendar
+              id="received_date"
+              v-model="formData.received_date"
+              date-format="yy-mm-dd"
+              show-icon
+              :max-date="new Date()"
+              placeholder="Select received date"
+              :class="{ 'p-invalid': errors.received_date }"
+            />
+            <small v-if="errors.received_date" class="p-error">{{ errors.received_date }}</small>
+          </div>
         </div>
-        <div class="summary-row">
-          <span class="label">Supplier:</span>
-          <span class="value">{{ purchaseOrder?.Supplier?.name }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="label">Order Date:</span>
-          <span class="value">{{ formatDate(purchaseOrder?.order_date) }}</span>
-        </div>
-      </div>
-
-      <!-- Received Date -->
-      <div class="form-field">
-        <label for="received_date">Received Date <span class="required">*</span></label>
-        <Calendar
-          id="received_date"
-          v-model="formData.received_date"
-          date-format="yy-mm-dd"
-          show-icon
-          :max-date="new Date()"
-          placeholder="Select received date"
-          :class="{ 'p-invalid': errors.received_date }"
-        />
-        <small v-if="errors.received_date" class="p-error">{{ errors.received_date }}</small>
       </div>
 
       <TabView v-model:active-index="activeTab" class="receive-tabs">
@@ -68,7 +69,7 @@
                     />
                   </template>
                 </Column>
-                <Column field="material_name" header="Material">
+                <Column field="material_name" header="Material" style="width: 20%">
                   <template #body="{ data }">
                     <div class="material-cell">
                       <span class="material-name">{{ data.material_name }}</span>
@@ -76,14 +77,14 @@
                     </div>
                   </template>
                 </Column>
-                <Column field="ordered_quantity" header="Ordered Qty">
+                <Column field="ordered_quantity" header="Ordered Qty" style="width: 18%">
                   <template #body="{ data }">
                     <span class="ordered-qty"
                       >{{ formatNumber(data.ordered_quantity) }} {{ data.unit }}</span
                     >
                   </template>
                 </Column>
-                <Column field="quantity_received" header="Received Qty">
+                <Column field="quantity_received" header="Received Qty" style="width: 16%">
                   <template #body="{ data }">
                     <div class="quantity-input-group" :class="{ disabled: !data.receive }">
                       <InputNumber
@@ -104,7 +105,7 @@
                     </div>
                   </template>
                 </Column>
-                <Column field="expiry_date" header="Expiry Date">
+                <Column field="expiry_date" header="Expiry Date" style="width: 27%">
                   <template #body="{ data }">
                     <Calendar
                       v-model="data.expiry_date"
@@ -265,6 +266,115 @@
             </div>
           </div>
         </TabPanel>
+
+        <!-- Payment Tab (Optional) -->
+        <TabPanel header="Payment (Optional)">
+          <div class="payment-section">
+            <div class="payment-info">
+              <i class="pi pi-info-circle" style="color: #3b82f6; margin-right: 8px" />
+              <p>
+                Optionally record a payment when receiving goods. You can also record payments later
+                in the Supplier details page.
+              </p>
+            </div>
+
+            <!-- Balance Display -->
+            <div class="balance-display">
+              <div class="balance-item">
+                <span class="balance-label">PO Total Amount:</span>
+                <span class="balance-value">{{ formatCurrency(purchaseOrder?.total_amount) }}</span>
+              </div>
+              <div class="balance-item">
+                <span class="balance-label">Remaining Balance to Pay:</span>
+                <span class="balance-value primary">{{ formatCurrency(remainingBalance) }}</span>
+              </div>
+              <div v-if="formData.payment.amount" class="balance-item highlight">
+                <span class="balance-label">After Payment:</span>
+                <span class="balance-value">{{ formatCurrency(balanceAfterPayment) }}</span>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <label
+                  >Payment Amount (Rs.)
+                  <span v-if="paymentOverflow" class="warning-text">⚠ Overpayment</span></label
+                >
+                <InputNumber
+                  v-model="formData.payment.amount"
+                  :use-grouping="false"
+                  :min-fraction-digits="2"
+                  :max-fraction-digits="2"
+                  placeholder="0.00"
+                  :class="{ 'p-invalid': paymentOverflow }"
+                />
+
+                <small v-if="paymentOverflow" class="p-error"
+                  >Payment cannot exceed remaining balance ({{
+                    formatCurrency(remainingBalance)
+                  }})</small
+                >
+              </div>
+
+              <div class="form-field">
+                <label>Payment Method</label>
+                <Dropdown
+                  v-model="formData.payment.payment_method"
+                  :options="paymentMethods"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select method"
+                  :disabled="!formData.payment.amount"
+                />
+              </div>
+
+              <div v-if="formData.payment.payment_method === 'check'" class="form-field">
+                <label>Check Number</label>
+                <InputText
+                  v-model="formData.payment.check_number"
+                  placeholder="Enter check number"
+                  :disabled="!formData.payment.amount"
+                />
+              </div>
+
+              <div v-if="formData.payment.payment_method === 'check'" class="form-field">
+                <label>Check Date</label>
+                <Calendar
+                  v-model="formData.payment.check_date"
+                  date-format="yy-mm-dd"
+                  show-icon
+                  placeholder="Select check date"
+                  :disabled="!formData.payment.amount"
+                />
+              </div>
+
+              <div class="form-field">
+                <label>Reference/Notes</label>
+                <InputText
+                  v-model="formData.payment.reference"
+                  placeholder="Enter reference or notes (optional)"
+                  :disabled="!formData.payment.amount"
+                />
+              </div>
+            </div>
+            <small class="p-hint"
+              >Leave blank to skip payment. Amount can be partial or full PO amount.</small
+            >
+
+            <div v-if="formData.payment.amount" class="payment-summary">
+              <div class="summary-item">
+                <span class="label">Payment Amount:</span>
+                <span class="value">{{ formatCurrency(formData.payment.amount) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Payment Method:</span>
+                <span class="value">{{
+                  paymentMethods.find(m => m.value === formData.payment.payment_method)?.label
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </TabPanel>
       </TabView>
 
       <!-- Summary -->
@@ -313,6 +423,7 @@
           icon="pi pi-check"
           class="p-button-success"
           :loading="submitting"
+          :disabled="paymentOverflow"
           @click="handleSubmit"
         />
       </div>
@@ -322,6 +433,7 @@
 
 <script setup>
 import { usePurchaseOrderStore } from '@/stores/purchaseOrder';
+import { useSupplierStore } from '@/stores/supplier';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/formatters';
 import { computed, onMounted, reactive, ref } from 'vue';
 
@@ -335,6 +447,7 @@ const props = defineProps({
 const emit = defineEmits(['cancel', 'success']);
 
 const purchaseOrderStore = usePurchaseOrderStore();
+const supplierStore = useSupplierStore();
 const loading = ref(false);
 const submitting = ref(false);
 const error = ref(null);
@@ -347,6 +460,14 @@ const formData = ref({
   received_date: new Date(),
   received_items: [],
   return_items: [],
+  payment: {
+    amount: null,
+    payment_method: 'cash',
+    check_number: '',
+    check_date: null,
+    reference: '',
+    notes: '',
+  },
 });
 
 const currentReturn = reactive({
@@ -374,6 +495,13 @@ const returnReasons = [
 const dispositionOptions = [
   { label: 'Return to Stock', value: 'stock' },
   { label: 'Dispose', value: 'dispose' },
+];
+
+const paymentMethods = [
+  { label: 'Cash', value: 'cash' },
+  { label: 'Bank Transfer', value: 'bank_transfer' },
+  { label: 'Check', value: 'check' },
+  { label: 'Credit', value: 'credit' },
 ];
 
 const availableMaterials = computed(() => {
@@ -427,6 +555,26 @@ const canAddReturn = computed(() => {
 
 const itemsToReceiveCount = computed(() => {
   return formData.value.received_items.filter(item => item.receive).length;
+});
+
+// Calculate remaining balance for this specific PO
+const remainingBalance = computed(() => {
+  if (!purchaseOrder.value) return 0;
+
+  // Balance = PO total amount (what still needs to be paid)
+  return parseFloat(purchaseOrder.value.total_amount || 0);
+});
+
+// Calculate balance after proposed payment
+const balanceAfterPayment = computed(() => {
+  const payment = parseFloat(formData.value.payment.amount) || 0;
+  return Math.max(0, remainingBalance.value - payment);
+});
+
+// Check if payment exceeds remaining balance
+const paymentOverflow = computed(() => {
+  const payment = parseFloat(formData.value.payment.amount) || 0;
+  return payment > remainingBalance.value && payment > 0;
 });
 
 const initializeForm = () => {
@@ -634,7 +782,30 @@ const handleSubmit = async () => {
       }));
     }
 
+    // Add payment if amount is provided
+    if (formData.value.payment.amount) {
+      payload.payment = {
+        amount: parseFloat(formData.value.payment.amount),
+        payment_method: formData.value.payment.payment_method,
+        check_number: formData.value.payment.check_number || null,
+        check_date: formData.value.payment.check_date
+          ? formatDateForAPI(formData.value.payment.check_date)
+          : null,
+        reference: formData.value.payment.reference || null,
+        notes: formData.value.payment.notes || null,
+      };
+    }
+
     await purchaseOrderStore.receivePurchaseOrder(props.purchaseOrderId, payload);
+
+    // If payment was recorded, refresh supplier data so balance updates in SupplierView
+    if (formData.value.payment.amount) {
+      // Get supplier ID from the PO (could be supplier_id or supplier.id)
+      const supplierId = purchaseOrder.value?.supplier_id || purchaseOrder.value?.supplier?.id;
+      if (supplierId) {
+        await supplierStore.fetchSupplierById(supplierId);
+      }
+    }
 
     emit('success');
   } catch (err) {
@@ -710,15 +881,6 @@ onMounted(async () => {
   padding: 8px 0;
 }
 
-.summary-row .label {
-  font-weight: 600;
-  color: #4a5568;
-}
-
-.summary-row .value {
-  color: #2d3748;
-}
-
 .po-number {
   font-family: 'Courier New', monospace;
   font-weight: 700;
@@ -729,8 +891,75 @@ onMounted(async () => {
   margin-bottom: 20px;
 }
 
-.form-field {
+/* Optimized Grid Layout for PO Summary */
+.po-summary-grid {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 12px;
   margin-bottom: 20px;
+}
+
+.summary-card {
+  display: flex;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
+.summary-card .label {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.summary-card .value {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.summary-card .po-number {
+  font-family: 'Courier New', monospace;
+  color: #2563eb;
+  font-size: 1rem;
+}
+
+.summary-card.form-field-inline {
+  border-left-color: #10b981;
+}
+
+.summary-card.form-field-inline label {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.summary-card.form-field-inline :deep(.p-calendar) {
+  width: 100%;
+  height: 32px;
+}
+
+.summary-card.form-field-inline :deep(.p-calendar .p-calendar-w) {
+  width: 100%;
+}
+
+.summary-card.form-field-inline .p-error {
+  display: block;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .po-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-field label {
@@ -745,7 +974,7 @@ onMounted(async () => {
 }
 
 .receive-tabs {
-  margin: 20px 0;
+  margin: 20px 0 0 0;
 }
 
 .items-section h4,
@@ -811,6 +1040,72 @@ onMounted(async () => {
   margin-top: 4px;
 }
 
+/* Balance Display Styles */
+.balance-display {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.balance-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #0284c7;
+}
+
+.balance-item.highlight {
+  background: #ecfdf5;
+  border-left-color: #10b981;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.balance-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Courier New', monospace;
+}
+
+.balance-value.primary {
+  color: #0284c7;
+  font-size: 1.4rem;
+}
+
+.warning-text {
+  color: #ef4444;
+  font-weight: 700;
+  margin-left: 4px;
+  font-size: 0.9rem;
+}
+
 /* Returns Section Styles */
 .returns-section {
   padding: 10px 0;
@@ -854,7 +1149,6 @@ onMounted(async () => {
   background: #f7fafc;
   padding: 16px;
   border-radius: 6px;
-  margin-top: 20px;
 }
 
 .summary-item {
@@ -924,5 +1218,53 @@ onMounted(async () => {
 
 .receive-checkbox {
   cursor: pointer;
+}
+
+/* Payment Section Styles */
+.payment-section {
+  padding: 10px 0;
+}
+
+.payment-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #eff6ff;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #3b82f6;
+}
+
+.payment-info p {
+  margin: 0;
+  color: #1e40af;
+  font-size: 0.9rem;
+}
+
+.payment-summary {
+  background: #f7fafc;
+  padding: 16px;
+  border-radius: 6px;
+  margin-top: 20px;
+  border-left: 4px solid #10b981;
+}
+
+.payment-summary .summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.payment-summary .summary-item .label {
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.payment-summary .summary-item .value {
+  font-weight: 600;
+  color: #065f46;
+  font-family: 'Courier New', monospace;
+  font-size: 1.05rem;
 }
 </style>

@@ -239,6 +239,65 @@
         </template>
       </Card>
 
+      <!-- Payments Section (if any exist) -->
+      <Card v-if="payments.length > 0" class="payments-card">
+        <template #header>
+          <div class="card-header">
+            <h3>Payments</h3>
+            <span class="payment-count">{{ payments.length }} payment(s)</span>
+          </div>
+        </template>
+        <template #content>
+          <DataTable :value="payments" responsive-layout="scroll">
+            <Column field="payment_date" header="Payment Date">
+              <template #body="{ data }">
+                <span>{{ formatDate(data.payment_date) }}</span>
+              </template>
+            </Column>
+            <Column field="payment_method" header="Method">
+              <template #body="{ data }">
+                <Tag
+                  :value="formatPaymentMethod(data.payment_method)"
+                  :severity="getPaymentMethodSeverity(data.payment_method)"
+                />
+              </template>
+            </Column>
+            <Column field="amount" header="Amount">
+              <template #body="{ data }">
+                <span class="payment-amount">{{ formatCurrency(data.amount) }}</span>
+              </template>
+            </Column>
+            <Column v-if="hasCheckPayments" field="check_number" header="Check #">
+              <template #body="{ data }">
+                <span v-if="data.check_number" class="check-number">{{ data.check_number }}</span>
+                <span v-else>-</span>
+              </template>
+            </Column>
+            <Column v-if="hasCheckPayments" field="check_status" header="Check Status">
+              <template #body="{ data }">
+                <Tag
+                  v-if="data.check_status"
+                  :value="data.check_status === 'pending' ? 'Pending' : 'Cleared'"
+                  :severity="data.check_status === 'pending' ? 'warning' : 'success'"
+                />
+                <span v-else>-</span>
+              </template>
+            </Column>
+            <Column field="reference" header="Reference">
+              <template #body="{ data }">
+                <span v-if="data.reference" class="reference-text">{{ data.reference }}</span>
+                <span v-else class="no-reference">-</span>
+              </template>
+            </Column>
+          </DataTable>
+
+          <div class="payments-total">
+            <span class="total-label">Total Paid:</span>
+            <span class="total-value">{{ formatCurrency(totalPaid) }}</span>
+          </div>
+        </template>
+      </Card>
+
       <!-- Audit Info -->
       <Card class="audit-card">
         <template #content>
@@ -291,6 +350,18 @@ const hasReturns = computed(() => {
   return batches.value.some(batch => batch.batch_type === 'return');
 });
 
+const payments = computed(() => {
+  return purchaseOrder.value?.payments || [];
+});
+
+const hasCheckPayments = computed(() => {
+  return payments.value.some(payment => payment.payment_method === 'check');
+});
+
+const totalPaid = computed(() => {
+  return payments.value.reduce((sum, payment) => sum + parseFloat(payment.amount || 0), 0);
+});
+
 const getStatusSeverity = status => {
   const severityMap = {
     pending: 'warning',
@@ -311,6 +382,26 @@ const formatReturnReason = reason => {
     other: 'Other',
   };
   return reasonMap[reason] || reason;
+};
+
+const formatPaymentMethod = method => {
+  const methodMap = {
+    cash: 'Cash',
+    check: 'Check',
+    bank: 'Bank Transfer',
+    credit: 'Credit',
+  };
+  return methodMap[method] || method;
+};
+
+const getPaymentMethodSeverity = method => {
+  const severityMap = {
+    cash: 'success',
+    check: 'warning',
+    bank: 'info',
+    credit: 'secondary',
+  };
+  return severityMap[method] || 'secondary';
 };
 
 const loadPurchaseOrder = async () => {
@@ -460,6 +551,7 @@ onMounted(() => {
 
 .items-card,
 .batches-card,
+.payments-card,
 .audit-card {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -478,7 +570,8 @@ onMounted(() => {
 }
 
 .item-count,
-.batch-count {
+.batch-count,
+.payment-count {
   background: #edf2f7;
   padding: 4px 12px;
   border-radius: 12px;
@@ -537,6 +630,32 @@ onMounted(() => {
 .negative-qty {
   color: #e53e3e;
   font-weight: 600;
+}
+
+.payment-amount,
+.check-number,
+.reference-text {
+  font-family: 'Courier New', monospace;
+  color: #2d3748;
+}
+
+.payment-amount {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.no-reference {
+  color: #cbd5e0;
+}
+
+.payments-total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e2e8f0;
 }
 
 .audit-card {

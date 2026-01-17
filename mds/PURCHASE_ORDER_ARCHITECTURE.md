@@ -1,33 +1,38 @@
 # Purchase Order Management & Batch Traceability Architecture
 
-**Version:** 2.1.0  
-**Last Updated:** January 15, 2026
+**Version:** 2.2.0  
+**Last Updated:** January 17, 2026
 
 ---
 
 ## Overview
 
-The Hasal POS system implements Purchase Order management as a unified workflow with integrated batch traceability. This document explains how returns, genealogy tracking, and inventory management are all part of the core Purchase Order functionality—not separate features.
+The Hasal POS system implements Purchase Order management as a unified workflow with integrated batch traceability and payment linking. This document explains how returns, genealogy tracking, payment association, and inventory management are all part of the core Purchase Order functionality—not separate features.
 
 ---
 
 ## Architectural Model
 
-### Core Concept: Self-Referential Batch Tracking
+### Core Concept: Self-Referential Batch Tracking with PO Linkage
 
-The `raw_material_batches` table uses a self-referential foreign key (`source_batch_id`) to create relationships between receipt batches and return batches:
+The `raw_material_batches` table uses a self-referential foreign key (`source_batch_id`) to create relationships between receipt batches and return batches, plus a `purchase_order_id` foreign key to link batches to their originating PO:
 
 ```
-Receipt Batch (id: 1)
-├── Returns to Stock (source_batch_id: 1)
-│   ├── Return Reason: "Excess stock"
-│   ├── Disposition: "stock" (back to inventory)
-│   └── Batch Type: "return"
+Purchase Order (PO-2026-001)
 │
-├── Returns to Dispose (source_batch_id: 1)
-│   ├── Return Reason: "Quality issue"
-│   ├── Disposition: "dispose" (discard)
-│   └── Batch Type: "return"
+├── Receipt Batch (id: 1, purchase_order_id: PO-2026-001)
+│   ├── Returns to Stock (source_batch_id: 1, purchase_order_id: PO-2026-001)
+│   │   ├── Return Reason: "Excess stock"
+│   │   ├── Disposition: "stock" (back to inventory)
+│   │   └── Batch Type: "return"
+│   │
+│   └── Returns to Dispose (source_batch_id: 1, purchase_order_id: PO-2026-001)
+│       ├── Return Reason: "Quality issue"
+│       ├── Disposition: "dispose" (discard)
+│       └── Batch Type: "return"
+│
+└── Payments (id: 456, purchase_order_id: PO-2026-001)
+    └── Amount: Rs. 20,000
 ```
 
 ### Key Database Fields
@@ -37,11 +42,23 @@ Receipt Batch (id: 1)
 | Field               | Type                      | Purpose                                                             |
 | ------------------- | ------------------------- | ------------------------------------------------------------------- |
 | `id`                | INT                       | Unique batch identifier                                             |
+| `purchase_order_id` | INT (FK, nullable)        | Links batch to originating PO (Added Jan 17, 2026)                  |
 | `batch_type`        | ENUM('receipt', 'return') | Distinguishes receipt vs return batches                             |
 | `source_batch_id`   | INT (FK)                  | Points to source receipt batch (NULL for receipts, set for returns) |
 | `return_reason`     | VARCHAR                   | Why material was returned (e.g., "excess stock", "quality issue")   |
 | `disposition`       | ENUM('stock', 'dispose')  | Where returned material goes                                        |
 | `inspection_status` | ENUM                      | QC approval workflow                                                |
+
+**`supplier_payments` table:**
+
+| Field               | Type               | Purpose                                           |
+| ------------------- | ------------------ | ------------------------------------------------- |
+| `id`                | INT                | Unique payment identifier                         |
+| `supplier_id`       | INT (FK)           | Links payment to supplier                         |
+| `purchase_order_id` | INT (FK, nullable) | Links payment to specific PO (Added Jan 17, 2026) |
+| `amount`            | DECIMAL(15,2)      | Payment amount                                    |
+| `payment_date`      | DATE               | When payment was made                             |
+| `payment_method`    | ENUM               | cash, bank_transfer, check, credit                |
 
 ---
 
@@ -78,14 +95,22 @@ POST /api/purchase-orders/1/receive
       "quantity_received": 50,
       "expiry_date": "2027-01-15"
     }
-  ]
+  ],
+  "payment": {
+    "amount": 2000,
+    "payment_method": "bank_transfer",
+    "payment_date": "2026-01-17",
+    "reference": "Payment for PO-2026-001"
+  }
 }
 ```
 
 **Result:**
 
-- Receipt batch created (batch_type: "receipt")
+- Receipt batch created (batch_type: "receipt", **purchase_order_id: 1**)
 - Raw material stock increases by 50
+- Payment created and linked (**purchase_order_id: 1**)
+- Supplier balance updated
 - PO status: "partial" (if more to receive)
 
 ---
@@ -211,13 +236,21 @@ GET /api/batches/materials/1/returns-summary
 
 ### Purchase Order Management
 
-| Endpoint                                | Method | Purpose                          |
-| --------------------------------------- | ------ | -------------------------------- |
-| `/api/purchase-orders`                  | POST   | Create PO                        |
-| `/api/purchase-orders/:id`              | GET    | Get PO details                   |
-| `/api/purchase-orders/:id/receive`      | POST   | Receive items OR process returns |
-| `/api/purchase-orders/:id/cancel`       | PATCH  | Cancel pending PO                |
-| `/api/raw-material-batches/:id/inspect` | PATCH  | QC inspection/approval           |
+| Endpoint                                | Method | Purpose                                                  |
+| --------------------------------------- | ------ | -------------------------------------------------------- |
+| `/api/purchase-orders`                  | POST   | Create PO                                                |
+| `/api/purchase-orders/:id`              | GET    | Get PO details (with PO-specific batches/payments)       |
+| `/api/purchase-orders/:id/receive`      | POST   | Receive items OR process returns (with optional payment) |
+| `/api/purchase-orders/:id/cancel`       | PATCH  | Cancel pending PO                                        |
+| `/api/raw-material-batches/:id/inspect` | PATCH  | QC inspection/approval                                   |
+
+### Supplier Payment Management
+
+| Endpoint                             | Method | Purpose                                           |
+| ------------------------------------ | ------ | ------------------------------------------------- |
+| `/api/suppliers/:id/payments`        | POST   | Record standalone payment (with optional PO link) |
+| `/api/suppliers/:id/payments`        | GET    | Get all payments for supplier                     |
+| `/api/suppliers/:id/purchase-orders` | GET    | Get supplier's POs (for dropdown in payment form) |
 
 ### Batch Traceability Queries (Read-Only)
 
@@ -328,6 +361,10 @@ ORDER BY rb.batch_type DESC, rb.created_at;
 
 - Receipt batch creation on PO receive
 - Return batch creation with source_batch_id linking
+- **PO-Payment linking (purchase_order_id in batches and payments)** _(Added Jan 17, 2026)_
+- **PO-specific batch filtering in PurchaseOrderView** _(Added Jan 17, 2026)_
+- **PO-specific payment filtering in PurchaseOrderView** _(Added Jan 17, 2026)_
+- **PO dropdown in standalone payment form** _(Added Jan 17, 2026)_
 - Batch genealogy query (all returns from receipt)
 - Return origin query (source of return)
 - Material returns summary (totals)
@@ -337,16 +374,77 @@ ORDER BY rb.batch_type DESC, rb.created_at;
 
 ### 🧪 Testing
 
-- 12/12 comprehensive tests passing
+- 12/12 comprehensive tests passing (original suite)
+- **7/7 PO payment linking tests passing** _(Added Jan 17, 2026)_
+  - PO receive with payment shows correct batches/payments
+  - Multiple POs correctly isolated
+  - Standalone payments with/without PO link work
+  - PO dropdown filtering and loading states
+  - Complete traceability verification
 - All workflows validated
-- Edge cases handled (null source_batch_id, invalid dispositions)
+- Edge cases handled (null source_batch_id, invalid dispositions, null purchase_order_id)
 
 ### 📚 Documentation
 
 - Postman collection (functional grouping)
-- Swagger API spec (2.1.0)
+- Swagger API spec (2.2.0) _(Updated Jan 17, 2026)_
 - API Testing README (workflow examples)
+- **SUPPLIER_PAYMENT_SYSTEM_IMPLEMENTATION.md** _(Updated with PO linking section)_
+- **SUPPLIER_PAYMENT_SYSTEM_TESTING.md** _(Updated with Test Suite 5)_
+- **DATABASE_SCHEMA.md** _(Updated with purchase_order_id fields)_
 - This architecture document
+
+---
+
+## Payment-PO Traceability Flow
+
+**Complete Audit Trail:** Payment → PO → Batches → Materials
+
+### Example Traceability Query
+
+```sql
+-- Step 1: Find payment details
+SELECT
+  sp.id AS payment_id,
+  sp.amount,
+  sp.payment_date,
+  sp.purchase_order_id
+FROM supplier_payments sp
+WHERE sp.id = 456;
+
+-- Step 2: Get PO details
+SELECT
+  po.po_number,
+  po.total_amount,
+  po.status,
+  po.order_date,
+  s.name AS supplier_name
+FROM purchase_orders po
+JOIN suppliers s ON po.supplier_id = s.id
+WHERE po.id = (SELECT purchase_order_id FROM supplier_payments WHERE id = 456);
+
+-- Step 3: Find all batches from this PO
+SELECT
+  rb.batch_number,
+  rb.batch_type,
+  rb.quantity,
+  rb.unit_cost,
+  rm.name AS material_name,
+  rm.sku
+FROM raw_material_batches rb
+JOIN raw_materials rm ON rb.material_id = rm.id
+WHERE rb.purchase_order_id = (SELECT purchase_order_id FROM supplier_payments WHERE id = 456);
+
+-- Result: Complete trace from payment to all materials received
+```
+
+### Traceability Benefits
+
+✅ **Financial Audit:** Trace every payment to specific materials received  
+✅ **PO-Specific Reporting:** Filter batches and payments by PO  
+✅ **Compliance:** Complete audit trail for accounting  
+✅ **Reconciliation:** Match payments to invoices and receipts  
+✅ **Historical Analysis:** Analyze payment patterns per PO
 
 ---
 

@@ -123,6 +123,10 @@
   padding: 0.7rem 0.5rem !important;
 }
 
+.p-steps .p-menuitem-link {
+  background: transparent;
+}
+
 /* Animation */
 @keyframes fadeIn {
   from {
