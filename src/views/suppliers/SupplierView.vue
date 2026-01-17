@@ -1,6 +1,5 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
-import { supplierService } from '@/services/supplierService';
 import { usePaymentStore } from '@/stores/payment';
 import { useSupplierStore } from '@/stores/supplier';
 import { computed, onMounted, ref } from 'vue';
@@ -110,16 +109,16 @@ const openPaymentDialog = async () => {
 const fetchSupplierPOs = async () => {
   loadingPOs.value = true;
   try {
-    const data = await supplierService.getSupplierPurchaseOrders(
-      supplierId.value,
-      'pending,partial,received'
-    );
+    // Use already-loaded POs from supplier data which now includes balance
+    const purchaseOrders = supplierStore.currentSupplier?.purchaseOrders || [];
 
-    supplierPOs.value = data.map(po => ({
-      label: `PO #${po.po_number} - Rs. ${parseFloat(po.total_amount).toLocaleString()} (${po.status})`,
+    supplierPOs.value = purchaseOrders.map(po => ({
+      // label: `PO #${po.po_number} - Total: Rs. ${parseFloat(po.total_amount).toLocaleString()} | Balance: Rs. ${parseFloat(po.balance || 0).toLocaleString()}`,
+      label: `PO #${po.po_number}  |  Balance: Rs. ${parseFloat(po.balance || 0).toLocaleString()}`,
       value: po.id,
       poNumber: po.po_number,
       totalAmount: po.total_amount,
+      balance: po.balance || 0,
       status: po.status,
     }));
   } catch (error) {
