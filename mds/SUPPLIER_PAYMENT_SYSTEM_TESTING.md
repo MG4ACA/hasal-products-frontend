@@ -1,5 +1,7 @@
 # Supplier Payment System - Testing & Verification Guide
 
+**Last Updated:** January 18, 2026
+
 ## 📋 Complete Testing Guide
 
 ### Test Organization
@@ -14,6 +16,60 @@ Tests are organized by workflow and complexity:
 
 ---
 
+## 🆕 Payment Status Feature (NEW - Jan 18, 2026)
+
+### Overview
+
+The system now implements a **payment_status** enum field to properly handle deferred payments (checks and credit terms). This replaces the previous `check_status` field and provides a more robust payment lifecycle management.
+
+### Key Changes
+
+**1. Payment Status Enum:**
+
+- `pending` - Payment created but not yet cleared (check/credit)
+- `cleared` - Payment completed and balance reduced
+- `cancelled` - Payment cancelled (future use)
+- `bounced` - Check bounced (future use)
+
+**2. Balance Impact by Payment Method:**
+
+| Method        | Initial Status | Balance Impact | When Balance Changes  |
+| ------------- | -------------- | -------------- | --------------------- |
+| Cash          | `cleared`      | ✅ Immediate   | On payment creation   |
+| Bank Transfer | `cleared`      | ✅ Immediate   | On payment creation   |
+| Check         | `pending`      | ⏳ Deferred    | When manually cleared |
+| Credit        | `pending`      | ⏳ Deferred    | When manually cleared |
+
+**3. Critical Testing Points:**
+
+✅ **Cash/Bank Payments:**
+
+- Create payment → `payment_status='cleared'`, balance reduced immediately
+- Delete payment → Balance restored (always)
+
+✅ **Check/Credit Payments:**
+
+- Create payment → `payment_status='pending'`, balance UNCHANGED
+- Clear payment → `payment_status='cleared'`, balance NOW reduced
+- Delete pending → Balance unchanged (never deducted)
+- Delete cleared → Balance restored (reversal)
+
+**4. Frontend Changes:**
+
+- Payment Status column shows color-coded badges
+- "Clear Payment" button (✓) appears for pending payments only
+- Clear Payment dialog with date validation
+- Real-time balance updates
+
+**5. Backend Changes:**
+
+- `payment_status` field added to `supplier_payments` table
+- `clearance_date` tracks when payment was cleared
+- Balance logic conditional on payment status
+- New endpoint: `PUT /api/suppliers/:id/payments/:paymentId/clear`
+
+---
+
 ## 🔑 Critical Business Logic (Updated January 2026)
 
 **Understanding Balance Updates:**
@@ -22,28 +78,48 @@ Tests are organized by workflow and complexity:
    - Creating a PO does NOT affect supplier balance
    - Balance only changes when goods are received and/or payment is made
 
-2. **First Receive from a PO** → Balance += **FULL PO Amount** - Payment
+2. **First Receive from a PO** → Balance += **FULL PO Amount** - Payment (if cleared)
    - When receiving goods from a PO for the FIRST time (status: pending → partial/received)
    - The FULL PO amount is added to balance (not just the received portion)
-   - Example: PO for 10kg @ Rs. 10,000. Receive only 5kg → Still adds Rs. 10,000 to balance
-   - This represents the accounting concept that the full invoice becomes payable on first delivery
+   - **NEW:** Payment only deducted if `payment_status='cleared'` (cash/bank)
+   - Check/credit payments don't reduce balance until cleared
+   - Example: PO for 10kg @ Rs. 10,000. Receive 5kg + pay Rs. 3,000 cash → Balance = Rs. 7,000
+   - Example: PO for 10kg @ Rs. 10,000. Receive 5kg + pay Rs. 3,000 check → Balance = Rs. 10,000 (pending)
 
-3. **Subsequent Receive from Same PO** → Balance -= Payment only
+3. **Subsequent Receive from Same PO** → Balance -= Payment (if cleared)
    - When receiving more goods from a PO that was already partially received (status: partial → partial/received)
    - NO goods value is added to balance (PO amount already added on first receive)
-   - Only the payment (if any) reduces the balance
+   - **NEW:** Payment only deducted if `payment_status='cleared'`
 
-4. **Standalone Payment** → Balance -= Payment
-   - Recording a payment outside of PO receive always reduces balance
+4. **Standalone Payment** → Balance -= Amount (if cleared)
+   - **NEW:** Immediate payments (cash/bank) reduce balance on creation
+   - Deferred payments (check/credit) don't reduce balance until manually cleared
 
-**Example Workflow:**
+5. **Clear Pending Payment** → Balance -= Amount (now)
+   - Manual action via "Clear Payment" button in UI
+   - Changes `payment_status` from 'pending' to 'cleared'
+   - Balance now reduced by payment amount
+
+**Example Workflow with Deferred Payments:**
 
 ```
 Initial Balance: Rs. 0
 Create PO (10kg @ Rs. 10,000) → Balance: Rs. 0 (no change)
-First Receive 5kg + Pay Rs. 3,000 → Balance: Rs. 7,000 (0 + 10,000 - 3,000)
-Subsequent Receive 5kg + Pay Rs. 2,000 → Balance: Rs. 5,000 (7,000 + 0 - 2,000)
-Standalone Payment Rs. 5,000 → Balance: Rs. 0 (fully settled)
+
+First Receive 5kg + Pay Rs. 3,000 CHECK → Balance: Rs. 10,000
+  (0 + 10,000 - 0) - Check payment pending, not deducted
+
+Clear Check Payment → Balance: Rs. 7,000
+  (10,000 - 3,000) - Payment now cleared
+
+Subsequent Receive 5kg + Pay Rs. 2,000 CASH → Balance: Rs. 5,000
+  (7,000 + 0 - 2,000) - Cash deducted immediately
+
+Standalone Payment Rs. 5,000 CREDIT → Balance: Rs. 5,000
+  (5,000 - 0) - Credit pending, not deducted
+
+Clear Credit Payment → Balance: Rs. 0
+  (5,000 - 5,000) - Fully settled
 ```
 
 ---
@@ -84,14 +160,16 @@ SELECT balance FROM Suppliers WHERE id = ?;
 
 ---
 
-### Test 1.2: Create Check Payment
+### Test 1.2: Create Check Payment (Pending)
 
-**Purpose:** Verify check payment with details
+**Purpose:** Verify check payment creates with pending status and does NOT reduce balance
+
+**Prerequisites:** Note current supplier balance before test
 
 **Steps:**
 
 1. Open Suppliers list
-2. Select a supplier
+2. Select a supplier (note current balance: e.g., Rs. 10,000)
 3. Click "Record Payment"
 4. Fill form:
    - Payment Date: Today
@@ -104,18 +182,85 @@ SELECT balance FROM Suppliers WHERE id = ?;
 
 **Expected Results:**
 
-- ✅ Payment created
-- ✅ Check fields populated
-- ✅ Payment shows in history
-- ✅ Status: "pending" (not cleared)
-- ✅ Balance updated
+- ✅ Payment created successfully
+- ✅ Check fields populated (number, date)
+- ✅ Payment shows in history with Status badge: **"Pending" (Orange/Warning)**
+- ✅ **Balance UNCHANGED** (still Rs. 10,000) ← Critical!
+- ✅ clearance_date = null
+- ✅ Green "Clear Payment" button (✓) visible in Action column
 
 **Verification:**
 
 ```sql
-SELECT check_number, check_date, check_status FROM SupplierPayments
-WHERE supplier_id = ? AND payment_method = 'check' LIMIT 1;
+-- Check payment record
+SELECT
+  payment_method,
+  payment_status,
+  clearance_date,
+  check_number,
+  check_date
+FROM supplier_payments
+WHERE supplier_id = ? AND payment_method = 'check'
+ORDER BY created_at DESC LIMIT 1;
+
+-- Expected: payment_status='pending', clearance_date=NULL
+
+-- Check supplier balance (should be UNCHANGED)
+SELECT balance FROM suppliers WHERE id = ?;
+-- Expected: Same as before (Rs. 10,000)
 ```
+
+---
+
+### Test 1.2a: Clear Pending Check Payment
+
+**Purpose:** Verify clearing a pending payment updates status and reduces balance
+
+**Prerequisites:** Test 1.2 completed (pending check payment exists, balance Rs. 10,000)
+
+**Steps:**
+
+1. In payment history table, locate the pending check payment from Test 1.2
+2. Verify Status badge shows "Pending" (Orange)
+3. Click the green **"Clear Payment" button (✓)** in Action column
+4. Clear Payment dialog opens:
+   - Shows payment details (Method: Check, Amount: Rs. 3,000, dates)
+   - Clearance Date picker (defaults to today)
+5. Select clearance date (today or later)
+6. Click "Clear Payment" button
+
+**Expected Results:**
+
+- ✅ Success toast: "Payment cleared successfully"
+- ✅ Dialog closes
+- ✅ Payment status badge changes to **"Cleared" (Green/Success)**
+- ✅ **Balance NOW reduced** from Rs. 10,000 → Rs. 7,000
+- ✅ clearance_date populated
+- ✅ Clear Payment button (✓) no longer visible
+- ✅ Only Delete button remains
+
+**Validation:**
+
+```sql
+-- Verify payment status updated
+SELECT
+  payment_status,
+  clearance_date,
+  amount
+FROM supplier_payments
+WHERE id = ?;
+-- Expected: payment_status='cleared', clearance_date=<selected_date>
+
+-- Verify balance reduced
+SELECT balance FROM suppliers WHERE id = ?;
+-- Expected: Rs. 7,000 (10,000 - 3,000)
+```
+
+**Edge Cases to Test:**
+
+- ✅ Clearance date cannot be before payment_date (validation error)
+- ✅ Clearance date cannot be before check_date (validation error)
+- ✅ Can only clear payments with status='pending' (already cleared → error)
 
 ---
 
@@ -140,9 +285,11 @@ WHERE supplier_id = ? AND payment_method = 'check' LIMIT 1;
 
 ---
 
-### Test 1.4: Create Credit Payment
+### Test 1.4: Create Credit Payment (Pending)
 
-**Purpose:** Verify credit transaction
+**Purpose:** Verify credit payment creates with pending status (similar to check)
+
+**Prerequisites:** Note current supplier balance
 
 **Steps:**
 
@@ -154,38 +301,97 @@ WHERE supplier_id = ? AND payment_method = 'check' LIMIT 1;
 
 **Expected Results:**
 
-- ✅ Payment created
-- ✅ No check fields
-- ✅ Balance updated
-- ✅ Recorded in history
+- ✅ Payment created successfully
+- ✅ No check fields visible (credit doesn't require check number/date)
+- ✅ Payment shows in history with Status badge: **"Pending" (Orange)**
+- ✅ **Balance UNCHANGED** ← Critical! (credit is deferred like check)
+- ✅ clearance_date = null
+- ✅ payment_status = 'pending'
+- ✅ Green "Clear Payment" button (✓) visible
+
+**Verification:**
+
+```sql
+SELECT payment_status, clearance_date, amount
+FROM supplier_payments
+WHERE supplier_id = ? AND payment_method = 'credit'
+ORDER BY created_at DESC LIMIT 1;
+-- Expected: payment_status='pending', clearance_date=NULL
+
+-- Balance should be UNCHANGED
+```
 
 ---
 
 ### Test 1.5: Delete Payment with Balance Reversal
 
-**Purpose:** Verify payment deletion and balance restoration
+**Purpose:** Verify payment deletion handles cleared vs pending status correctly
 
-**Prerequisites:** Payment from Test 1.1 exists
+**Test 1.5a: Delete CLEARED Payment (Balance Reversal)**
+
+**Prerequisites:** Cleared cash payment from Test 1.1 exists (balance already reduced)
 
 **Steps:**
 
 1. Open Suppliers → Select same supplier
-2. In Payments table, click Delete on the test payment
-3. Confirm deletion
+2. Note current balance (e.g., Rs. 5,000)
+3. In Payments table, find cleared cash payment (Rs. 5,000)
+4. Click Delete button
+5. Confirm deletion
 
 **Expected Results:**
 
 - ✅ Payment removed from table
-- ✅ Success message: "Payment deleted"
-- ✅ Supplier balance **increased** by payment amount
-- ✅ Balance now restored
+- ✅ Success message: "Payment deleted successfully"
+- ✅ Supplier balance **INCREASED** by payment amount (reversal)
+- ✅ Balance restored (Rs. 5,000 → Rs. 10,000)
 
 **Example:**
 
 ```
-Before delete: balance = 5,000
-Delete payment of 5,000
-After delete: balance = 10,000 (restored)
+Before delete: balance = Rs. 5,000 (payment already deducted)
+Delete cleared payment of Rs. 5,000
+After delete: balance = Rs. 10,000 (restored)
+```
+
+**Test 1.5b: Delete PENDING Payment (No Balance Change)**
+
+**Prerequisites:** Pending check payment from Test 1.2 exists (balance NOT reduced)
+
+**Steps:**
+
+1. Same supplier from Test 1.2
+2. Note current balance (e.g., Rs. 10,000 - unchanged from pending payment)
+3. In Payments table, find pending check payment (Rs. 3,000, Status: Pending)
+4. Click Delete button
+5. Confirm deletion
+
+**Expected Results:**
+
+- ✅ Payment removed from table
+- ✅ Success message: "Payment deleted successfully"
+- ✅ Supplier balance **UNCHANGED** (Rs. 10,000 → Rs. 10,000)
+- ✅ No reversal because payment never reduced balance
+
+**Verification:**
+
+```sql
+-- Balance should remain the same for pending payment deletion
+SELECT balance FROM suppliers WHERE id = ?;
+-- Expected: Same as before deletion
+```
+
+**Console Log Check (Backend):**
+
+```
+Delete Payment - Reversing balance for cleared payment:
+  Old Balance: 5000.00
+  Payment Amount: 5000.00
+  New Balance: 10000.00
+
+OR
+
+No balance change for pending payment
 ```
 
 ---
@@ -218,41 +424,61 @@ After delete: balance = 10,000 (restored)
 
 **Steps:**
 
-1. Create payment with all details
-2. View in payment history table
-3. Verify each column
+1. Create payments with all methods (cash, check, credit, bank)
+2. Clear one check payment
+3. View in payment history table
+4. Verify each column
 
 **Expected Results:**
 
 - ✅ Payment Date: Formatted correctly
-- ✅ Method: Shows "Cash", "Check", "Bank", or "Credit"
+- ✅ Method: Shows "Cash", "Check", "Bank Transfer", or "Credit" as Tag
 - ✅ Amount: Formatted currency (Rs. 5,000.00)
 - ✅ Check #: Shows if method='check'
-- ✅ Status: Shows if check (pending/cleared)
+- ✅ **Status Column**: Shows color-coded badge
+  - Pending (Orange/Warning) - Check/Credit not yet cleared
+  - Cleared (Green/Success) - All cash/bank, or cleared check/credit
+  - Cancelled (Red/Danger) - Future use
+  - Bounced (Red/Danger) - Future use
 - ✅ Reference: Shows text entered
-- ✅ Delete: Icon appears
+- ✅ **Action Column**:
+  - Green ✓ button (Clear Payment) - Only for pending payments
+  - Red trash icon (Delete) - Always visible
+
+**Table Columns:**
+
+```
+| Date | Method | Amount | Check # | Status | Reference | Action |
+```
+
+**Status Badge Examples:**
+
+- Cash payment → "Cleared" (green) immediately
+- New check payment → "Pending" (orange) with ✓ button
+- Cleared check → "Cleared" (green) no ✓ button
+- Credit payment → "Pending" (orange) with ✓ button
 
 ---
 
 ## 🧪 Test Suite 2: Integrated PO Receive Payment (ReceivePO)
 
-### Test 2.1: Receive Goods with Cash Payment
+### Test 2.1: Receive Goods with Cash Payment (Immediate)
 
-**Purpose:** Verify payment during PO receive
+**Purpose:** Verify payment during PO receive reduces balance immediately for cash
 
-**Prerequisites:** Pending PO with items
+**Prerequisites:** Pending PO with items, Supplier initial balance Rs. 0
 
 **Steps:**
 
 1. Open Purchase Orders
-2. Select pending PO
+2. Select pending PO (e.g., Rs. 10,000 total)
 3. Click "Receive"
 4. Enter Received Date: Today
 5. Select items to receive (check at least 2)
 6. Go to "Payment (Optional)" tab
 7. Enter Amount: Rs. 5,000
-8. Keep Method: Cash
-9. Enter Reference: "Payment with receive"
+8. Keep Method: **Cash**
+9. Enter Reference: "Cash payment with receive"
 10. Click Submit
 
 **Expected Results:**
@@ -261,9 +487,25 @@ After delete: balance = 10,000 (restored)
 - ✅ Success: "Purchase order received successfully and payment recorded"
 - ✅ PO status: "partial" or "received"
 - ✅ Batches created for received items
-- ✅ Payment recorded
-- ✅ Supplier balance decreased by 5,000
-- ✅ Payment appears in SupplierView payments tab
+- ✅ Payment recorded with **payment_status = 'cleared'**
+- ✅ **Supplier balance = Rs. 5,000** (0 + 10,000 - 5,000)
+  - Full PO amount added (Rs. 10,000)
+  - Cash payment deducted immediately (Rs. 5,000)
+- ✅ Payment appears in SupplierView with "Cleared" badge
+- ✅ clearance_date = payment_date
+
+**Console Log:**
+
+```
+PO Receive Balance Update: Supplier X, PO #XXX
+  First Receive: true
+  Old Balance: Rs. 0.00
+  Amount to Add (PO): Rs. 10000.00
+  Payment Amount: Rs. 5000.00
+  Payment Method: cash (cleared)
+  Payment to Deduct: Rs. 5000.00
+  New Balance: Rs. 5000.00
+```
 
 ---
 
@@ -296,27 +538,56 @@ After: supplier.balance = X (unchanged)
 
 ---
 
-### Test 2.3: Receive with Check Payment
+### Test 2.3: Receive with Check Payment (Deferred)
 
-**Purpose:** Verify check payment with receive
+**Purpose:** Verify check payment during receive does NOT reduce balance
+
+**Prerequisites:** Same PO from Test 2.1 (now partial), current balance Rs. 5,000
 
 **Steps:**
 
-1. ReceivePO dialog
-2. Select items
+1. ReceivePO dialog (receive remaining items)
+2. Select remaining items
 3. Payment tab:
    - Amount: Rs. 3,000
-   - Method: Check
+   - Method: **Check**
    - Check Number: CHK99999
-   - Check Date: 2024-02-01
+   - Check Date: Tomorrow
+   - Reference: "Check payment with receive"
 4. Submit
 
 **Expected Results:**
 
-- ✅ Goods received
-- ✅ Payment recorded with pending status
-- ✅ Check details stored
-- ✅ Balance = received - payment
+- ✅ Goods received successfully
+- ✅ Payment recorded with **payment_status = 'pending'**
+- ✅ Check details stored (number, date)
+- ✅ clearance_date = null
+- ✅ **Balance UNCHANGED at Rs. 5,000** ← Critical!
+  - This is subsequent receive (PO already added on first receive)
+  - Check payment doesn't reduce balance until cleared
+- ✅ Payment shows in SupplierView with "Pending" badge
+- ✅ Clear Payment button (✓) visible
+
+**Console Log:**
+
+```
+PO Receive Balance Update: Supplier X, PO #XXX
+  First Receive: false
+  Old Balance: Rs. 5000.00
+  Amount to Add (PO): Rs. 0.00
+  Payment Amount: Rs. 3000.00
+  Payment Method: check (pending)
+  Payment to Deduct: Rs. 0.00
+  New Balance: Rs. 5000.00
+```
+
+**Follow-up Test:** Clear this check payment later
+
+- Go to SupplierView → Payments tab
+- Click green ✓ button on pending check
+- Select clearance date
+- Clear payment
+- **Balance should NOW reduce to Rs. 2,000** (5,000 - 3,000)
 
 ---
 

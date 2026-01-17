@@ -2,8 +2,8 @@
 
 **Project:** POS & Inventory Management System  
 **Database:** MySQL  
-**Version:** 1.1 (Revised)  
-**Date:** December 18, 2025
+**Version:** 1.2 (Updated with Payment Status)  
+**Date:** January 18, 2026
 
 ---
 
@@ -280,9 +280,10 @@ CREATE TABLE supplier_payments (
     payment_date DATE NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
     payment_method ENUM('cash', 'credit', 'bank_transfer', 'check') NOT NULL,
-    check_number VARCHAR(50),
-    check_date DATE,
-    clearance_date DATE,
+    payment_status ENUM('pending', 'cleared', 'cancelled', 'bounced') NOT NULL DEFAULT 'cleared', -- NEW: Tracks payment lifecycle
+    check_number VARCHAR(50), -- For check payments
+    check_date DATE, -- For check payments
+    clearance_date DATE, -- Date when payment was cleared (used for deferred payments: check/credit)
     reference VARCHAR(100),
     notes TEXT,
     created_by INT NOT NULL,
@@ -293,11 +294,27 @@ CREATE TABLE supplier_payments (
     INDEX idx_supplier (supplier_id),
     INDEX idx_purchase_order (purchase_order_id),
     INDEX idx_payment_date (payment_date),
+    INDEX idx_supplier_payments_payment_status (payment_status), -- NEW: For status filtering
     INDEX idx_check_number (check_number)
 );
 ```
 
-**Payment-PO Linking (Added Jan 17, 2026):**
+**Payment Status Tracking (Added Jan 18, 2026):**
+
+- `payment_status`: ENUM field tracking payment lifecycle
+  - `pending`: Payment created but not yet cleared (check/credit payments)
+  - `cleared`: Payment completed and balance reduced (cash/bank or after manual clearance)
+  - `cancelled`: Payment cancelled (future use)
+  - `bounced`: Check bounced (future use)
+
+**Deferred Payment Handling (Added Jan 18, 2026):**
+
+- `clearance_date`: Now specifically used for tracking when deferred payments (check/credit) are cleared
+  - For cash/bank: `clearance_date = payment_date` (auto-filled on creation)
+  - For check/credit: `clearance_date = NULL` initially, set when payment is manually cleared
+  - Enables audit trail of when payment was actually settled
+
+**Payment-PO Linking:**
 
 - `purchase_order_id` (nullable): Links payment to specific PO
 - NULL value indicates general payment not allocated to specific PO

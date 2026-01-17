@@ -73,4 +73,16 @@ export const supplierService = {
       return handleApiError(error);
     }
   },
+
+  // Clear supplier payment (for check/credit payments)
+  async clearSupplierPayment(supplierId, paymentId, clearanceDate) {
+    try {
+      const response = await api.put(`/suppliers/${supplierId}/payments/${paymentId}/clear`, {
+        clearance_date: clearanceDate,
+      });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };

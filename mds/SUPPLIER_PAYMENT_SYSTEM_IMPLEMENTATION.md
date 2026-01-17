@@ -36,13 +36,16 @@ purchase_order_id (FK, nullable) → PurchaseOrders
 amount (DECIMAL)
 payment_date (DATE)
 payment_method (ENUM: cash, bank_transfer, check, credit)
+payment_status (ENUM: pending, cleared, cancelled, bounced) -- NEW: Replaces check_status
 check_number (VARCHAR, nullable)
 check_date (DATE, nullable)
-check_status (ENUM: pending, cleared, nullable)
+clearance_date (DATE, nullable) -- Date when payment was cleared
 reference (VARCHAR)
 notes (TEXT)
 created_by (FK) → Users (audit trail)
 created_at, updated_at (TIMESTAMPS)
+
+INDEX: idx_supplier_payments_payment_status
 ```
 
 **PO Linking (Added Jan 17, 2026):**
@@ -625,12 +628,52 @@ Methods: -getSupplierPayments(supplierId, params) -
 
 ## 📊 Payment Methods
 
-| Method            | Use Case               | Auto-Cleared | Fields               |
-| ----------------- | ---------------------- | ------------ | -------------------- |
-| **Cash**          | Immediate cash payment | ✅ Yes       | -                    |
-| **Bank Transfer** | Wire/bank transfer     | ✅ Yes       | -                    |
-| **Check**         | Check payment          | ❌ No        | Number, Date, Status |
-| **Credit**        | Credit terms           | ✅ Yes       | -                    |
+| Method            | Use Case               | Initial Status | Balance Impact       | Fields Required |
+| ----------------- | ---------------------- | -------------- | -------------------- | --------------- |
+| **Cash**          | Immediate cash payment | `cleared`      | ✅ Immediate         | -               |
+| **Bank Transfer** | Wire/bank transfer     | `cleared`      | ✅ Immediate         | -               |
+| **Check**         | Check payment          | `pending`      | ⏳ On clearance only | Number, Date    |
+| **Credit**        | Credit terms           | `pending`      | ⏳ On clearance only | -               |
+
+### Payment Status Workflow
+
+**Immediate Payments (Cash/Bank):**
+
+```javascript
+payment_status = 'cleared';
+clearance_date = payment_date;
+balance -= payment_amount; // Immediate reduction
+```
+
+**Deferred Payments (Check/Credit):**
+
+```javascript
+payment_status = 'pending'
+clearance_date = null
+balance unchanged  // No reduction until cleared
+```
+
+**Clear Pending Payment:**
+
+```javascript
+// Manual action required
+PUT /api/suppliers/:id/payments/:paymentId/clear
+{
+  clearance_date: '2026-01-20'  // Must be >= payment_date and check_date
+}
+
+// Result:
+payment_status = 'cleared'
+clearance_date = selected_date
+balance -= payment_amount  // Reduction happens now
+```
+
+**Payment Status Values:**
+
+- `pending` - Payment created but not yet cleared (check/credit)
+- `cleared` - Payment completed and balance reduced
+- `cancelled` - Payment cancelled (future use)
+- `bounced` - Check bounced (future use)
 
 ---
 
@@ -661,13 +704,23 @@ NewBalance = OldBalance + ReceivedAmount - ReturnAmount - PaymentAmount
    - Example: Receive remaining 5kg → Balance += 0 (goods don't add again)
    - Only payment affects balance: Balance -= payment
 
-4. **Pay Supplier** → Balance **decreases** (we pay down the debt)
-   - Example: Pay Rs. 5,000 → Balance -= 5,000
-   - System prevents payment > outstanding balance + PO amount (first receive)
-   - System prevents payment > outstanding balance (subsequent receive)
+4. **Pay Supplier** → Balance **decreases** (ONLY if payment_status = 'cleared')
+   - **Cash/Bank**: Immediate → Balance -= amount (status='cleared')
+   - **Check/Credit**: Deferred → Balance unchanged until cleared (status='pending')
+   - Example: Pay Rs. 5,000 cash → Balance -= 5,000 immediately
+   - Example: Pay Rs. 5,000 check → Balance unchanged (pending)
+   - System prevents overpayment (only for immediate payments)
 
-5. **Delete Payment** → Balance **increases** (payment is reversed)
-   - Example: Delete Rs. 3,000 payment → Balance += 3,000
+5. **Clear Pending Payment** → Balance **decreases** (check/credit cleared)
+   - Manual action via Clear Payment button
+   - Example: Clear Rs. 5,000 check → Balance -= 5,000 now
+   - Validation: clearance_date >= payment_date and check_date
+
+6. **Delete Payment** → Balance **increases** (ONLY if payment was cleared)
+   - If payment_status = 'cleared' → Balance += amount (reversal)
+   - If payment_status = 'pending' → Balance unchanged (never deducted)
+   - Example: Delete cleared payment Rs. 3,000 → Balance += 3,000
+   - Example: Delete pending payment Rs. 3,000 → Balance unchanged
 
 ### Example Scenarios
 

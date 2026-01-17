@@ -1,5 +1,6 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
+import { supplierService } from '@/services/supplierService';
 import { usePaymentStore } from '@/stores/payment';
 import { useSupplierStore } from '@/stores/supplier';
 import { computed, onMounted, ref } from 'vue';
@@ -198,6 +199,91 @@ const getPaymentMethodLabel = method => {
     credit: 'Credit',
   };
   return methods[method] || method;
+};
+
+// Get payment status label
+const getPaymentStatusLabel = status => {
+  const labels = {
+    pending: 'Pending',
+    cleared: 'Cleared',
+    cancelled: 'Cancelled',
+    bounced: 'Bounced',
+  };
+  return labels[status] || status;
+};
+
+// Get payment status severity for Tag component
+const getPaymentStatusSeverity = status => {
+  const severities = {
+    pending: 'warning',
+    cleared: 'success',
+    cancelled: 'danger',
+    bounced: 'danger',
+  };
+  return severities[status] || 'info';
+};
+
+// Clear Payment functionality
+const showClearDialog = ref(false);
+const selectedPayment = ref(null);
+const clearanceDate = ref(new Date());
+const clearingPayment = ref(false);
+
+const openClearPaymentDialog = payment => {
+  selectedPayment.value = payment;
+  // Set default clearance date to today, but not before payment date or check date
+  const minDate = getClearanceMinDate();
+  clearanceDate.value = new Date() >= minDate ? new Date() : minDate;
+  showClearDialog.value = true;
+};
+
+const closeClearDialog = () => {
+  showClearDialog.value = false;
+  selectedPayment.value = null;
+  clearanceDate.value = new Date();
+};
+
+const getClearanceMinDate = () => {
+  if (!selectedPayment.value) return new Date();
+
+  // Clearance date must be >= payment_date and >= check_date (if check)
+  const paymentDate = new Date(selectedPayment.value.payment_date);
+  const checkDate = selectedPayment.value.check_date
+    ? new Date(selectedPayment.value.check_date)
+    : paymentDate;
+
+  return paymentDate > checkDate ? paymentDate : checkDate;
+};
+
+const clearPayment = async () => {
+  if (!clearanceDate.value) {
+    showError('Please select a clearance date');
+    return;
+  }
+
+  try {
+    clearingPayment.value = true;
+
+    // Format date as YYYY-MM-DD
+    const formattedDate = clearanceDate.value.toISOString().split('T')[0];
+
+    await supplierService.clearSupplierPayment(
+      supplierId.value,
+      selectedPayment.value.id,
+      formattedDate
+    );
+
+    showSuccess('Payment cleared successfully');
+    closeClearDialog();
+
+    // Refresh data
+    await paymentStore.fetchSupplierPaymentsBySupplierId(supplierId.value);
+    await supplierStore.fetchSupplierById(supplierId.value);
+  } catch (error) {
+    showError(error.message || 'Failed to clear payment');
+  } finally {
+    clearingPayment.value = false;
+  }
 };
 </script>
 
@@ -410,15 +496,12 @@ const getPaymentMethodLabel = method => {
                 {{ data.check_number || '-' }}
               </template>
             </Column>
-            <Column field="check_status" header="Check Status" style="width: 12%">
+            <Column field="payment_status" header="Status" style="width: 12%">
               <template #body="{ data }">
-                <div v-if="data.payment_method === 'check'">
-                  <Tag
-                    :value="data.clearance_date ? 'Cleared' : 'Pending'"
-                    :severity="data.clearance_date ? 'success' : 'warning'"
-                  />
-                </div>
-                <span v-else>-</span>
+                <Tag
+                  :value="getPaymentStatusLabel(data.payment_status)"
+                  :severity="getPaymentStatusSeverity(data.payment_status)"
+                />
               </template>
             </Column>
             <Column field="reference" header="Reference" style="width: 20%">
@@ -426,16 +509,27 @@ const getPaymentMethodLabel = method => {
                 {{ data.reference || data.notes || '-' }}
               </template>
             </Column>
-            <Column header="Action" style="width: 12%">
+            <Column header="Action" style="width: 15%">
               <template #body="{ data }">
-                <Button
-                  v-tooltip="'Delete Payment'"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  rounded
-                  text
-                  @click="deletePayment(data.id)"
-                />
+                <div style="display: flex; gap: 0.5rem">
+                  <Button
+                    v-if="data.payment_status === 'pending'"
+                    v-tooltip="'Clear Payment'"
+                    icon="pi pi-check"
+                    severity="success"
+                    rounded
+                    text
+                    @click="openClearPaymentDialog(data)"
+                  />
+                  <Button
+                    v-tooltip="'Delete Payment'"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    rounded
+                    text
+                    @click="deletePayment(data.id)"
+                  />
+                </div>
               </template>
             </Column>
           </DataTable>
@@ -447,6 +541,56 @@ const getPaymentMethodLabel = method => {
         </div>
       </div>
     </template>
+
+    <!-- Clear Payment Dialog -->
+    <Dialog
+      v-model:visible="showClearDialog"
+      header="Clear Payment"
+      :modal="true"
+      :closable="true"
+      style="width: 90%; max-width: 400px"
+    >
+      <div class="p-fluid">
+        <div class="form-group">
+          <label>Payment Details</label>
+          <div style="padding: 1rem; background: #f9fafb; border-radius: 6px; margin-bottom: 1rem">
+            <p style="margin: 0.25rem 0">
+              <strong>Method:</strong> {{ getPaymentMethodLabel(selectedPayment?.payment_method) }}
+            </p>
+            <p style="margin: 0.25rem 0">
+              <strong>Amount:</strong> Rs.
+              {{ selectedPayment?.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+            </p>
+            <p style="margin: 0.25rem 0">
+              <strong>Payment Date:</strong>
+              {{ selectedPayment?.payment_date }}
+            </p>
+            <p v-if="selectedPayment?.check_date" style="margin: 0.25rem 0">
+              <strong>Check Date:</strong> {{ selectedPayment?.check_date }}
+            </p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Clearance Date *</label>
+          <Calendar
+            v-model="clearanceDate"
+            date-format="yy-mm-dd"
+            show-icon
+            :min-date="getClearanceMinDate()"
+            placeholder="Select clearance date"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" severity="secondary" text @click="closeClearDialog" />
+        <Button
+          label="Clear Payment"
+          severity="success"
+          :loading="clearingPayment"
+          @click="clearPayment"
+        />
+      </template>
+    </Dialog>
 
     <!-- Payment Dialog -->
     <Dialog
