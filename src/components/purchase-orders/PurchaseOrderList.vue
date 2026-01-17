@@ -85,7 +85,7 @@
               v-if="data.status === 'pending' || data.status === 'partial'"
               v-tooltip.top="'Receive PO'"
               icon="pi pi-check"
-              class="p-button-rounded p-button-text p-button-sm p-button-success"
+              class="p-button-rounded p-button-text p-button-sm"
               @click="$emit('receive', data.id)"
             />
             <Button

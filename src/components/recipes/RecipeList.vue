@@ -18,7 +18,7 @@
         <div class="grid mb-3">
           <div class="col-12 md:col-4">
             <InputText
-              v-model="searchQuery"
+              v-model="filters.search"
               placeholder="Search recipes..."
               class="w-full"
               @input="handleSearch"
@@ -26,7 +26,7 @@
           </div>
           <div class="col-12 md:col-3">
             <Dropdown
-              v-model="statusFilter"
+              v-model="filters.status"
               :options="statusOptions"
               option-label="label"
               option-value="value"
@@ -37,7 +37,7 @@
           </div>
           <div class="col-12 md:col-3">
             <Dropdown
-              v-model="productFilter"
+              v-model="filters.product"
               :options="productOptions"
               option-label="label"
               option-value="value"
@@ -48,12 +48,11 @@
             />
           </div>
           <div class="col-12 md:col-2">
-            <Button
-              label="Clear"
-              icon="pi pi-filter-slash"
-              class="w-full"
-              outlined
-              @click="clearFilters"
+            <Avatar
+              v-badge.info="activeFilterCount"
+              :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
+              class="p-overlay-badge"
+              @click="hasActiveFilters && clearFilters()"
             />
           </div>
         </div>
@@ -233,6 +232,7 @@
 </template>
 
 <script setup>
+import { useFilterClear } from '@/composables/useFilterClear';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
 import { useRecipeStore } from '@/stores/recipe';
@@ -245,7 +245,7 @@ import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -253,9 +253,24 @@ const recipeStore = useRecipeStore();
 const productStore = useProductStore();
 const toast = useToastNotification();
 
-const searchQuery = ref('');
-const statusFilter = ref('');
-const productFilter = ref('');
+const filters = reactive({
+  search: '',
+  status: '',
+  product: '',
+  page: 1,
+  limit: 10,
+});
+
+const initialFilters = {
+  search: '',
+  status: '',
+  product: '',
+  page: 1,
+  limit: 10,
+};
+
+const { activeFilterCount, hasActiveFilters, clearAllFilters } = useFilterClear(filters);
+
 const deleteDialog = ref(false);
 const recipeToDelete = ref(null);
 const versionDialog = ref(false);
@@ -294,26 +309,29 @@ const loadProducts = async () => {
 };
 
 const handleSearch = () => {
-  recipeStore.setSearch(searchQuery.value);
+  filters.search = filters.search;
+  recipeStore.setSearch(filters.search);
 };
 
 const handleStatusFilter = () => {
-  recipeStore.setStatusFilter(statusFilter.value);
+  recipeStore.setStatusFilter(filters.status);
 };
 
 const handleProductFilter = () => {
-  recipeStore.setProductFilter(productFilter.value);
+  recipeStore.setProductFilter(filters.product);
 };
 
 const clearFilters = () => {
-  searchQuery.value = '';
-  statusFilter.value = '';
-  productFilter.value = '';
-  recipeStore.clearFilters();
+  clearAllFilters(initialFilters, {
+    onClear: () => {
+      recipeStore.clearFilters();
+    },
+  });
 };
 
 const onPage = event => {
-  recipeStore.setPage(event.page + 1);
+  filters.page = event.page + 1;
+  recipeStore.setPage(filters.page);
 };
 
 const navigateToCreate = () => {

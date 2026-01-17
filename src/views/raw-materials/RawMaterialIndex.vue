@@ -3,7 +3,7 @@ import RawMaterialList from '@/components/raw-materials/RawMaterialList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRawMaterialStore } from '@/stores/rawMaterial';
 import { useConfirm } from 'primevue/useconfirm';
-import { onMounted, reactive, watch } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -19,6 +19,26 @@ const filters = reactive({
   page: 1,
   limit: 10,
 });
+
+const isFiltersActive = computed(() => {
+  return filters.search !== '' || filters.category !== null || filters.status !== null;
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.search !== '') count++;
+  if (filters.category !== null) count++;
+  if (filters.status !== null) count++;
+  return count;
+});
+
+const clearFilters = async () => {
+  filters.search = '';
+  filters.category = null;
+  filters.status = null;
+  filters.page = 1;
+  await loadRawMaterials();
+};
 
 // Category options
 const categoryOptions = [
@@ -164,35 +184,35 @@ onMounted(() => {
       <div class="traceability-cards">
         <div class="traceability-card" @click="navigateToBatchGenealogy">
           <div class="card-icon">
-            <i class="pi pi-sitemap"></i>
+            <i class="pi pi-sitemap" />
           </div>
           <div class="card-content">
             <h4>Batch Genealogy</h4>
             <p>Trace all returns from a receipt batch</p>
           </div>
-          <i class="pi pi-arrow-right"></i>
+          <i class="pi pi-arrow-right" />
         </div>
 
         <div class="traceability-card" @click="navigateToReturnOrigin">
           <div class="card-icon">
-            <i class="pi pi-arrow-up-left"></i>
+            <i class="pi pi-arrow-up-left" />
           </div>
           <div class="card-content">
             <h4>Return Origin Tracer</h4>
             <p>Trace a return batch back to source</p>
           </div>
-          <i class="pi pi-arrow-right"></i>
+          <i class="pi pi-arrow-right" />
         </div>
 
         <div class="traceability-card" @click="navigateToMaterialSummary">
           <div class="card-icon">
-            <i class="pi pi-chart-bar"></i>
+            <i class="pi pi-chart-bar" />
           </div>
           <div class="card-content">
             <h4>Material Returns Summary</h4>
             <p>View comprehensive returns by material</p>
           </div>
-          <i class="pi pi-arrow-right"></i>
+          <i class="pi pi-arrow-right" />
         </div>
       </div>
     </div>
@@ -230,6 +250,14 @@ onMounted(() => {
           option-value="value"
           placeholder="All Status"
           class="filter-dropdown"
+        />
+
+        <!-- Clear Filters Button -->
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="isFiltersActive && clearFilters()"
         />
       </div>
     </div>

@@ -3,7 +3,7 @@ import RouteList from '@/components/routes/RouteList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRouteStore } from '@/stores/route';
 import { useConfirm } from 'primevue/useconfirm';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -53,6 +53,24 @@ const fetchData = async () => {
   } catch (err) {
     showError(err.message || 'Failed to load routes');
   }
+};
+
+const isFiltersActive = computed(() => {
+  return filters.search !== '' || filters.status !== '';
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.search !== '') count++;
+  if (filters.status !== '') count++;
+  return count;
+});
+
+const clearFilters = async () => {
+  filters.search = '';
+  filters.status = '';
+  filters.page = 1;
+  await fetchData();
 };
 
 const onPageChange = event => {
@@ -128,6 +146,12 @@ onMounted(() => {
           placeholder="Filter by Status"
           @change="fetchData"
         />
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="isFiltersActive && clearFilters()"
+        />
       </div>
     </div>
 
@@ -198,7 +222,6 @@ onMounted(() => {
 
 .search-box {
   flex: 1;
-  max-width: 400px;
 }
 
 .search-box input {

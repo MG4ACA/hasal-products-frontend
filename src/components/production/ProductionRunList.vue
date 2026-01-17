@@ -6,6 +6,7 @@
           <span>Production Runs</span>
           <Button
             label="New Production Run"
+            class="p-button-success"
             icon="pi pi-plus"
             @click="$router.push('/production-runs/create')"
           />
@@ -15,7 +16,7 @@
       <template #content>
         <!-- Filters -->
         <div class="grid mb-3">
-          <div class="col-12 md:col-3">
+          <div class="col-12 md:col-5">
             <InputText
               v-model="filters.search"
               placeholder="Search by run number..."
@@ -24,7 +25,7 @@
             />
           </div>
 
-          <div class="col-12 md:col-3">
+          <div class="col-12 md:col-2">
             <Dropdown
               v-model="filters.status"
               :options="statusOptions"
@@ -37,7 +38,7 @@
             />
           </div>
 
-          <div class="col-12 md:col-3">
+          <div class="col-12 md:col-2">
             <Dropdown
               v-model="filters.product_id"
               :options="productOptions"
@@ -51,7 +52,7 @@
             />
           </div>
 
-          <div class="col-12 md:col-3">
+          <div class="col-12 md:col-2">
             <Dropdown
               v-model="filters.recipe_id"
               :options="recipeOptions"
@@ -62,6 +63,15 @@
               show-clear
               filter
               @change="onFilterChange"
+            />
+          </div>
+
+          <div class="col-12 md:col-1">
+            <Avatar
+              v-badge.info="activeFilterCount"
+              :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
+              class="p-overlay-badge"
+              @click="hasActiveFilters && clearProductionFilters()"
             />
           </div>
         </div>
@@ -328,6 +338,7 @@
 </template>
 
 <script setup>
+import { useFilterClear } from '@/composables/useFilterClear';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
 import { useProductionStore } from '@/stores/production';
@@ -344,7 +355,7 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -362,12 +373,21 @@ const materialCheck = ref(null);
 const productOptions = ref([]);
 const recipeOptions = ref([]);
 
-const filters = ref({
+const filters = reactive({
   search: '',
   status: null,
   product_id: null,
   recipe_id: null,
 });
+
+const initialFilters = {
+  search: '',
+  status: null,
+  product_id: null,
+  recipe_id: null,
+};
+
+const { activeFilterCount, hasActiveFilters, clearAllFilters } = useFilterClear(filters);
 
 const completionData = ref({
   actual_output: 0,
@@ -403,11 +423,27 @@ const loadRecipes = async () => {
 };
 
 const onSearch = () => {
-  productionStore.setSearch(filters.value.search);
+  productionStore.pagination.page = 1;
+  productionStore.fetchProductionRuns();
 };
 
 const onFilterChange = () => {
-  productionStore.setFilters(filters.value);
+  if (filters.status) {
+    productionStore.setStatusFilter(filters.status);
+  }
+  if (filters.product_id) {
+    productionStore.setProductFilter(filters.product_id);
+  }
+  productionStore.pagination.page = 1;
+  productionStore.fetchProductionRuns();
+};
+
+const clearProductionFilters = () => {
+  clearAllFilters(initialFilters, {
+    onClear: () => {
+      productionStore.clearFilters();
+    },
+  });
 };
 
 const onPage = event => {

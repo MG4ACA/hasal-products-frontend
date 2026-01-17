@@ -6,6 +6,7 @@
           <span>Products</span>
           <Button
             label="Create Product"
+            class="p-button-success"
             icon="pi pi-plus"
             severity="success"
             @click="navigateToCreate"
@@ -18,7 +19,7 @@
         <div class="grid mb-3">
           <div class="col-12 md:col-6">
             <InputText
-              v-model="searchQuery"
+              v-model="filters.search"
               placeholder="Search by code, name..."
               class="w-full"
               @input="handleSearch"
@@ -26,7 +27,7 @@
           </div>
           <div class="col-12 md:col-3">
             <Dropdown
-              v-model="statusFilter"
+              v-model="filters.status"
               :options="statusOptions"
               option-label="label"
               option-value="value"
@@ -36,12 +37,11 @@
             />
           </div>
           <div class="col-12 md:col-3">
-            <Button
-              label="Clear Filters"
-              icon="pi pi-filter-slash"
-              class="w-full"
-              outlined
-              @click="clearFilters"
+            <Avatar
+              v-badge.info="activeFilterCount"
+              :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
+              class="p-overlay-badge"
+              @click="hasActiveFilters && clearFilters()"
             />
           </div>
         </div>
@@ -153,6 +153,7 @@
 </template>
 
 <script setup>
+import { useFilterClear } from '@/composables/useFilterClear';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
 import Button from 'primevue/button';
@@ -163,15 +164,29 @@ import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const productStore = useProductStore();
 const toast = useToastNotification();
 
-const searchQuery = ref('');
-const statusFilter = ref('');
+const filters = reactive({
+  search: '',
+  status: '',
+  page: 1,
+  limit: 10,
+});
+
+const initialFilters = {
+  search: '',
+  status: '',
+  page: 1,
+  limit: 10,
+};
+
+const { activeFilterCount, hasActiveFilters, clearAllFilters } = useFilterClear(filters);
+
 const deleteDialog = ref(false);
 const productToDelete = ref(null);
 
@@ -186,17 +201,20 @@ onMounted(() => {
 });
 
 const handleSearch = () => {
-  productStore.setSearch(searchQuery.value);
+  filters.search = filters.search;
+  productStore.setSearch(filters.search);
 };
 
 const handleStatusFilter = () => {
-  productStore.setStatusFilter(statusFilter.value);
+  productStore.setStatusFilter(filters.status);
 };
 
 const clearFilters = () => {
-  searchQuery.value = '';
-  statusFilter.value = '';
-  productStore.clearFilters();
+  clearAllFilters(initialFilters, {
+    onClear: () => {
+      productStore.clearFilters();
+    },
+  });
 };
 
 const onPage = event => {

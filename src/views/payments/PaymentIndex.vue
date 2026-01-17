@@ -79,6 +79,13 @@
             @date-select="fetchPayments"
           />
         </div>
+
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="isFiltersActive && clearFilters()"
+        />
       </div>
     </div>
 
@@ -210,6 +217,37 @@ const filters = ref({
   page: 1,
   limit: 10,
 });
+
+const isFiltersActive = computed(() => {
+  return (
+    filters.value.outlet_id !== null ||
+    filters.value.payment_method !== null ||
+    filters.value.check_status !== null ||
+    filters.value.start_date !== null ||
+    filters.value.end_date !== null
+  );
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.value.outlet_id !== null) count++;
+  if (filters.value.payment_method !== null) count++;
+  if (filters.value.check_status !== null) count++;
+  if (filters.value.start_date !== null) count++;
+  if (filters.value.end_date !== null) count++;
+  return count;
+});
+
+const clearFilters = async () => {
+  filters.value.outlet_id = null;
+  filters.value.payment_method = null;
+  filters.value.check_status = null;
+  filters.value.start_date = null;
+  filters.value.end_date = null;
+  filters.value.page = 1;
+  paginatorFirst.value = 0;
+  await fetchPayments();
+};
 
 const paginatorFirst = ref(0);
 

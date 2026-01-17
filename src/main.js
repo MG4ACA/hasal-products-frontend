@@ -14,6 +14,9 @@ import App from './App.vue';
 import router from './router';
 
 // PrimeVue components
+import Avatar from 'primevue/avatar';
+import Badge from 'primevue/badge';
+import BadgeDirective from 'primevue/badgedirective';
 import Breadcrumb from 'primevue/breadcrumb';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
@@ -66,6 +69,8 @@ app.component('Calendar', Calendar);
 app.component('DataTable', DataTable);
 app.component('Column', Column);
 app.component('Message', Message);
+app.component('Avatar', Avatar);
+app.component('Badge', Badge);
 app.component('ProgressBar', ProgressBar);
 app.component('InputGroup', InputGroup);
 app.component('Dialog', Dialog);
@@ -84,5 +89,7 @@ app.component('IconField', IconField);
 app.component('InputIcon', InputIcon);
 app.component('TabPanel', TabPanel);
 app.component('Checkbox', Checkbox);
+
+app.directive('badge', BadgeDirective);
 
 app.mount('#app');

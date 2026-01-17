@@ -286,6 +286,7 @@
             v-if="activeStep < 2"
             label="Next"
             icon="pi pi-arrow-right"
+            class="p-button-success"
             icon-pos="right"
             @click="nextStep"
           />

@@ -178,6 +178,7 @@ onMounted(() => {
           />
           <Button
             label="Save Employee"
+            class="p-button-success"
             icon="pi pi-check"
             :loading="loading"
             :disabled="!formData.name || !formData.type || !formData.status"

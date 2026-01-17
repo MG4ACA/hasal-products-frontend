@@ -81,6 +81,7 @@
               <Button
                 label="Add SKU"
                 icon="pi pi-plus"
+                class="p-button-success"
                 size="small"
                 @click="showSkuDialog = true"
               />
@@ -134,6 +135,8 @@
               :label="isEditMode ? 'Update Product' : 'Create Product'"
               icon="pi pi-check"
               :loading="loading"
+                          class="p-button-success"
+
             />
             <Button
               type="button"

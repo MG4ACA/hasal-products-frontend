@@ -88,15 +88,14 @@
               @date-select="applyFilters"
             />
           </div>
-
-          <div class="filter-item filter-actions">
-            <Button
-              label="Reset"
-              icon="pi pi-refresh"
-              class="p-button-outlined"
-              @click="resetFilters"
-            />
-          </div>
+        </div>
+        <div class="filter-item justify-content-end ml-3">
+          <Avatar
+            v-badge.info="activeFilterCount"
+            :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+            class="p-overlay-badge"
+            @click="isFiltersActive && clearFilters()"
+          />
         </div>
       </template>
     </Card>
@@ -197,6 +196,26 @@ const filters = reactive({
   end_date: null,
 });
 
+const isFiltersActive = computed(() => {
+  return (
+    filters.search !== '' ||
+    filters.status !== '' ||
+    filters.supplier_id !== null ||
+    filters.start_date !== null ||
+    filters.end_date !== null
+  );
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.search !== '') count++;
+  if (filters.status !== '') count++;
+  if (filters.supplier_id !== null) count++;
+  if (filters.start_date !== null) count++;
+  if (filters.end_date !== null) count++;
+  return count;
+});
+
 const pagination = computed(() => purchaseOrderStore.getPagination);
 const receiveDialogVisible = ref(false);
 const deleteDialogVisible = ref(false);
@@ -248,7 +267,7 @@ const applyFilters = async () => {
   }
 };
 
-const resetFilters = () => {
+const clearFilters = () => {
   filters.search = '';
   filters.status = '';
   filters.supplier_id = null;
@@ -406,6 +425,7 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   align-items: end;
+  width: 100%;
 }
 
 .filter-item {
@@ -418,11 +438,6 @@ onMounted(() => {
   font-size: 0.9rem;
   font-weight: 600;
   color: #4a5568;
-}
-
-.filter-actions {
-  display: flex;
-  align-items: flex-end;
 }
 
 .list-card {
@@ -456,7 +471,8 @@ onMounted(() => {
   padding: 20px;
 }
 
-:deep(.p-card-content) {
+:deep(.filters-card .p-card-content) {
   padding: 0;
+  display: flex;
 }
 </style>

@@ -1,9 +1,9 @@
 /* Global Styles */
 
 :root {
-  --primary-color: #3b82f6;
+  --primary-color: #076aff;
   --primary-dark: #2563eb;
-  --success-color: #10b981;
+  --success-color: var(--primary-color);
   --warning-color: #f59e0b;
   --danger-color: #ef4444;
   --info-color: #06b6d4;
@@ -13,7 +13,7 @@
   --text-light: #9ca3af;
 
   --border-color: #e5e7eb;
-  --surface-ground: #f9fafb;
+  --surface-ground: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   --surface-card: #ffffff;
 
   --sidebar-width: 260px;
@@ -60,7 +60,12 @@
 .p-inputtext {
   height: 2.4rem;
 }
-
+.p-button-success {
+  background: var(--success-color);
+}
+.p-button-text {
+  color: var(--primary-dark);
+}
 .p-icon-field > .p-input-icon {
   margin-top: -0.5rem !important;
 }
@@ -125,6 +130,29 @@
 
 .p-steps .p-menuitem-link {
   background: transparent;
+}
+
+.card-header {
+  background: var(--surface-ground) !important;
+}
+
+.p-badge.p-badge-dot {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.p-avatar {
+  width: auto;
+  padding: 0.5rem;
+  background: var(--surface-ground);
+  border: 1px solid var(--surface-ground);
+  align-self: end;
+}
+.p-avatar .p-avatar-icon {
+  color: var(--primary-color);
+}
+.p-avatar .p-badge-info {
+  background: var(--primary-color);
 }
 
 /* Animation */

@@ -46,6 +46,12 @@
           placeholder="Filter by Payment Terms"
           @change="fetchData"
         />
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="isFiltersActive && clearFilters()"
+        />
       </div>
     </div>
 
@@ -78,7 +84,7 @@ import SupplierList from '@/components/suppliers/SupplierList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useSupplierStore } from '@/stores/supplier';
 import { useConfirm } from 'primevue/useconfirm';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -94,6 +100,26 @@ const filters = reactive({
   page: 1,
   limit: 10,
 });
+
+const isFiltersActive = computed(() => {
+  return filters.search !== '' || filters.status !== '' || filters.payment_terms !== '';
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.search !== '') count++;
+  if (filters.status !== '') count++;
+  if (filters.payment_terms !== '') count++;
+  return count;
+});
+
+const clearFilters = async () => {
+  filters.search = '';
+  filters.status = '';
+  filters.payment_terms = '';
+  filters.page = 1;
+  await fetchData();
+};
 
 const pagination = ref({
   total: 0,

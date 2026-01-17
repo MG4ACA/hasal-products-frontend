@@ -111,7 +111,7 @@ const formatType = type => {
           <Button
             v-tooltip.top="'Edit'"
             icon="pi pi-pencil"
-            class="p-button-rounded p-button-text p-button-success"
+            class="p-button-rounded p-button-text"
             @click="emit('edit', data.id)"
           />
           <Button

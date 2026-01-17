@@ -1,10 +1,11 @@
 <script setup>
 import VehicleAssignment from '@/components/vehicles/VehicleAssignment.vue';
 import VehicleList from '@/components/vehicles/VehicleList.vue';
+import { useFilterClear } from '@/composables/useFilterClear';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useVehicleStore } from '@/stores/vehicle';
 import { useConfirm } from 'primevue/useconfirm';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -12,8 +13,22 @@ const vehicleStore = useVehicleStore();
 const { showSuccess, showError } = useToastNotification();
 const confirm = useConfirm();
 
-const searchQuery = ref('');
-const statusFilter = ref('');
+const filters = reactive({
+  search: '',
+  status: '',
+  page: 1,
+  limit: 10,
+});
+
+const initialFilters = {
+  search: '',
+  status: '',
+  page: 1,
+  limit: 10,
+};
+
+const { activeFilterCount, hasActiveFilters, clearAllFilters } = useFilterClear(filters);
+
 const currentPage = ref(1);
 const pageSize = ref(10);
 const loading = ref(false);
@@ -28,27 +43,33 @@ const statusOptions = [
 
 // Debounce timer
 let searchTimeout;
-watch(searchQuery, () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    currentPage.value = 1;
-    fetchVehicles();
-  }, 500);
-});
+watch(
+  () => filters.search,
+  () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      filters.page = 1;
+      fetchVehicles();
+    }, 500);
+  }
+);
 
-watch([statusFilter], () => {
-  currentPage.value = 1;
-  fetchVehicles();
-});
+watch(
+  () => filters.status,
+  () => {
+    filters.page = 1;
+    fetchVehicles();
+  }
+);
 
 const fetchVehicles = async () => {
   loading.value = true;
   try {
     // Update store filters and pagination
-    vehicleStore.pagination.page = currentPage.value;
-    vehicleStore.pagination.limit = pageSize.value;
-    vehicleStore.filters.search = searchQuery.value;
-    vehicleStore.filters.status = statusFilter.value;
+    vehicleStore.pagination.page = filters.page;
+    vehicleStore.pagination.limit = filters.limit;
+    vehicleStore.filters.search = filters.search;
+    vehicleStore.filters.status = filters.status;
 
     await vehicleStore.fetchVehicles();
   } catch (error) {
@@ -59,8 +80,14 @@ const fetchVehicles = async () => {
 };
 
 const handlePageChange = event => {
-  currentPage.value = event.page + 1;
+  filters.page = event.page + 1;
   fetchVehicles();
+};
+
+const onClearFilters = () => {
+  clearAllFilters(initialFilters, {
+    onClear: fetchVehicles,
+  });
 };
 
 const handleView = id => {
@@ -139,7 +166,7 @@ onMounted(() => {
           <IconField>
             <InputIcon class="pi pi-search" />
             <InputText
-              v-model="searchQuery"
+              v-model="filters.search"
               placeholder="Search vehicles..."
               class="search-input"
             />
@@ -147,12 +174,19 @@ onMounted(() => {
         </div>
 
         <Dropdown
-          v-model="statusFilter"
+          v-model="filters.status"
           :options="statusOptions"
           option-label="label"
           option-value="value"
           placeholder="Filter by status"
           class="filter-dropdown"
+        />
+
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="hasActiveFilters && onClearFilters()"
         />
       </div>
     </div>
@@ -169,7 +203,7 @@ onMounted(() => {
     </div>
     <div v-if="!loading && vehicleStore.vehicles.length > 0" class="pagination-container">
       <Paginator
-        :rows="pageSize"
+        :rows="filters.limit"
         :total-records="vehicleStore.pagination.total"
         @page="handlePageChange"
       />
@@ -212,8 +246,7 @@ onMounted(() => {
 }
 
 .filters {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
   gap: 1rem;
   align-items: center;
 }

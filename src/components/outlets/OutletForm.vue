@@ -234,6 +234,7 @@ onMounted(() => {
           />
           <Button
             label="Save Outlet"
+            class="p-button-success"
             icon="pi pi-check"
             :loading="loading"
             :disabled="!formData.name || !formData.payment_terms || !formData.status"

@@ -56,6 +56,32 @@ const salesRefOptions = computed(() => [
 
 const routeOptions = computed(() => [{ name: 'All Routes', id: null }, ...routeStore.routes]);
 
+const isFiltersActive = computed(() => {
+  return (
+    filters.value.search !== '' ||
+    filters.value.outlet_id !== null ||
+    filters.value.sales_ref_id !== null ||
+    filters.value.route_id !== null ||
+    filters.value.payment_status !== null ||
+    filters.value.payment_method !== null ||
+    filters.value.start_date !== null ||
+    filters.value.end_date !== null
+  );
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.value.search !== '') count++;
+  if (filters.value.outlet_id !== null) count++;
+  if (filters.value.sales_ref_id !== null) count++;
+  if (filters.value.route_id !== null) count++;
+  if (filters.value.payment_status !== null) count++;
+  if (filters.value.payment_method !== null) count++;
+  if (filters.value.start_date !== null) count++;
+  if (filters.value.end_date !== null) count++;
+  return count;
+});
+
 // Methods
 const fetchInvoices = async () => {
   const params = {
@@ -87,7 +113,7 @@ const handleSearch = () => {
   fetchInvoices();
 };
 
-const handleClearFilters = () => {
+const clearFilters = () => {
   filters.value = {
     search: '',
     outlet_id: null,
@@ -171,11 +197,11 @@ onMounted(async () => {
       </div>
       <div class="header-actions">
         <Button
+          v-tooltip="'Refresh'"
           icon="pi pi-refresh"
           rounded
           severity="primary"
           @click="fetchInvoices"
-          v-tooltip="'Refresh'"
         />
         <Button label="Create Invoice" icon="pi pi-plus" @click="handleCreate" />
       </div>
@@ -295,11 +321,11 @@ onMounted(async () => {
       </div>
 
       <div class="filters-actions">
-        <Button
-          label="Clear Filters"
-          icon="pi pi-filter-slash"
-          severity="secondary"
-          @click="handleClearFilters"
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="isFiltersActive && clearFilters()"
         />
         <Button label="Apply Filters" icon="pi pi-search" @click="handleSearch" />
       </div>

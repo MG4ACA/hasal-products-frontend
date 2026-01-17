@@ -192,6 +192,7 @@
               type="submit"
               :label="isEditMode ? 'Update Production Run' : 'Create Production Run'"
               icon="pi pi-check"
+              class="p-button-success"
               :loading="loading"
             />
             <Button

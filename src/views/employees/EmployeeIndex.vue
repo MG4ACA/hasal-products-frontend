@@ -4,7 +4,7 @@ import { useToastNotification } from '@/composables/useToastNotification';
 import { useEmployeeStore } from '@/stores/employee';
 import { useRouteStore } from '@/stores/route';
 import { useConfirm } from 'primevue/useconfirm';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -22,6 +22,30 @@ const filters = reactive({
   page: 1,
   limit: 10,
 });
+
+const isFiltersActive = computed(() => {
+  return (
+    filters.search !== '' || filters.status !== '' || filters.type !== '' || filters.route_id !== ''
+  );
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.search !== '') count++;
+  if (filters.status !== '') count++;
+  if (filters.type !== '') count++;
+  if (filters.route_id !== '') count++;
+  return count;
+});
+
+const clearFilters = async () => {
+  filters.search = '';
+  filters.status = '';
+  filters.type = '';
+  filters.route_id = '';
+  filters.page = 1;
+  await fetchData();
+};
 
 const pagination = ref({
   total: 0,
@@ -183,6 +207,12 @@ onMounted(() => {
           placeholder="Filter by Route"
           @change="fetchData"
         />
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="isFiltersActive && clearFilters()"
+        />
       </div>
     </div>
 
@@ -253,7 +283,6 @@ onMounted(() => {
 
 .search-box {
   flex: 1;
-  max-width: 400px;
 }
 
 .search-box input {
