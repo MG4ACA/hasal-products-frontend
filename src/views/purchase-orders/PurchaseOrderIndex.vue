@@ -111,8 +111,12 @@
           @delete="confirmDelete"
           @receive="openReceiveDialog"
         />
+      </template>
+    </Card>
 
-        <!-- Pagination -->
+    <!-- Pagination -->
+    <Card class="pagination-card">
+      <template #content>
         <div v-if="pagination.total > 0" class="pagination-container">
           <Paginator
             :rows="pagination.limit"
@@ -178,7 +182,6 @@ import PurchaseOrderList from '@/components/purchase-orders/PurchaseOrderList.vu
 import ReceivePO from '@/components/purchase-orders/ReceivePO.vue';
 import { usePurchaseOrderStore } from '@/stores/purchaseOrder';
 import { useSupplierStore } from '@/stores/supplier';
-
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -438,10 +441,6 @@ onMounted(() => {
   font-size: 0.9rem;
   font-weight: 600;
   color: #4a5568;
-}
-
-.list-card {
-  margin-bottom: 24px;
 }
 
 .pagination-container {

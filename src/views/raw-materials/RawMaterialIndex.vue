@@ -263,24 +263,33 @@ onMounted(() => {
     </div>
 
     <!-- Raw Materials List -->
-    <RawMaterialList
-      :raw-materials="rawMaterialStore.rawMaterials"
-      :loading="rawMaterialStore.loading"
-      @view="handleView"
-      @edit="handleEdit"
-      @delete="handleDelete"
-    />
+    <Card class="list-card">
+      <template #content>
+        <RawMaterialList
+          :raw-materials="rawMaterialStore.rawMaterials"
+          :loading="rawMaterialStore.loading"
+          @view="handleView"
+          @edit="handleEdit"
+          @delete="handleDelete"
+        />
+      </template>
+    </Card>
 
     <!-- Pagination -->
-    <div v-if="rawMaterialStore.pagination.total > 0" class="pagination-section">
-      <Paginator
-        :rows="filters.limit"
-        :total-records="rawMaterialStore.pagination.total"
-        :first="(filters.page - 1) * filters.limit"
-        :rows-per-page-options="[10, 25, 50]"
-        @page="onPageChange"
-      />
-    </div>
+    <Card class="pagination-card">
+      <template #content>
+        <div v-if="rawMaterialStore.pagination.total > 0" class="pagination-container">
+          <Paginator
+            :rows="filters.limit"
+            :total-records="rawMaterialStore.pagination.total"
+            :first="(filters.page - 1) * filters.limit"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} raw materials"
+            @page="onPageChange"
+          />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 

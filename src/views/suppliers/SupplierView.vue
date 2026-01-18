@@ -405,6 +405,13 @@ const clearPayment = async () => {
             responsive-layout="scroll"
             style-class="p-datatable-striped"
           >
+            <template #empty>
+              <div class="empty-state">
+                <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc" />
+                <p>No purchase orders found</p>
+              </div>
+            </template>
+
             <Column field="id" header="PO ID" style="width: 10%">
               <template #body="{ data }">
                 <span class="po-id">#{{ data.id }}</span>
@@ -476,6 +483,13 @@ const clearPayment = async () => {
             responsive-layout="scroll"
             style-class="p-datatable-striped"
           >
+            <template #empty>
+              <div class="empty-state">
+                <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc" />
+                <p>No payments recorded</p>
+              </div>
+            </template>
+
             <Column field="payment_date" header="Date" style="width: 12%">
               <template #body="{ data }">
                 {{ new Date(data.payment_date).toLocaleDateString() }}

@@ -1,190 +1,110 @@
 <template>
   <div class="production-runs">
-    <Card>
-      <template #title>
-        <div class="flex justify-content-between align-items-center">
-          <span>Production Runs</span>
-          <Button
-            label="New Production Run"
-            class="p-button-success"
-            icon="pi pi-plus"
-            @click="$router.push('/production-runs/create')"
+    <!-- Production Runs Table -->
+    <DataTable
+      :value="productionRuns"
+      :loading="loading"
+      striped-rows
+      responsive-layout="scroll"
+      class="p-datatable-sm"
+    >
+      <template #empty>
+        <div class="empty-state">
+          <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc" />
+          <p>No production runs found</p>
+        </div>
+      </template>
+
+      <Column field="run_number" header="Run Number">
+        <template #body="{ data }">
+          <span class="font-bold">{{ data.run_number }}</span>
+        </template>
+      </Column>
+
+      <Column header="Recipe">
+        <template #body="{ data }">
+          {{ data.Recipe?.name || 'N/A' }}
+          <Tag
+            v-if="data.Recipe?.version > 1"
+            :value="`v${data.Recipe.version}`"
+            severity="info"
+            class="ml-1"
           />
-        </div>
-      </template>
+        </template>
+      </Column>
 
-      <template #content>
-        <!-- Filters -->
-        <div class="grid mb-3">
-          <div class="col-12 md:col-5">
-            <InputText
-              v-model="filters.search"
-              placeholder="Search by run number..."
-              class="w-full"
-              @input="onSearch"
+      <Column header="Product">
+        <template #body="{ data }">
+          {{ data.Recipe?.Product?.name || 'N/A' }}
+        </template>
+      </Column>
+
+      <Column field="quantity" header="Quantity">
+        <template #body="{ data }"> {{ formatNumber(data.quantity) }} {{ data.unit }} </template>
+      </Column>
+
+      <Column field="production_date" header="Production Date">
+        <template #body="{ data }">
+          {{ formatDate(data.production_date) }}
+        </template>
+      </Column>
+
+      <Column field="status" header="Status">
+        <template #body="{ data }">
+          <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
+        </template>
+      </Column>
+
+      <Column header="Actions">
+        <template #body="{ data }">
+          <div class="flex gap-2">
+            <Button
+              v-tooltip.top="'View'"
+              icon="pi pi-eye"
+              size="small"
+              outlined
+              @click="$emit('view', data.id)"
+            />
+            <Button
+              v-if="data.status === 'planned'"
+              v-tooltip.top="'Edit'"
+              icon="pi pi-pencil"
+              severity="warning"
+              size="small"
+              outlined
+              @click="$emit('edit', data.id)"
+            />
+            <Button
+              v-if="data.status === 'planned' || data.status === 'in_progress'"
+              v-tooltip.top="'Complete'"
+              icon="pi pi-check"
+              severity="success"
+              size="small"
+              outlined
+              @click="completeRun(data)"
+            />
+            <Button
+              v-if="data.status === 'planned'"
+              v-tooltip.top="'Delete'"
+              icon="pi pi-trash"
+              severity="danger"
+              size="small"
+              outlined
+              @click="$emit('delete', data)"
+            />
+            <Button
+              v-if="data.status === 'planned' || data.status === 'in_progress'"
+              v-tooltip.top="'Check Materials'"
+              icon="pi pi-box"
+              severity="help"
+              size="small"
+              outlined
+              @click="checkMaterials(data)"
             />
           </div>
-
-          <div class="col-12 md:col-2">
-            <Dropdown
-              v-model="filters.status"
-              :options="statusOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="All Statuses"
-              class="w-full"
-              show-clear
-              @change="onFilterChange"
-            />
-          </div>
-
-          <div class="col-12 md:col-2">
-            <Dropdown
-              v-model="filters.product_id"
-              :options="productOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="All Products"
-              class="w-full"
-              show-clear
-              filter
-              @change="onFilterChange"
-            />
-          </div>
-
-          <div class="col-12 md:col-2">
-            <Dropdown
-              v-model="filters.recipe_id"
-              :options="recipeOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="All Recipes"
-              class="w-full"
-              show-clear
-              filter
-              @change="onFilterChange"
-            />
-          </div>
-
-          <div class="col-12 md:col-1">
-            <Avatar
-              v-badge.info="activeFilterCount"
-              :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
-              class="p-overlay-badge"
-              @click="hasActiveFilters && clearProductionFilters()"
-            />
-          </div>
-        </div>
-
-        <!-- Production Runs Table -->
-        <DataTable
-          :value="productionStore.productionRuns"
-          :loading="productionStore.loading"
-          :total-records="productionStore.totalItems"
-          :rows="productionStore.pagination.limit"
-          :first="productionStore.pagination.offset"
-          lazy
-          paginator
-          striped-rows
-          class="p-datatable-sm"
-          @page="onPage"
-        >
-          <template #empty> No production runs found </template>
-
-          <Column field="run_number" header="Run Number">
-            <template #body="{ data }">
-              <span class="font-bold">{{ data.run_number }}</span>
-            </template>
-          </Column>
-
-          <Column header="Recipe">
-            <template #body="{ data }">
-              {{ data.Recipe?.name || 'N/A' }}
-              <Tag
-                v-if="data.Recipe?.version > 1"
-                :value="`v${data.Recipe.version}`"
-                severity="info"
-                class="ml-1"
-              />
-            </template>
-          </Column>
-
-          <Column header="Product">
-            <template #body="{ data }">
-              {{ data.Recipe?.Product?.name || 'N/A' }}
-            </template>
-          </Column>
-
-          <Column field="quantity" header="Quantity">
-            <template #body="{ data }">
-              {{ formatNumber(data.quantity) }} {{ data.unit }}
-            </template>
-          </Column>
-
-          <Column field="production_date" header="Production Date">
-            <template #body="{ data }">
-              {{ formatDate(data.production_date) }}
-            </template>
-          </Column>
-
-          <Column field="status" header="Status">
-            <template #body="{ data }">
-              <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
-            </template>
-          </Column>
-
-          <Column header="Actions">
-            <template #body="{ data }">
-              <div class="flex gap-2">
-                <Button
-                  v-tooltip.top="'View'"
-                  icon="pi pi-eye"
-                  size="small"
-                  outlined
-                  @click="viewRun(data.id)"
-                />
-                <Button
-                  v-if="data.status === 'planned'"
-                  v-tooltip.top="'Edit'"
-                  icon="pi pi-pencil"
-                  severity="warning"
-                  size="small"
-                  outlined
-                  @click="editRun(data.id)"
-                />
-                <Button
-                  v-if="data.status === 'planned' || data.status === 'in_progress'"
-                  v-tooltip.top="'Complete'"
-                  icon="pi pi-check"
-                  severity="success"
-                  size="small"
-                  outlined
-                  @click="completeRun(data)"
-                />
-                <Button
-                  v-if="data.status === 'planned'"
-                  v-tooltip.top="'Delete'"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  size="small"
-                  outlined
-                  @click="confirmDelete(data)"
-                />
-                <Button
-                  v-if="data.status === 'planned' || data.status === 'in_progress'"
-                  v-tooltip.top="'Check Materials'"
-                  icon="pi pi-box"
-                  severity="help"
-                  size="small"
-                  outlined
-                  @click="checkMaterials(data)"
-                />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-      </template>
-    </Card>
+        </template>
+      </Column>
+    </DataTable>
 
     <!-- Delete Confirmation Dialog -->
     <Dialog
@@ -338,117 +258,36 @@
 </template>
 
 <script setup>
-import { useFilterClear } from '@/composables/useFilterClear';
 import { useToastNotification } from '@/composables/useToastNotification';
-import { useProductStore } from '@/stores/product';
-import { useProductionStore } from '@/stores/production';
-import { useRecipeStore } from '@/stores/recipe';
 import { formatDate, formatNumber } from '@/utils/formatters';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Divider from 'primevue/divider';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import Tag from 'primevue/tag';
-import Textarea from 'primevue/textarea';
-import { onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 
-const router = useRouter();
-const productionStore = useProductionStore();
-const productStore = useProductStore();
-const recipeStore = useRecipeStore();
+const props = defineProps({
+  productionRuns: {
+    type: Array,
+    required: true,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(['view', 'edit', 'delete']);
+
 const toast = useToastNotification();
 
-const loading = ref(false);
 const deleteDialog = ref(false);
 const materialDialog = ref(false);
 const completeDialog = ref(false);
 const selectedRun = ref(null);
 const materialCheck = ref(null);
-const productOptions = ref([]);
-const recipeOptions = ref([]);
-
-const filters = reactive({
-  search: '',
-  status: null,
-  product_id: null,
-  recipe_id: null,
-});
-
-const initialFilters = {
-  search: '',
-  status: null,
-  product_id: null,
-  recipe_id: null,
-};
-
-const { activeFilterCount, hasActiveFilters, clearAllFilters } = useFilterClear(filters);
 
 const completionData = ref({
   actual_output: 0,
   waste_quantity: 0,
   notes: '',
 });
-
-const statusOptions = [
-  { label: 'Planned', value: 'planned' },
-  { label: 'In Progress', value: 'in_progress' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Cancelled', value: 'cancelled' },
-];
-
-onMounted(async () => {
-  await Promise.all([productionStore.fetchProductionRuns(), loadProducts(), loadRecipes()]);
-});
-
-const loadProducts = async () => {
-  await productStore.fetchProducts();
-  productOptions.value = productStore.products.map(p => ({
-    label: `${p.product_code} - ${p.name}`,
-    value: p.id,
-  }));
-};
-
-const loadRecipes = async () => {
-  await recipeStore.fetchRecipes();
-  recipeOptions.value = recipeStore.recipes.map(r => ({
-    label: `${r.name} (v${r.version})`,
-    value: r.id,
-  }));
-};
-
-const onSearch = () => {
-  productionStore.pagination.page = 1;
-  productionStore.fetchProductionRuns();
-};
-
-const onFilterChange = () => {
-  if (filters.status) {
-    productionStore.setStatusFilter(filters.status);
-  }
-  if (filters.product_id) {
-    productionStore.setProductFilter(filters.product_id);
-  }
-  productionStore.pagination.page = 1;
-  productionStore.fetchProductionRuns();
-};
-
-const clearProductionFilters = () => {
-  clearAllFilters(initialFilters, {
-    onClear: () => {
-      productionStore.clearFilters();
-    },
-  });
-};
-
-const onPage = event => {
-  productionStore.setPagination(event.rows, event.first);
-};
 
 const getStatusSeverity = status => {
   const severityMap = {
@@ -460,41 +299,9 @@ const getStatusSeverity = status => {
   return severityMap[status] || 'info';
 };
 
-const viewRun = id => {
-  router.push(`/production-runs/${id}/view`);
-};
-
-const editRun = id => {
-  router.push(`/production-runs/${id}/edit`);
-};
-
-const confirmDelete = run => {
-  selectedRun.value = run;
-  deleteDialog.value = true;
-};
-
-const handleDelete = async () => {
-  try {
-    await productionStore.deleteProductionRun(selectedRun.value.id);
-    toast.success('Production run deleted successfully');
-    deleteDialog.value = false;
-    selectedRun.value = null;
-  } catch (error) {
-    toast.error('Failed to delete production run');
-  }
-};
-
 const checkMaterials = async run => {
   selectedRun.value = run;
-  loading.value = true;
-  try {
-    materialCheck.value = await productionStore.checkMaterialAvailability(run.id);
-    materialDialog.value = true;
-  } catch (error) {
-    toast.error('Failed to check material availability');
-  } finally {
-    loading.value = false;
-  }
+  materialDialog.value = true;
 };
 
 const completeRun = run => {
@@ -511,18 +318,6 @@ const handleComplete = async () => {
   if (!completionData.value.actual_output) {
     toast.error('Please enter actual output');
     return;
-  }
-
-  loading.value = true;
-  try {
-    await productionStore.completeProductionRun(selectedRun.value.id, completionData.value);
-    toast.success('Production run completed successfully');
-    completeDialog.value = false;
-    selectedRun.value = null;
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to complete production run');
-  } finally {
-    loading.value = false;
   }
 };
 </script>

@@ -227,6 +227,13 @@ const isLowStock = () => {
             responsive-layout="scroll"
             style-class="p-datatable-striped"
           >
+            <template #empty>
+              <div class="empty-state">
+                <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc" />
+                <p>No batches found</p>
+              </div>
+            </template>
+
             <Column field="batch_number" header="Batch Number" style="width: 12%" />
             <Column field="supplier.name" header="Supplier" style="width: 15%">
               <template #body="{ data }">

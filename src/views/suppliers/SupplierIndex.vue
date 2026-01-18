@@ -59,23 +59,35 @@
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
     </div>
 
-    <SupplierList
-      v-else
-      :suppliers="supplierStore.suppliers"
-      :loading="loading"
-      @view="viewSupplier"
-      @edit="editSupplier"
-      @delete="confirmDelete"
-    />
+    <!-- Suppliers List -->
+    <Card class="list-card">
+      <template #content>
+        <SupplierList
+          v-if="!loading"
+          :suppliers="supplierStore.suppliers"
+          :loading="loading"
+          @view="viewSupplier"
+          @edit="editSupplier"
+          @delete="confirmDelete"
+        />
+      </template>
+    </Card>
 
-    <div v-if="!loading && supplierStore.suppliers.length > 0" class="pagination-container">
-      <Paginator
-        :rows="pagination.limit"
-        :total-records="pagination.total"
-        :first="(pagination.page - 1) * pagination.limit"
-        @page="onPageChange"
-      />
-    </div>
+    <!-- Pagination -->
+    <Card class="pagination-card">
+      <template #content>
+        <div v-if="pagination.total > 0" class="pagination-container">
+          <Paginator
+            :rows="pagination.limit"
+            :total-records="pagination.total"
+            :first="(pagination.page - 1) * pagination.limit"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} suppliers"
+            @page="onPageChange"
+          />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -141,6 +153,10 @@ const paymentTermsOptions = [
   { label: 'Check', value: 'check' },
 ];
 
+onMounted(() => {
+  fetchData();
+});
+
 let searchTimeout;
 const onSearch = () => {
   clearTimeout(searchTimeout);
@@ -194,10 +210,6 @@ const deleteSupplier = async id => {
     showError(err.message || 'Failed to delete supplier');
   }
 };
-
-onMounted(() => {
-  fetchData();
-});
 </script>
 
 <style scoped>

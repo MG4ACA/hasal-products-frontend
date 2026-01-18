@@ -53,7 +53,11 @@ onMounted(() => {
 
 <template>
   <div class="route-view">
-    <Breadcrumb :home="breadcrumbHome" :model="breadcrumbItems" class="mb-4" />
+    <Breadcrumb
+      :home="breadcrumbHome"
+      :model="breadcrumbItems"
+      class="mb-4"
+    />
 
     <div class="page-header">
       <div class="header-content">
@@ -61,7 +65,12 @@ onMounted(() => {
           <h1 v-if="currentRoute">
             {{ currentRoute.name }}
           </h1>
-          <p v-if="currentRoute" class="route-code">Code: {{ currentRoute.code }}</p>
+          <p
+            v-if="currentRoute"
+            class="route-code"
+          >
+            Code: {{ currentRoute.code }}
+          </p>
         </div>
       </div>
       <div class="header-actions">
@@ -71,18 +80,33 @@ onMounted(() => {
           class="p-button-secondary"
           @click="handleBack"
         />
-        <Button label="Edit" icon="pi pi-pencil" @click="handleEdit" />
+        <Button
+          label="Edit"
+          icon="pi pi-pencil"
+          @click="handleEdit"
+        />
       </div>
     </div>
 
-    <div v-if="loading" class="loading-container">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
+      <i
+        class="pi pi-spin pi-spinner"
+        style="font-size: 2rem"
+      />
     </div>
 
-    <div v-else-if="currentRoute" class="route-details">
+    <div
+      v-else-if="currentRoute"
+      class="route-details"
+    >
       <!-- Route Information Card -->
       <Card class="mb-4">
-        <template #title> Route Information </template>
+        <template #title>
+          Route Information
+        </template>
         <template #content>
           <div class="details-grid">
             <div class="detail-item">
@@ -110,17 +134,44 @@ onMounted(() => {
       </Card>
 
       <!-- Outlets Card -->
-      <Card v-if="currentRoute.outlets && currentRoute.outlets.length > 0" class="mb-4">
-        <template #title> Assigned Outlets ({{ currentRoute.outlets.length }}) </template>
+      <Card
+        v-if="currentRoute.outlets && currentRoute.outlets.length > 0"
+        class="mb-4"
+      >
+        <template #title>
+          Assigned Outlets ({{ currentRoute.outlets.length }})
+        </template>
         <template #content>
-          <DataTable :value="currentRoute.outlets" responsive-layout="scroll">
-            <Column field="code" header="Code">
+          <DataTable
+            :value="currentRoute.outlets"
+            responsive-layout="scroll"
+          >
+            <template #empty>
+              <div class="empty-state">
+                <i
+                  class="pi pi-inbox"
+                  style="font-size: 3rem; color: #ccc"
+                />
+                <p>No outlets assigned</p>
+              </div>
+            </template>
+
+            <Column
+              field="code"
+              header="Code"
+            >
               <template #body="{ data }">
                 <span class="font-semibold">{{ data.code }}</span>
               </template>
             </Column>
-            <Column field="name" header="Outlet Name" />
-            <Column field="status" header="Status">
+            <Column
+              field="name"
+              header="Outlet Name"
+            />
+            <Column
+              field="status"
+              header="Status"
+            >
               <template #body="{ data }">
                 <Tag
                   :value="data.status"
@@ -135,16 +186,40 @@ onMounted(() => {
 
       <!-- Employees Card -->
       <Card v-if="currentRoute.employees && currentRoute.employees.length > 0">
-        <template #title> Assigned Employees ({{ currentRoute.employees.length }}) </template>
+        <template #title>
+          Assigned Employees ({{ currentRoute.employees.length }})
+        </template>
         <template #content>
-          <DataTable :value="currentRoute.employees" responsive-layout="scroll">
-            <Column field="code" header="Code">
+          <DataTable
+            :value="currentRoute.employees"
+            responsive-layout="scroll"
+          >
+            <template #empty>
+              <div class="empty-state">
+                <i
+                  class="pi pi-inbox"
+                  style="font-size: 3rem; color: #ccc"
+                />
+                <p>No employees assigned</p>
+              </div>
+            </template>
+
+            <Column
+              field="code"
+              header="Code"
+            >
               <template #body="{ data }">
                 <span class="font-semibold">{{ data.code }}</span>
               </template>
             </Column>
-            <Column field="name" header="Name" />
-            <Column field="type" header="Type">
+            <Column
+              field="name"
+              header="Name"
+            />
+            <Column
+              field="type"
+              header="Type"
+            >
               <template #body="{ data }">
                 <Tag
                   :value="data.type"
@@ -159,7 +234,10 @@ onMounted(() => {
                 />
               </template>
             </Column>
-            <Column field="status" header="Status">
+            <Column
+              field="status"
+              header="Status"
+            >
               <template #body="{ data }">
                 <Tag
                   :value="data.status"

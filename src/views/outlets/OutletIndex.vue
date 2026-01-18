@@ -198,23 +198,35 @@ onMounted(() => {
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
     </div>
 
-    <OutletList
-      v-else
-      :outlets="outletStore.outlets"
-      :loading="loading"
-      @view="viewOutlet"
-      @edit="editOutlet"
-      @delete="confirmDelete"
-    />
+    <!-- Outlets List -->
+    <Card class="list-card">
+      <template #content>
+        <OutletList
+          v-if="!loading"
+          :outlets="outletStore.outlets"
+          :loading="loading"
+          @view="viewOutlet"
+          @edit="editOutlet"
+          @delete="confirmDelete"
+        />
+      </template>
+    </Card>
 
-    <div v-if="!loading && outletStore.outlets.length > 0" class="pagination-container">
-      <Paginator
-        :rows="pagination.limit"
-        :total-records="pagination.total"
-        :first="(pagination.page - 1) * pagination.limit"
-        @page="onPageChange"
-      />
-    </div>
+    <!-- Pagination -->
+    <Card class="pagination-card">
+      <template #content>
+        <div v-if="pagination.total > 0" class="pagination-container">
+          <Paginator
+            :rows="pagination.limit"
+            :total-records="pagination.total"
+            :first="(pagination.page - 1) * pagination.limit"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} outlets"
+            @page="onPageChange"
+          />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -224,11 +236,7 @@ onMounted(() => {
 }
 
 .page-header {
-  background: white;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -279,14 +287,6 @@ onMounted(() => {
   padding: 3rem;
   background: white;
   border-radius: 8px;
-}
-
-.pagination-container {
-  margin-top: 1.5rem;
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {

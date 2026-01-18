@@ -125,7 +125,11 @@ onMounted(() => {
           severity="primary"
           @click="fetchData"
         />
-        <Button label="Add Route" icon="pi pi-plus" @click="() => router.push('/routes/create')" />
+        <Button
+          label="Add Route"
+          icon="pi pi-plus"
+          @click="() => router.push('/routes/create')"
+        />
       </div>
     </div>
 
@@ -133,7 +137,11 @@ onMounted(() => {
       <div class="search-box">
         <IconField>
           <InputIcon class="pi pi-search" />
-          <InputText v-model="filters.search" placeholder="Search routes..." @input="onSearch" />
+          <InputText
+            v-model="filters.search"
+            placeholder="Search routes..."
+            @input="onSearch"
+          />
         </IconField>
       </div>
 
@@ -155,27 +163,47 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="routeStore.loading" class="loading-container">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
-    </div>
-
-    <RouteList
-      v-else
-      :routes="routeStore.routes"
-      :loading="routeStore.loading"
-      @view="viewRoute"
-      @edit="editRoute"
-      @delete="confirmDelete"
-    />
-
-    <div v-if="!routeStore.loading && routeStore.routes.length > 0" class="pagination-container">
-      <Paginator
-        :rows="pagination.limit"
-        :total-records="pagination.total"
-        :first="(pagination.page - 1) * pagination.limit"
-        @page="onPageChange"
+    <div
+      v-if="routeStore.loading"
+      class="loading-container"
+    >
+      <i
+        class="pi pi-spin pi-spinner"
+        style="font-size: 2rem"
       />
     </div>
+
+    <!-- Routes List -->
+    <Card class="list-card">
+      <template #content>
+        <RouteList
+          :routes="routeStore.routes"
+          :loading="routeStore.loading"
+          @view="viewRoute"
+          @edit="editRoute"
+          @delete="confirmDelete"
+        />
+      </template>
+    </Card>
+
+    <!-- Pagination -->
+    <Card class="pagination-card">
+      <template #content>
+        <div
+          v-if="pagination.total > 0"
+          class="pagination-container"
+        >
+          <Paginator
+            :rows="pagination.limit"
+            :total-records="pagination.total"
+            :first="(pagination.page - 1) * pagination.limit"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} routes"
+            @page="onPageChange"
+          />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -185,11 +213,7 @@ onMounted(() => {
 }
 
 .page-header {
-  background: white;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -240,14 +264,6 @@ onMounted(() => {
   padding: 3rem;
   background: white;
   border-radius: 8px;
-}
-
-.pagination-container {
-  margin-top: 1.5rem;
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive */

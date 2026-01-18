@@ -191,23 +191,34 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="content-card">
-      <VehicleList
-        :vehicles="vehicleStore.vehicles"
-        :loading="loading"
-        @view="handleView"
-        @assign="handleAssign"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      />
-    </div>
-    <div v-if="!loading && vehicleStore.vehicles.length > 0" class="pagination-container">
-      <Paginator
-        :rows="filters.limit"
-        :total-records="vehicleStore.pagination.total"
-        @page="handlePageChange"
-      />
-    </div>
+    <Card class="list-card">
+      <template #content>
+        <VehicleList
+          :vehicles="vehicleStore.vehicles"
+          :loading="loading"
+          @view="handleView"
+          @assign="handleAssign"
+          @edit="handleEdit"
+          @delete="handleDelete"
+        />
+      </template>
+    </Card>
+
+    <!-- Pagination -->
+    <Card class="pagination-card">
+      <template #content>
+        <div v-if="vehicleStore.pagination.total > 0" class="pagination-container">
+          <Paginator
+            :rows="filters.limit"
+            :total-records="vehicleStore.pagination.total"
+            :first="(filters.page - 1) * filters.limit"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} vehicles"
+            @page="handlePageChange"
+          />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -261,13 +272,6 @@ onMounted(() => {
 
 .filter-dropdown {
   min-width: 200px;
-}
-
-.content-card {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .pagination-container {

@@ -10,10 +10,10 @@
           <div class="grid">
             <!-- Product Code (Read-only in edit mode) -->
             <div class="col-12 md:col-6">
-              <label for="product_code" class="block mb-2">Product Code</label>
+              <label for="code" class="block mb-2">Product Code</label>
               <InputText
-                id="product_code"
-                v-model="formData.product_code"
+                id="code"
+                v-model="formData.code"
                 class="w-full"
                 disabled
                 placeholder="Auto-generated"
@@ -135,8 +135,7 @@
               :label="isEditMode ? 'Update Product' : 'Create Product'"
               icon="pi pi-check"
               :loading="loading"
-                          class="p-button-success"
-
+              class="p-button-success"
             />
             <Button
               type="button"
@@ -301,7 +300,7 @@ const deleteSkuDialog = ref(false);
 const skuToDelete = ref(null);
 
 const formData = ref({
-  product_code: '',
+  code: '',
   name: '',
   description: '',
   category: '',
@@ -323,22 +322,12 @@ const statusOptions = [
 
 const isEditMode = computed(() => !!props.productId);
 
-watch(
-  () => props.productId,
-  async newId => {
-    if (newId) {
-      await loadProduct(newId);
-    }
-  },
-  { immediate: true }
-);
-
 const loadProduct = async id => {
   loading.value = true;
   try {
     productData.value = await productStore.fetchProductById(id);
     formData.value = {
-      product_code: productData.value.product_code,
+      code: productData.value.code,
       name: productData.value.name,
       description: productData.value.description,
       category: productData.value.category,
@@ -350,6 +339,16 @@ const loadProduct = async id => {
     loading.value = false;
   }
 };
+
+watch(
+  () => props.productId,
+  async newId => {
+    if (newId) {
+      await loadProduct(newId);
+    }
+  },
+  { immediate: true }
+);
 
 const handleSubmit = async () => {
   errors.value = {};

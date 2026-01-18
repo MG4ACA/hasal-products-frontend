@@ -1,223 +1,3 @@
-<template>
-  <div class="product-view">
-    <Card>
-      <template #title>
-        <div class="flex justify-content-between align-items-center">
-          <span>Product Details</span>
-          <div class="flex gap-2">
-            <Button label="Edit" icon="pi pi-pencil" severity="warning" @click="editProduct" />
-            <Button label="Back" icon="pi pi-arrow-left" outlined @click="goBack" />
-          </div>
-        </div>
-      </template>
-
-      <template #content>
-        <div v-if="loading" class="text-center">
-          <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
-        </div>
-
-        <div v-else-if="product">
-          <!-- Product Information -->
-          <div class="grid">
-            <div class="col-12">
-              <h3>Product Information</h3>
-              <Divider />
-            </div>
-
-            <div class="col-12 md:col-6">
-              <label class="font-bold">Product Code:</label>
-              <p>{{ product.product_code }}</p>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <label class="font-bold">Product Name:</label>
-              <p>{{ product.name }}</p>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <label class="font-bold">Category:</label>
-              <p>{{ product.category || 'N/A' }}</p>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <label class="font-bold">Status:</label>
-              <p>
-                <Tag
-                  :value="product.status"
-                  :severity="product.status === 'active' ? 'success' : 'danger'"
-                />
-              </p>
-            </div>
-
-            <div class="col-12">
-              <label class="font-bold">Description:</label>
-              <p>{{ product.description || 'No description' }}</p>
-            </div>
-          </div>
-
-          <!-- SKUs Section -->
-          <div class="mt-4">
-            <div class="flex justify-content-between align-items-center mb-3">
-              <h3>Product SKUs</h3>
-              <Button label="View Stock" icon="pi pi-chart-bar" outlined @click="viewStock" />
-            </div>
-            <Divider />
-
-            <DataTable :value="product.skus || []" striped-rows class="p-datatable-sm">
-              <template #empty>
-                <div class="text-center p-4">No SKUs found</div>
-              </template>
-
-              <Column field="sku_code" header="SKU Code">
-                <template #body="{ data }">
-                  <strong>{{ data.sku_code }}</strong>
-                </template>
-              </Column>
-
-              <Column field="variant" header="Variant" />
-
-              <Column field="barcode" header="Barcode">
-                <template #body="{ data }">
-                  {{ data.barcode || 'N/A' }}
-                </template>
-              </Column>
-
-              <Column field="price" header="Price">
-                <template #body="{ data }"> Rs. {{ formatNumber(data.price) }} </template>
-              </Column>
-
-              <Column field="current_stock" header="Current Stock">
-                <template #body="{ data }">
-                  <span :class="{ 'text-red-500': needsReorder(data) }">
-                    {{ formatNumber(data.current_stock) }}
-                  </span>
-                </template>
-              </Column>
-
-              <Column field="reorder_level" header="Reorder Level">
-                <template #body="{ data }">
-                  {{ formatNumber(data.reorder_level) }}
-                </template>
-              </Column>
-
-              <Column field="status" header="Status">
-                <template #body="{ data }">
-                  <Tag
-                    :value="data.status"
-                    :severity="data.status === 'active' ? 'success' : 'danger'"
-                  />
-                </template>
-              </Column>
-
-              <Column header="Alert">
-                <template #body="{ data }">
-                  <Tag
-                    v-if="needsReorder(data)"
-                    value="Low Stock"
-                    severity="danger"
-                    icon="pi pi-exclamation-triangle"
-                  />
-                </template>
-              </Column>
-            </DataTable>
-          </div>
-
-          <!-- Timestamps -->
-          <div class="grid mt-4">
-            <div class="col-12">
-              <Divider />
-            </div>
-            <div class="col-12 md:col-6">
-              <label class="font-bold">Created At:</label>
-              <p>{{ formatDate(product.created_at) }}</p>
-            </div>
-            <div class="col-12 md:col-6">
-              <label class="font-bold">Last Updated:</label>
-              <p>{{ formatDate(product.updated_at) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div v-else class="text-center p-4">
-          <p>Product not found</p>
-        </div>
-      </template>
-    </Card>
-
-    <!-- Stock Dialog -->
-    <Dialog
-      v-model:visible="showStockDialog"
-      :style="{ width: '800px' }"
-      header="Stock Summary"
-      :modal="true"
-    >
-      <div v-if="stockData">
-        <div class="grid mb-3">
-          <div class="col-12 md:col-4">
-            <Card>
-              <template #content>
-                <div class="text-center">
-                  <div class="text-500 mb-2">Total Stock</div>
-                  <div class="text-2xl font-bold text-primary">
-                    {{ formatNumber(stockData.total_stock) }}
-                  </div>
-                </div>
-              </template>
-            </Card>
-          </div>
-          <div class="col-12 md:col-4">
-            <Card>
-              <template #content>
-                <div class="text-center">
-                  <div class="text-500 mb-2">Total SKUs</div>
-                  <div class="text-2xl font-bold">
-                    {{ stockData.skus?.length || 0 }}
-                  </div>
-                </div>
-              </template>
-            </Card>
-          </div>
-          <div class="col-12 md:col-4">
-            <Card>
-              <template #content>
-                <div class="text-center">
-                  <div class="text-500 mb-2">Low Stock Items</div>
-                  <div class="text-2xl font-bold text-red-500">
-                    {{ lowStockCount }}
-                  </div>
-                </div>
-              </template>
-            </Card>
-          </div>
-        </div>
-
-        <DataTable :value="stockData.skus" striped-rows class="p-datatable-sm">
-          <Column field="sku_code" header="SKU Code" />
-          <Column field="variant" header="Variant" />
-          <Column field="current_stock" header="Current Stock">
-            <template #body="{ data }">
-              <span :class="{ 'text-red-500': data.needs_reorder }">
-                {{ formatNumber(data.current_stock) }}
-              </span>
-            </template>
-          </Column>
-          <Column field="reorder_level" header="Reorder Level">
-            <template #body="{ data }">
-              {{ formatNumber(data.reorder_level) }}
-            </template>
-          </Column>
-          <Column header="Status">
-            <template #body="{ data }">
-              <Tag v-if="data.needs_reorder" value="Reorder" severity="danger" />
-              <Tag v-else value="OK" severity="success" />
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-    </Dialog>
-  </div>
-</template>
-
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
@@ -228,61 +8,372 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const productStore = useProductStore();
-const toast = useToastNotification();
+const { showSuccess, showError } = useToastNotification();
 
-const loading = ref(false);
-const product = ref(null);
+const productId = ref(route.params.id);
+const isLoading = ref(true);
+const notFound = ref(false);
 const showStockDialog = ref(false);
-const stockData = ref(null);
 
-const productId = computed(() => route.params.id);
+// Breadcrumb items
+const breadcrumbItems = ref([
+  { label: 'Dashboard', to: '/' },
+  { label: 'Products', to: '/products' },
+  { label: 'View' },
+]);
 
-const lowStockCount = computed(() => {
-  if (!stockData.value?.skus) return 0;
-  return stockData.value.skus.filter(sku => sku.needs_reorder).length;
-});
+const breadcrumbHome = { icon: 'pi pi-home', to: '/' };
 
+// Load product data
 onMounted(async () => {
-  await loadProduct();
+  try {
+    isLoading.value = true;
+    await productStore.fetchProductById(productId.value);
+
+    if (!productStore.currentProduct) {
+      notFound.value = true;
+      showError('Product not found');
+    } else {
+      // Update breadcrumb with product name
+      breadcrumbItems.value = [
+        { label: 'Dashboard', to: '/' },
+        { label: 'Products', to: '/products' },
+        { label: productStore.currentProduct.name },
+      ];
+    }
+  } catch (error) {
+    console.error('Failed to load product:', error);
+    notFound.value = true;
+    showError('Failed to load product details');
+  } finally {
+    isLoading.value = false;
+  }
 });
 
-const loadProduct = async () => {
-  loading.value = true;
-  try {
-    product.value = await productStore.fetchProductById(productId.value);
-  } catch (error) {
-    toast.error('Failed to load product');
-  } finally {
-    loading.value = false;
-  }
+// Handle edit button
+const handleEdit = () => {
+  router.push(`/products/${productId.value}/edit`);
 };
 
+// Handle back button
+const handleBack = () => {
+  router.push('/products');
+};
+
+// Check if SKU needs reorder
 const needsReorder = sku => {
   return parseFloat(sku.current_stock || 0) <= parseFloat(sku.reorder_level || 0);
 };
 
-const editProduct = () => {
-  router.push(`/products/${productId.value}/edit`);
-};
-
-const goBack = () => {
-  router.push('/products');
-};
-
-const viewStock = async () => {
-  try {
-    stockData.value = await productStore.getProductStock(productId.value);
-    showStockDialog.value = true;
-  } catch (error) {
-    toast.error('Failed to load stock data');
-  }
-};
+// Count low stock items
+const lowStockCount = computed(() => {
+  const product = productStore.currentProduct;
+  if (!product?.skus) return 0;
+  return product.skus.filter(needsReorder).length;
+});
 </script>
 
+<template>
+  <div class="product-view">
+    <!-- Breadcrumb -->
+    <Breadcrumb :home="breadcrumbHome" :model="breadcrumbItems" class="mb-4" />
+
+    <!-- Loading State -->
+    <div v-if="isLoading" class="loading-container">
+      <ProgressSpinner />
+      <p>Loading product details...</p>
+    </div>
+
+    <!-- Not Found State -->
+    <div v-else-if="notFound" class="not-found-container">
+      <i class="pi pi-exclamation-triangle" />
+      <h2>Product Not Found</h2>
+      <p>The product you're looking for doesn't exist or has been deleted.</p>
+      <Button label="Back to Products" icon="pi pi-arrow-left" @click="handleBack" />
+    </div>
+
+    <!-- Product Details -->
+    <template v-else>
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="header-content">
+          <div class="header-text">
+            <h1>{{ productStore.currentProduct?.name }}</h1>
+            <p>
+              <Tag
+                :value="productStore.currentProduct?.status"
+                :severity="productStore.currentProduct?.status === 'active' ? 'success' : 'danger'"
+              />
+            </p>
+          </div>
+          <div class="action-buttons">
+            <Button label="Edit" icon="pi pi-pencil" severity="warning" @click="handleEdit" />
+            <Button label="Back" icon="pi pi-arrow-left" outlined @click="handleBack" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Information -->
+      <Card class="mt-4">
+        <template #title>
+          <h3>Product Information</h3>
+        </template>
+        <template #content>
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="info-field">
+                <label class="label">Product Code</label>
+                <p class="value">
+                  {{ productStore.currentProduct?.code }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="info-field">
+                <label class="label">Product Name</label>
+                <p class="value">
+                  {{ productStore.currentProduct?.name }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="info-field">
+                <label class="label">Category</label>
+                <p class="value">
+                  {{ productStore.currentProduct?.category || 'N/A' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="info-field">
+                <label class="label">Status</label>
+                <p class="value">
+                  <Tag
+                    :value="productStore.currentProduct?.status"
+                    :severity="
+                      productStore.currentProduct?.status === 'active' ? 'success' : 'danger'
+                    "
+                  />
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="info-field">
+                <label class="label">Description</label>
+                <p class="value">
+                  {{ productStore.currentProduct?.description || 'No description' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- SKUs Section -->
+      <Card v-if="productStore.currentProduct?.skus?.length > 0" class="mt-4">
+        <template #title>
+          <div class="flex justify-content-between align-items-center">
+            <h3>Product SKUs</h3>
+            <span class="badge">{{ productStore.currentProduct?.skus?.length }} SKUs</span>
+          </div>
+        </template>
+        <template #content>
+          <DataTable
+            :value="productStore.currentProduct?.skus || []"
+            striped-rows
+            responsive-layout="scroll"
+            class="p-datatable-sm"
+          >
+            <template #empty>
+              <div class="empty-state">
+                <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc" />
+                <p>No SKUs found for this product</p>
+              </div>
+            </template>
+
+            <Column field="sku_code" header="SKU Code">
+              <template #body="{ data }">
+                <strong>{{ data.sku_code }}</strong>
+              </template>
+            </Column>
+
+            <Column field="size" header="Size" />
+
+            <Column field="unit" header="Unit" />
+
+            <Column field="barcode" header="Barcode">
+              <template #body="{ data }">
+                {{ data.barcode || 'N/A' }}
+              </template>
+            </Column>
+
+            <Column field="price" header="Price">
+              <template #body="{ data }"> Rs. {{ formatNumber(data.price) }} </template>
+            </Column>
+
+            <Column field="status" header="Status">
+              <template #body="{ data }">
+                <Tag
+                  :value="data.status"
+                  :severity="data.status === 'active' ? 'success' : 'danger'"
+                />
+              </template>
+            </Column>
+          </DataTable>
+        </template>
+      </Card>
+
+      <!-- No SKUs Message -->
+      <Card v-else class="mt-4">
+        <template #content>
+          <div class="text-center p-4">
+            <i class="pi pi-inbox" style="font-size: 2rem; color: #999" />
+            <p class="mt-3">No SKUs found for this product</p>
+          </div>
+        </template>
+      </Card>
+
+      <!-- Audit Information -->
+      <Card class="mt-4">
+        <template #title>
+          <h3>Audit Information</h3>
+        </template>
+        <template #content>
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="info-field">
+                <label class="label">Created At</label>
+                <p class="value">
+                  {{ formatDate(productStore.currentProduct?.created_at) }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="info-field">
+                <label class="label">Last Updated</label>
+                <p class="value">
+                  {{ formatDate(productStore.currentProduct?.updated_at) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
+    </template>
+  </div>
+</template>
+
 <style scoped>
-.font-bold {
+.product-view {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loading-container i {
+  margin-bottom: 1rem;
+}
+
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-container i {
+  font-size: 3rem;
+  color: #f59e0b;
+  margin-bottom: 1rem;
+}
+
+.not-found-container h2 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.not-found-container p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.page-header {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-text h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.header-text p {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.info-field {
+  margin-bottom: 1rem;
+}
+
+.info-field .label {
+  display: block;
   font-weight: 600;
   color: #6c757d;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.info-field .value {
+  margin: 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 </style>

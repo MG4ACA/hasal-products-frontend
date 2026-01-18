@@ -132,6 +132,14 @@
   padding: 0.7rem 0.5rem !important;
 }
 
+.p-datatable-emptymessage .empty-state {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
 .p-steps .p-menuitem-link {
   background: transparent;
 }
@@ -157,6 +165,20 @@
 }
 .p-avatar .p-badge-info {
   background: var(--primary-color);
+}
+
+.list-card {
+  margin-bottom: 24px;
+}
+
+.pagination-card .p-card-body {
+  padding: 0.5rem !important;
+}
+
+.pagination-card .pagination-container {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
 }
 
 /* Animation */

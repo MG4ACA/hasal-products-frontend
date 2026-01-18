@@ -1,132 +1,83 @@
 <template>
   <div class="product-list">
-    <Card>
-      <template #title>
-        <div class="flex justify-content-between align-items-center">
-          <span>Products</span>
-          <Button
-            label="Create Product"
-            class="p-button-success"
-            icon="pi pi-plus"
-            severity="success"
-            @click="navigateToCreate"
-          />
+    <!-- Data Table -->
+    <DataTable
+      :value="productStore.products"
+      :loading="productStore.loading"
+      striped-rows
+      responsive-layout="scroll"
+      class="p-datatable-sm"
+    >
+      <template #empty>
+        <div class="empty-state">
+          <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc" />
+          <p>No products found</p>
         </div>
       </template>
 
-      <template #content>
-        <!-- Filters -->
-        <div class="grid mb-3">
-          <div class="col-12 md:col-6">
-            <InputText
-              v-model="filters.search"
-              placeholder="Search by code, name..."
-              class="w-full"
-              @input="handleSearch"
+      <Column field="code" header="Product Code" :sortable="true">
+        <template #body="{ data }">
+          <strong>{{ data.code }}</strong>
+        </template>
+      </Column>
+
+      <Column field="name" header="Product Name" :sortable="true" />
+
+      <Column field="category" header="Category" :sortable="true">
+        <template #body="{ data }">
+          <span>{{ data.category || 'N/A' }}</span>
+        </template>
+      </Column>
+
+      <Column header="SKUs">
+        <template #body="{ data }">
+          <Tag :value="data.skus?.length || 0" severity="info" />
+        </template>
+      </Column>
+
+      <Column header="Total Stock">
+        <template #body="{ data }">
+          {{ calculateTotalStock(data.skus) }}
+        </template>
+      </Column>
+
+      <Column field="status" header="Status">
+        <template #body="{ data }">
+          <Tag :value="data.status" :severity="data.status === 'active' ? 'success' : 'danger'" />
+        </template>
+      </Column>
+
+      <Column header="Actions" style="width: 200px">
+        <template #body="{ data }">
+          <div class="flex gap-2">
+            <Button
+              v-tooltip.top="'View Details'"
+              icon="pi pi-eye"
+              severity="info"
+              size="small"
+              outlined
+              @click="$emit('view', data.id)"
+            />
+            <Button
+              v-tooltip.top="'Edit'"
+              icon="pi pi-pencil"
+              severity="warning"
+              size="small"
+              outlined
+              @click="$emit('edit', data.id)"
+            />
+            <Button
+              v-tooltip.top="'Delete'"
+              icon="pi pi-trash"
+              severity="danger"
+              size="small"
+              outlined
+              @click="$emit('delete', data)"
             />
           </div>
-          <div class="col-12 md:col-3">
-            <Dropdown
-              v-model="filters.status"
-              :options="statusOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="Filter by Status"
-              class="w-full"
-              @change="handleStatusFilter"
-            />
-          </div>
-          <div class="col-12 md:col-3">
-            <Avatar
-              v-badge.info="activeFilterCount"
-              :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
-              class="p-overlay-badge"
-              @click="hasActiveFilters && clearFilters()"
-            />
-          </div>
-        </div>
-
-        <!-- Data Table -->
-        <DataTable
-          :value="productStore.products"
-          :loading="productStore.loading"
-          striped-rows
-          responsive-layout="scroll"
-          :paginator="true"
-          :rows="productStore.pagination.limit"
-          :total-records="productStore.pagination.total"
-          :lazy="true"
-          class="p-datatable-sm"
-          @page="onPage"
-        >
-          <Column field="product_code" header="Product Code" :sortable="true">
-            <template #body="{ data }">
-              <strong>{{ data.product_code }}</strong>
-            </template>
-          </Column>
-
-          <Column field="name" header="Product Name" :sortable="true" />
-
-          <Column field="category" header="Category" :sortable="true">
-            <template #body="{ data }">
-              <span>{{ data.category || 'N/A' }}</span>
-            </template>
-          </Column>
-
-          <Column header="SKUs">
-            <template #body="{ data }">
-              <Tag :value="data.skus?.length || 0" severity="info" />
-            </template>
-          </Column>
-
-          <Column header="Total Stock">
-            <template #body="{ data }">
-              {{ calculateTotalStock(data.skus) }}
-            </template>
-          </Column>
-
-          <Column field="status" header="Status">
-            <template #body="{ data }">
-              <Tag
-                :value="data.status"
-                :severity="data.status === 'active' ? 'success' : 'danger'"
-              />
-            </template>
-          </Column>
-
-          <Column header="Actions" style="width: 200px">
-            <template #body="{ data }">
-              <div class="flex gap-2">
-                <Button
-                  v-tooltip.top="'View Details'"
-                  icon="pi pi-eye"
-                  severity="info"
-                  size="small"
-                  outlined
-                  @click="viewProduct(data.id)"
-                />
-                <Button
-                  v-tooltip.top="'Edit'"
-                  icon="pi pi-pencil"
-                  severity="warning"
-                  size="small"
-                  outlined
-                  @click="editProduct(data.id)"
-                />
-                <Button
-                  v-tooltip.top="'Delete'"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  size="small"
-                  outlined
-                  @click="confirmDelete(data)"
-                />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-      </template>
-    </Card>
+        </template>
+      </Column>
+    </DataTable>
 
     <!-- Delete Confirmation Dialog -->
     <Dialog
@@ -153,95 +104,27 @@
 </template>
 
 <script setup>
-import { useFilterClear } from '@/composables/useFilterClear';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
 import Button from 'primevue/button';
-import Card from 'primevue/card';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
-import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
-import { onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 
-const router = useRouter();
 const productStore = useProductStore();
 const toast = useToastNotification();
 
-const filters = reactive({
-  search: '',
-  status: '',
-  page: 1,
-  limit: 10,
-});
-
-const initialFilters = {
-  search: '',
-  status: '',
-  page: 1,
-  limit: 10,
-};
-
-const { activeFilterCount, hasActiveFilters, clearAllFilters } = useFilterClear(filters);
+const emit = defineEmits(['view', 'edit', 'delete']);
 
 const deleteDialog = ref(false);
 const productToDelete = ref(null);
-
-const statusOptions = [
-  { label: 'All Status', value: '' },
-  { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' },
-];
-
-onMounted(() => {
-  productStore.fetchProducts();
-});
-
-const handleSearch = () => {
-  filters.search = filters.search;
-  productStore.setSearch(filters.search);
-};
-
-const handleStatusFilter = () => {
-  productStore.setStatusFilter(filters.status);
-};
-
-const clearFilters = () => {
-  clearAllFilters(initialFilters, {
-    onClear: () => {
-      productStore.clearFilters();
-    },
-  });
-};
-
-const onPage = event => {
-  productStore.setPage(event.page + 1);
-};
 
 const calculateTotalStock = skus => {
   if (!skus || skus.length === 0) return '0';
   const total = skus.reduce((sum, sku) => sum + parseFloat(sku.current_stock || 0), 0);
   return total.toFixed(2);
-};
-
-const navigateToCreate = () => {
-  router.push('/products/create');
-};
-
-const viewProduct = id => {
-  router.push(`/products/${id}/view`);
-};
-
-const editProduct = id => {
-  router.push(`/products/${id}/edit`);
-};
-
-const confirmDelete = product => {
-  productToDelete.value = product;
-  deleteDialog.value = true;
 };
 
 const deleteProduct = async () => {
