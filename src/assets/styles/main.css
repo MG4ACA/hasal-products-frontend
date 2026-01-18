@@ -83,6 +83,10 @@
   padding: 0;
 }
 
+.audit-card .p-card-body {
+  padding: 0.5rem;
+}
+
 .p-button-icon.pi {
   margin-left: 1rem;
 }

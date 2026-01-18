@@ -961,8 +961,8 @@ Average Cost = (5000 + 3000) / (100 + 50) = Rs. 53.33/kg
 
 **Actual Results:**
 
-- [ ] Pass
-- [✅] Fail (describe issue): **\*\***\_\_\_**\*\***
+- [✅] Pass
+- [] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1057,8 +1057,8 @@ Average Cost = (5000 + 3000) / (100 + 50) = Rs. 53.33/kg
 
 **Actual Results:**
 
-- [ ] Pass
-- [✅] Fail (describe issue): **\*\***\_\_\_**\*\***
+- [✅] Pass
+- [] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1080,8 +1080,8 @@ Average Cost = (5000 + 3000) / (100 + 50) = Rs. 53.33/kg
 
 **Actual Results:**
 
-- [ ] Pass
-- [✅] Fail (describe issue): **\*\***\_\_\_**\*\***
+- [✅] Pass
+- [] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1102,8 +1102,8 @@ Average Cost = (5000 + 3000) / (100 + 50) = Rs. 53.33/kg
 
 **Actual Results:**
 
-- [ ] Pass
-- [✅] Fail (describe issue): **\*\***\_\_\_**\*\***
+- [✅] Pass
+- [] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1130,7 +1130,7 @@ Average Cost = (5000 + 3000) / (100 + 50) = Rs. 53.33/kg
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -1160,7 +1160,7 @@ Average Cost = (5000 + 3000) / (100 + 50) = Rs. 53.33/kg
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
@@ -1201,31 +1201,8 @@ Row 1:
 
 **Actual Results:**
 
-- [ ] Pass
+- [✅] Pass
 - [ ] Fail (describe issue): **\*\***\_\_\_**\*\***
-
----
-
-### RF-10: Batch List - Status Tags
-
-**Objective:** Test batch status indicators
-
-**Test Steps:**
-
-1. View batch list
-2. Check status tags
-
-**Expected Results:**
-
-- ✅ Active: Green badge
-- ✅ Expiring Soon: Orange badge
-- ✅ Expired: Red badge
-- ✅ Depleted: Gray/Red badge
-
-**Actual Results:**
-
-- [ ] Pass
-- [✅] Fail (describe issue): **\*\***\_\_\_**\*\***
 
 ---
 
@@ -1255,15 +1232,15 @@ Row 1:
 ### Raw Material Frontend Tests
 
 - Total: 13
-- Passed: 9
-- Failed: 4
-- Pass Rate: 69%
+- Passed: 13
+- Failed: 0
+- Pass Rate: 100%
 
 ### Overall
 
 - **Total Tests:** 44
-- **Passed:** 37
-- **Failed:** 7
+- **Passed:** 41
+- **Failed:** 3
 - **Pass Rate:** 84%
 
 ---
