@@ -47,7 +47,7 @@
                 placeholder="Select SKU"
                 class="w-full"
                 :class="{ 'p-invalid': errors.product_sku_id }"
-                :disabled="!formData.product_id || isEditMode"
+                :disabled="isEditMode"
                 required
               />
               <small v-if="errors.product_sku_id" class="p-error">{{
@@ -315,16 +315,6 @@ import { useProductStore } from '@/stores/product';
 import { useRawMaterialStore } from '@/stores/rawMaterial';
 import { useRecipeStore } from '@/stores/recipe';
 import { formatNumber } from '@/utils/formatters';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Divider from 'primevue/divider';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -390,6 +380,7 @@ const costPerUnit = computed(() => {
 
 onMounted(async () => {
   await Promise.all([loadProducts(), loadRawMaterials()]);
+  console.log('asssssssssss', formData.value, isEditMode.value);
 
   if (isEditMode.value) {
     await loadRecipe(props.recipeId);
@@ -426,7 +417,7 @@ const loadRecipe = async id => {
       status: 'active', // New version is always active
       items:
         recipe.items?.map(item => ({
-          raw_material_id: item.raw_material_id,
+          raw_material_id: item.material_id,
           quantity: item.quantity,
           unit: item.unit,
         })) || [],

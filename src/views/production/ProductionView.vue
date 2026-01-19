@@ -176,6 +176,89 @@ const efficiency = computed(() => {
                 />
               </span>
             </div>
+            <div v-if="productionStore.currentProductionRun?.batch_number" class="info-row">
+              <span class="label">Batch Number:</span>
+              <span class="value font-bold text-primary">{{ productionStore.currentProductionRun?.batch_number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost Information -->
+        <div v-if="productionStore.currentProductionRun?.status === 'completed'" class="info-card">
+          <div class="card-header">
+            <i class="pi pi-money-bill" />
+            <h3>Cost Information</h3>
+          </div>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">Material Cost:</span>
+              <span class="value font-semibold">Rs. {{ formatNumber(totalMaterialCost) }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.unit_cost" class="info-row">
+              <span class="label">Unit Cost (Finished Goods):</span>
+              <span class="value font-semibold">Rs. {{ formatNumber(productionStore.currentProductionRun.outputs[0].unit_cost) }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.total_cost" class="info-row">
+              <span class="label">Total Cost (Finished Goods):</span>
+              <span class="value font-bold text-green-600">Rs. {{ formatNumber(productionStore.currentProductionRun.outputs[0].total_cost) }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.waste_cost && parseFloat(productionStore.currentProductionRun.outputs[0].waste_cost) > 0" class="info-row">
+              <span class="label">Waste Cost:</span>
+              <span class="value font-bold text-red-600">Rs. {{ formatNumber(productionStore.currentProductionRun.outputs[0].waste_cost) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Yield Tracking -->
+        <div v-if="productionStore.currentProductionRun?.status === 'completed'" class="info-card">
+          <div class="card-header">
+            <i class="pi pi-chart-bar" />
+            <h3>Yield Tracking</h3>
+          </div>
+          <div class="card-content">
+            <div v-if="productionStore.currentProductionRun?.expected_quantity" class="info-row">
+              <span class="label">Expected Quantity:</span>
+              <span class="value">{{ formatNumber(productionStore.currentProductionRun.expected_quantity) }} {{ productionStore.currentProductionRun.unit }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.actual_quantity" class="info-row">
+              <span class="label">Actual Quantity:</span>
+              <span class="value font-semibold">{{ formatNumber(productionStore.currentProductionRun.actual_quantity) }} {{ productionStore.currentProductionRun.unit }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.waste_quantity" class="info-row">
+              <span class="label">Waste Quantity:</span>
+              <span :class="parseFloat(productionStore.currentProductionRun.waste_quantity) > 0 ? 'value text-orange-600 font-semibold' : 'value'">{{ formatNumber(productionStore.currentProductionRun.waste_quantity) }} {{ productionStore.currentProductionRun.unit }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.yield_efficiency" class="info-row">
+              <span class="label">Yield Efficiency:</span>
+              <span class="value">
+                <Tag
+                  :value="parseFloat(productionStore.currentProductionRun.yield_efficiency).toFixed(2) + '%'"
+                  :severity="parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 95 ? 'success' : parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 85 ? 'info' : parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 75 ? 'warning' : 'danger'"
+                />
+              </span>
+            </div>
+            <div v-if="productionStore.currentProductionRun?.waste_reason" class="info-row">
+              <span class="label">Waste Reason:</span>
+              <span class="value">{{ productionStore.currentProductionRun.waste_reason }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finished Goods Batch -->
+        <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.batch_number" class="info-card">
+          <div class="card-header">
+            <i class="pi pi-tag" />
+            <h3>Finished Goods</h3>
+          </div>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">Finished Goods Batch:</span>
+              <span class="value font-bold text-primary">{{ productionStore.currentProductionRun.outputs[0].batch_number }}</span>
+            </div>
+            <div v-if="productionStore.currentProductionRun.outputs[0].production_date" class="info-row">
+              <span class="label">Production Date:</span>
+              <span class="value">{{ formatDate(productionStore.currentProductionRun.outputs[0].production_date) }}</span>
+            </div>
           </div>
         </div>
 

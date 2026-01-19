@@ -211,8 +211,75 @@ const lowStockCount = computed(() => {
               </template>
             </Column>
 
-            <Column field="price" header="Price">
+            <Column field="price" header="Selling Price">
               <template #body="{ data }"> Rs. {{ formatNumber(data.price) }} </template>
+            </Column>
+
+            <Column field="average_cost" header="Avg Cost">
+              <template #body="{ data }">
+                <span v-if="data.average_cost"> Rs. {{ formatNumber(data.average_cost) }} </span>
+                <span v-else class="text-500">-</span>
+              </template>
+            </Column>
+
+            <Column header="Profit/Unit">
+              <template #body="{ data }">
+                <span
+                  v-if="data.average_cost"
+                  :class="
+                    parseFloat(data.price) - parseFloat(data.average_cost) >= 0
+                      ? 'text-green-600 font-semibold'
+                      : 'text-red-600'
+                  "
+                >
+                  Rs. {{ formatNumber(parseFloat(data.price) - parseFloat(data.average_cost)) }}
+                </span>
+                <span v-else class="text-500">-</span>
+              </template>
+            </Column>
+
+            <Column header="Margin %">
+              <template #body="{ data }">
+                <Tag
+                  v-if="data.average_cost"
+                  :value="
+                    (
+                      ((parseFloat(data.price) - parseFloat(data.average_cost)) /
+                        parseFloat(data.price)) *
+                      100
+                    ).toFixed(2) + '%'
+                  "
+                  :severity="
+                    ((parseFloat(data.price) - parseFloat(data.average_cost)) /
+                      parseFloat(data.price)) *
+                      100 >=
+                    30
+                      ? 'success'
+                      : ((parseFloat(data.price) - parseFloat(data.average_cost)) /
+                            parseFloat(data.price)) *
+                            100 >=
+                          15
+                        ? 'warning'
+                        : 'danger'
+                  "
+                />
+                <span v-else class="text-500">-</span>
+              </template>
+            </Column>
+
+            <Column field="current_stock" header="Stock">
+              <template #body="{ data }">
+                {{ formatNumber(data.current_stock || 0) }}
+              </template>
+            </Column>
+
+            <Column header="Stock Value">
+              <template #body="{ data }">
+                <span v-if="data.average_cost" class="font-semibold">
+                  Rs. {{ formatNumber((data.current_stock || 0) * parseFloat(data.average_cost)) }}
+                </span>
+                <span v-else class="text-500">-</span>
+              </template>
             </Column>
 
             <Column field="status" header="Status">

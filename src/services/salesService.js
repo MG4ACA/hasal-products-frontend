@@ -63,6 +63,26 @@ const salesService = {
       return handleApiError(error);
     }
   },
+
+  // Get sale profit for specific invoice
+  async getSaleProfit(id) {
+    try {
+      const response = await api.get(`/sales/invoices/${id}/profit`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Get profit summary (daily/monthly)
+  async getProfitSummary(params = {}) {
+    try {
+      const response = await api.get('/sales/profit-summary', { params });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default salesService;

@@ -73,6 +73,26 @@ export const productionService = {
       return handleApiError(error);
     }
   },
+
+  // Get waste cost report
+  async getWasteCostReport(params = {}) {
+    try {
+      const response = await api.get(`${PRODUCTION_BASE_URL}/waste-cost-report`, { params });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Get efficiency report
+  async getEfficiencyReport(params = {}) {
+    try {
+      const response = await api.get(`${PRODUCTION_BASE_URL}/efficiency-report`, { params });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default productionService;

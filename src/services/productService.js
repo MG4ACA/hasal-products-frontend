@@ -93,6 +93,26 @@ export const productService = {
       return handleApiError(error);
     }
   },
+
+  // Get profit summary for all products
+  async getProfitSummary() {
+    try {
+      const response = await api.get(`${PRODUCT_BASE_URL}/profit-summary`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Get SKU profit analysis
+  async getSkuProfit(productId, skuId) {
+    try {
+      const response = await api.get(`${PRODUCT_BASE_URL}/${productId}/skus/${skuId}/profit`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default productService;

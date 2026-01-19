@@ -84,6 +84,11 @@ const PaymentCreate = () => import('@/views/payments/PaymentCreate.vue');
 const PaymentDetails = () => import('@/views/payments/PaymentDetails.vue');
 const PendingChecks = () => import('@/views/payments/PendingChecks.vue');
 
+// Report views
+const ProfitAnalysis = () => import('@/views/reports/ProfitAnalysis.vue');
+const WasteCostReport = () => import('@/views/reports/WasteCostReport.vue');
+const EfficiencyReport = () => import('@/views/reports/EfficiencyReport.vue');
+
 const routes = [
   {
     path: '/login',
@@ -402,6 +407,24 @@ const routes = [
     path: '/payments/:id',
     name: 'PaymentDetails',
     component: PaymentDetails,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/profit-analysis',
+    name: 'ProfitAnalysis',
+    component: ProfitAnalysis,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/waste-cost',
+    name: 'WasteCostReport',
+    component: WasteCostReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/efficiency',
+    name: 'EfficiencyReport',
+    component: EfficiencyReport,
     meta: { requiresAuth: true },
   },
   {

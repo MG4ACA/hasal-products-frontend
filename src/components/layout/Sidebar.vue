@@ -57,6 +57,22 @@
         <i class="pi pi-users" />
         <span>Employees</span>
       </RouterLink>
+
+      <!-- Reports Section -->
+      <div class="menu-divider"></div>
+      <div class="menu-section-title">Reports</div>
+      <RouterLink to="/reports/profit-analysis" class="menu-item">
+        <i class="pi pi-chart-line" />
+        <span>Profit Analysis</span>
+      </RouterLink>
+      <RouterLink to="/reports/waste-cost" class="menu-item">
+        <i class="pi pi-exclamation-triangle" />
+        <span>Waste Cost Report</span>
+      </RouterLink>
+      <RouterLink to="/reports/efficiency" class="menu-item">
+        <i class="pi pi-chart-bar" />
+        <span>Efficiency Report</span>
+      </RouterLink>
     </nav>
   </div>
 </template>
@@ -112,5 +128,20 @@
 
 .menu-item i {
   font-size: 1.2rem;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 1rem 1.5rem;
+}
+
+.menu-section-title {
+  padding: 0.75rem 1.5rem 0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 </style>
