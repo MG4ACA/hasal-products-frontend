@@ -1,4 +1,5 @@
 <script setup>
+import { CATEGORY_OPTIONS, STATUS_OPTIONS, UNIT_OPTIONS } from '@/utils/constants';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
@@ -48,24 +49,9 @@ const errors = reactive({
 });
 
 // Dropdown options
-const categoryOptions = [
-  { label: 'Spice', value: 'spice' },
-  { label: 'Packaging', value: 'packaging' },
-  { label: 'Other', value: 'other' },
-];
-
-const unitOptions = [
-  { label: 'Kilogram (kg)', value: 'kg' },
-  { label: 'Gram (g)', value: 'g' },
-  { label: 'Piece', value: 'piece' },
-  { label: 'Liter (L)', value: 'liter' },
-  { label: 'Milliliter (ml)', value: 'ml' },
-];
-
-const statusOptions = [
-  { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' },
-];
+const categoryOptions = CATEGORY_OPTIONS;
+const unitOptions = UNIT_OPTIONS;
+const statusOptions = STATUS_OPTIONS;
 
 // Initialize form with initial data
 watch(

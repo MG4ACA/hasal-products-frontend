@@ -197,7 +197,7 @@ const lowStockCount = computed(() => {
 
             <Column field="sku_code" header="SKU Code">
               <template #body="{ data }">
-                <strong>{{ data.sku_code }}</strong>
+                <strong>{{ data.id }}</strong>
               </template>
             </Column>
 
@@ -417,6 +417,10 @@ const lowStockCount = computed(() => {
 
 .info-field {
   margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-content: center;
+  align-items: center;
 }
 
 .info-field .label {
@@ -426,7 +430,6 @@ const lowStockCount = computed(() => {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
 }
 
 .info-field .value {

@@ -2,11 +2,14 @@
 import ProductForm from '@/components/products/ProductForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
+import Breadcrumb from 'primevue/breadcrumb';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const productStore = useProductStore();
 const { showSuccess, showError } = useToastNotification();
+const loading = ref(false);
 
 // Breadcrumb items
 const breadcrumbItems = [
@@ -19,13 +22,16 @@ const breadcrumbHome = { icon: 'pi pi-home', to: '/' };
 
 // Handle form submission
 const handleSubmit = async formData => {
+  loading.value = true;
   try {
     await productStore.createProduct(formData);
     showSuccess('Product created successfully');
     router.push('/products');
   } catch (error) {
     console.error('Failed to create product:', error);
-    showError(error.message || 'Failed to create product');
+    showError(error.response?.data?.message || error.message || 'Failed to create product');
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -51,7 +57,7 @@ const handleCancel = () => {
     </div>
 
     <!-- Product Form -->
-    <ProductForm :loading="productStore.loading" @submit="handleSubmit" @cancel="handleCancel" />
+    <ProductForm :loading="loading" @submit="handleSubmit" @cancel="handleCancel" />
   </div>
 </template>
 

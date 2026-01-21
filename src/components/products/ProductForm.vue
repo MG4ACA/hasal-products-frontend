@@ -39,11 +39,14 @@
             <!-- Category -->
             <div class="col-12 md:col-6">
               <label for="category" class="block mb-2">Category</label>
-              <InputText
+              <Dropdown
                 id="category"
                 v-model="formData.category"
+                :options="categoryOptions"
+                option-label="label"
+                option-value="value"
+                placeholder="Select category"
                 class="w-full"
-                placeholder="e.g., Spices, Condiments"
               />
             </div>
 
@@ -114,12 +117,17 @@
               <Column header="Actions">
                 <template #body="{ data }">
                   <div class="flex gap-2">
-                    <Button icon="pi pi-pencil" size="small" outlined @click="editSku(data)" />
+                    <Button
+                      icon="pi pi-pencil"
+                      class="p-button-rounded p-button-text"
+                      size="small"
+                      @click="editSku(data)"
+                    />
                     <Button
                       icon="pi pi-trash"
                       severity="danger"
+                      class="p-button-rounded p-button-text"
                       size="small"
-                      outlined
                       @click="confirmDeleteSku(data)"
                     />
                   </div>
@@ -190,29 +198,35 @@
           />
         </div>
 
-        <div class="col-12 md:col-6">
+        <div class="col-12">
           <label for="price" class="block mb-2"> Price <span class="text-red-500">*</span> </label>
           <InputNumber
             id="price"
             v-model="skuFormData.price"
             class="w-full"
             mode="decimal"
+            :use-grouping="false"
+            :min="0"
             :min-fraction-digits="2"
             :max-fraction-digits="2"
-            prefix="Rs. "
+            placeholder="0.00"
+            suffix=" Rs"
             required
           />
         </div>
 
-        <div class="col-12 md:col-6">
+        <div class="col-12">
           <label for="reorder_level" class="block mb-2">Reorder Level</label>
           <InputNumber
             id="reorder_level"
             v-model="skuFormData.reorder_level"
             class="w-full"
             mode="decimal"
+            :use-grouping="false"
+            :min="0"
             :min-fraction-digits="2"
             :max-fraction-digits="2"
+            placeholder="0.00"
           />
         </div>
 
@@ -265,20 +279,10 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
+import { CATEGORY_OPTIONS, STATUS_OPTIONS } from '@/utils/constants';
 import { formatNumber } from '@/utils/formatters';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Divider from 'primevue/divider';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import Tag from 'primevue/tag';
-import Textarea from 'primevue/textarea';
+
 import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 
 const props = defineProps({
   productId: {
@@ -287,9 +291,10 @@ const props = defineProps({
   },
 });
 
-const router = useRouter();
+const emit = defineEmits(['submit', 'cancel']);
+
 const productStore = useProductStore();
-const toast = useToastNotification();
+const { showSuccess, showError } = useToastNotification();
 
 const loading = ref(false);
 const errors = ref({});
@@ -315,10 +320,8 @@ const skuFormData = ref({
   status: 'active',
 });
 
-const statusOptions = [
-  { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' },
-];
+const statusOptions = STATUS_OPTIONS;
+const categoryOptions = CATEGORY_OPTIONS;
 
 const isEditMode = computed(() => !!props.productId);
 
@@ -334,7 +337,7 @@ const loadProduct = async id => {
       status: productData.value.status,
     };
   } catch (error) {
-    toast.error('Failed to load product');
+    showError('Failed to load product');
   } finally {
     loading.value = false;
   }
@@ -350,7 +353,7 @@ watch(
   { immediate: true }
 );
 
-const handleSubmit = async () => {
+const handleSubmit = () => {
   errors.value = {};
 
   if (!formData.value.name) {
@@ -358,26 +361,12 @@ const handleSubmit = async () => {
     return;
   }
 
-  loading.value = true;
-
-  try {
-    if (isEditMode.value) {
-      await productStore.updateProduct(props.productId, formData.value);
-      toast.success('Product updated successfully');
-    } else {
-      await productStore.createProduct(formData.value);
-      toast.success('Product created successfully');
-    }
-    router.push('/products');
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save product');
-  } finally {
-    loading.value = false;
-  }
+  // Emit submit event with form data to parent
+  emit('submit', { ...formData.value });
 };
 
 const handleCancel = () => {
-  router.push('/products');
+  emit('cancel');
 };
 
 const editSku = sku => {
@@ -409,15 +398,15 @@ const saveSku = async () => {
   try {
     if (skuToEdit.value) {
       await productStore.updateSku(props.productId, skuToEdit.value.id, skuFormData.value);
-      toast.success('SKU updated successfully');
+      showSuccess('SKU updated successfully');
     } else {
       await productStore.addSku(props.productId, skuFormData.value);
-      toast.success('SKU added successfully');
+      showSuccess('SKU added successfully');
     }
     closeSkuDialog();
     await loadProduct(props.productId);
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save SKU');
+    showError(error.response?.data?.message || 'Failed to save SKU');
   } finally {
     loading.value = false;
   }
@@ -432,12 +421,12 @@ const deleteSku = async () => {
   loading.value = true;
   try {
     await productStore.deleteSku(props.productId, skuToDelete.value.id);
-    toast.success('SKU deleted successfully');
+    showSuccess('SKU deleted successfully');
     deleteSkuDialog.value = false;
     skuToDelete.value = null;
     await loadProduct(props.productId);
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to delete SKU');
+    showError(error.response?.data?.message || 'Failed to delete SKU');
   } finally {
     loading.value = false;
   }

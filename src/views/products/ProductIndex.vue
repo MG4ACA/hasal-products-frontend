@@ -38,7 +38,7 @@
               option-label="label"
               option-value="value"
               placeholder="Filter by Status"
-              @change="fetchData"
+              @change="onStatusChange"
             />
             <Avatar
               v-badge.info="activeFilterCount"
@@ -118,7 +118,10 @@ const clearFilters = async () => {
   filters.search = '';
   filters.status = '';
   filters.page = 1;
-  await fetchData();
+  // Clear store filters and fetch
+  await productStore.clearFilters();
+  // Sync pagination from store
+  pagination.value = productStore.pagination;
 };
 
 const pagination = ref({
@@ -143,14 +146,19 @@ const onSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     filters.page = 1;
-    fetchData();
+    productStore.setSearch(filters.search);
   }, 500);
+};
+
+const onStatusChange = () => {
+  filters.page = 1;
+  productStore.setStatusFilter(filters.status);
 };
 
 const fetchData = async () => {
   loading.value = true;
   try {
-    await productStore.fetchProducts(filters);
+    await productStore.fetchProducts();
     pagination.value = productStore.pagination;
   } catch (err) {
     showError(err.message || 'Failed to load products');

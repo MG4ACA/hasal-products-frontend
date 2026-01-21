@@ -55,23 +55,22 @@
               icon="pi pi-eye"
               severity="info"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="$emit('view', data.id)"
             />
             <Button
               v-tooltip.top="'Edit'"
               icon="pi pi-pencil"
-              severity="warning"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="$emit('edit', data.id)"
             />
             <Button
               v-tooltip.top="'Delete'"
               icon="pi pi-trash"
               severity="danger"
+              class="p-button-rounded p-button-text"
               size="small"
-              outlined
               @click="$emit('delete', data)"
             />
           </div>
