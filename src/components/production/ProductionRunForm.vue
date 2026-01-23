@@ -121,7 +121,7 @@
                 <div class="field">
                   <label class="text-500 text-sm">Product</label>
                   <div class="text-lg font-bold">
-                    {{ selectedRecipe.Product?.name }}
+                    {{ selectedRecipe.product?.name }}
                   </div>
                 </div>
               </div>
@@ -130,16 +130,17 @@
                 <div class="field">
                   <label class="text-500 text-sm">SKU</label>
                   <div class="text-lg">
-                    {{ selectedRecipe.ProductSku?.variant }}
+                    {{ selectedRecipe.productSku?.size }}
                   </div>
                 </div>
               </div>
 
               <div class="col-12 md:col-4">
                 <div class="field">
-                  <label class="text-500 text-sm">Batch Size</label>
+                  <label class="text-500 text-sm">Expected Yield</label>
                   <div class="text-lg">
-                    {{ formatNumber(selectedRecipe.batch_size) }} {{ selectedRecipe.unit }}
+                    {{ formatNumber(selectedRecipe.expected_yield) }}
+                    {{ selectedRecipe.yield_unit }}
                   </div>
                 </div>
               </div>
@@ -169,7 +170,7 @@
               <DataTable :value="requiredMaterials" class="p-datatable-sm">
                 <Column field="name" header="Raw Material">
                   <template #body="{ data }">
-                    {{ data.RawMaterial?.name }}
+                    {{ data.material?.name }}
                   </template>
                 </Column>
                 <Column field="quantity_per_batch" header="Per Batch">
@@ -212,35 +213,27 @@
 
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
-import { useProductionStore } from '@/stores/production';
 import { useRecipeStore } from '@/stores/recipe';
 import { formatNumber } from '@/utils/formatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Divider from 'primevue/divider';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 const props = defineProps({
   runId: {
     type: [String, Number],
     default: null,
   },
+  loading: Boolean,
+  initialData: {
+    type: Object,
+    default: null,
+  },
 });
 
-const router = useRouter();
-const productionStore = useProductionStore();
+const emit = defineEmits(['submit', 'cancel']);
+
 const recipeStore = useRecipeStore();
 const toast = useToastNotification();
 
-const loading = ref(false);
 const errors = ref({});
 const recipeOptions = ref([]);
 const selectedRecipe = ref(null);
@@ -264,7 +257,7 @@ const isEditMode = computed(() => !!props.runId);
 
 const numberOfBatches = computed(() => {
   if (!selectedRecipe.value || !formData.value.quantity) return 0;
-  return formData.value.quantity / selectedRecipe.value.batch_size;
+  return formData.value.quantity / selectedRecipe.value.expected_yield;
 });
 
 const requiredMaterials = computed(() => {
@@ -274,38 +267,22 @@ const requiredMaterials = computed(() => {
 onMounted(async () => {
   await loadRecipes();
 
-  if (isEditMode.value) {
-    await loadProductionRun(props.runId);
+  if (props.initialData) {
+    formData.value = { ...formData.value, ...props.initialData };
+    if (props.initialData.recipe_id) {
+      await onRecipeChange();
+    }
   }
 });
 
 const loadRecipes = async () => {
-  await recipeStore.fetchRecipes({ status: 'active' });
-  recipeOptions.value = recipeStore.recipes.map(r => ({
-    label: `${r.name} (v${r.version}) - ${r.Product?.name}`,
+  await recipeStore.fetchRecipes();
+  // Filter only active recipes
+  const activeRecipes = recipeStore.recipes.filter(r => r.is_active);
+  recipeOptions.value = activeRecipes.map(r => ({
+    label: `${r.name} (v${r.version}) - ${r.product?.name}`,
     value: r.id,
   }));
-};
-
-const loadProductionRun = async id => {
-  loading.value = true;
-  try {
-    const run = await productionStore.fetchProductionRunById(id);
-    formData.value = {
-      run_number: run.run_number,
-      recipe_id: run.recipe_id,
-      quantity: run.quantity,
-      unit: run.unit,
-      production_date: new Date(run.production_date),
-      status: run.status,
-      notes: run.notes,
-    };
-    await onRecipeChange();
-  } catch (error) {
-    toast.error('Failed to load production run');
-  } finally {
-    loading.value = false;
-  }
 };
 
 const onRecipeChange = async () => {
@@ -317,13 +294,13 @@ const onRecipeChange = async () => {
 
   try {
     selectedRecipe.value = await recipeStore.fetchRecipeById(formData.value.recipe_id);
-    formData.value.unit = selectedRecipe.value.unit;
+    formData.value.unit = selectedRecipe.value.yield_unit;
   } catch (error) {
     toast.error('Failed to load recipe details');
   }
 };
 
-const handleSubmit = async () => {
+const handleSubmit = () => {
   errors.value = {};
 
   if (!formData.value.recipe_id) {
@@ -336,35 +313,21 @@ const handleSubmit = async () => {
     return;
   }
 
-  loading.value = true;
+  // Emit submit event with form data to parent
+  const submitData = {
+    recipe_id: formData.value.recipe_id,
+    quantity: formData.value.quantity,
+    unit: formData.value.unit,
+    production_date: formData.value.production_date,
+    status: formData.value.status,
+    notes: formData.value.notes,
+  };
 
-  try {
-    const submitData = {
-      recipe_id: formData.value.recipe_id,
-      quantity: formData.value.quantity,
-      unit: formData.value.unit,
-      production_date: formData.value.production_date,
-      status: formData.value.status,
-      notes: formData.value.notes,
-    };
-
-    if (isEditMode.value) {
-      await productionStore.updateProductionRun(props.runId, submitData);
-      toast.success('Production run updated successfully');
-    } else {
-      await productionStore.createProductionRun(submitData);
-      toast.success('Production run created successfully');
-    }
-    router.push('/production-runs');
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save production run');
-  } finally {
-    loading.value = false;
-  }
+  emit('submit', submitData);
 };
 
 const handleCancel = () => {
-  router.push('/production-runs');
+  emit('cancel');
 };
 </script>
 

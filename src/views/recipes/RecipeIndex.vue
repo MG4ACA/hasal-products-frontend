@@ -243,7 +243,7 @@ const duplicateRecipe = recipe => {
     product_sku_id: recipe.product_sku_id,
     name: `${recipe.name} - Copy`,
     description: recipe.description,
-    expected_yield: recipe.expected_yield,
+    expected_yield: parseFloat(recipe.expected_yield) || recipe.expected_yield,
     yield_unit: recipe.yield_unit,
     status: recipe.status || 'active',
     items: recipe.items

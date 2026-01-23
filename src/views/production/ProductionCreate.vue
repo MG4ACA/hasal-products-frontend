@@ -2,11 +2,13 @@
 import ProductionRunForm from '@/components/production/ProductionRunForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductionStore } from '@/stores/production';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const productionStore = useProductionStore();
 const { showSuccess, showError } = useToastNotification();
+const loading = ref(false);
 
 // Breadcrumb items
 const breadcrumbItems = [
@@ -19,6 +21,7 @@ const breadcrumbHome = { icon: 'pi pi-home', to: '/' };
 
 // Handle form submission
 const handleSubmit = async formData => {
+  loading.value = true;
   try {
     await productionStore.createProductionRun(formData);
     showSuccess('Production run created successfully');
@@ -26,6 +29,8 @@ const handleSubmit = async formData => {
   } catch (error) {
     console.error('Failed to create production run:', error);
     showError(error.message || 'Failed to create production run');
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -51,11 +56,7 @@ const handleCancel = () => {
     </div>
 
     <!-- Production Form -->
-    <ProductionRunForm
-      :loading="productionStore.loading"
-      @submit="handleSubmit"
-      @cancel="handleCancel"
-    />
+    <ProductionRunForm :loading="loading" @submit="handleSubmit" @cancel="handleCancel" />
   </div>
 </template>
 

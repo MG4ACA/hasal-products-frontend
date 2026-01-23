@@ -13,6 +13,7 @@ const { showSuccess, showError } = useToastNotification();
 const runId = ref(route.params.id);
 const isLoading = ref(true);
 const notFound = ref(false);
+const loading = ref(false);
 
 // Breadcrumb items
 const breadcrumbItems = ref([
@@ -51,6 +52,7 @@ onMounted(async () => {
 
 // Handle form submission
 const handleSubmit = async formData => {
+  loading.value = true;
   try {
     await productionStore.updateProductionRun(runId.value, formData);
     showSuccess('Production run updated successfully');
@@ -58,6 +60,8 @@ const handleSubmit = async formData => {
   } catch (error) {
     console.error('Failed to update production run:', error);
     showError(error.message || 'Failed to update production run');
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -115,7 +119,8 @@ const handleCancel = () => {
       <!-- Edit Form -->
       <ProductionRunForm
         :run-id="runId"
-        :loading="productionStore.loading"
+        :loading="loading"
+        :initial-data="productionStore.currentProductionRun"
         @submit="handleSubmit"
         @cancel="handleCancel"
       />

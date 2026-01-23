@@ -16,7 +16,10 @@
 
             <!-- Product Selection -->
             <div class="col-12 md:col-6">
-              <label for="product" class="block mb-2">
+              <label
+                for="product"
+                class="block mb-2"
+              >
                 Product <span class="text-red-500">*</span>
               </label>
               <Dropdown
@@ -32,12 +35,18 @@
                 required
                 @change="onProductChange"
               />
-              <small v-if="errors.product_id" class="p-error">{{ errors.product_id }}</small>
+              <small
+                v-if="errors.product_id"
+                class="p-error"
+              >{{ errors.product_id }}</small>
             </div>
 
             <!-- SKU Selection -->
             <div class="col-12 md:col-6">
-              <label for="sku" class="block mb-2"> SKU <span class="text-red-500">*</span> </label>
+              <label
+                for="sku"
+                class="block mb-2"
+              > SKU <span class="text-red-500">*</span> </label>
               <Dropdown
                 id="sku"
                 v-model="formData.product_sku_id"
@@ -50,14 +59,20 @@
                 :disabled="isEditMode"
                 required
               />
-              <small v-if="errors.product_sku_id" class="p-error">{{
+              <small
+                v-if="errors.product_sku_id"
+                class="p-error"
+              >{{
                 errors.product_sku_id
               }}</small>
             </div>
 
             <!-- Recipe Name -->
             <div class="col-12 md:col-6">
-              <label for="name" class="block mb-2">
+              <label
+                for="name"
+                class="block mb-2"
+              >
                 Recipe Name <span class="text-red-500">*</span>
               </label>
               <InputText
@@ -68,12 +83,18 @@
                 placeholder="Enter recipe name"
                 required
               />
-              <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
+              <small
+                v-if="errors.name"
+                class="p-error"
+              >{{ errors.name }}</small>
             </div>
 
             <!-- Batch Size -->
             <div class="col-12 md:col-3">
-              <label for="expected_yield" class="block mb-2">
+              <label
+                for="expected_yield"
+                class="block mb-2"
+              >
                 Expected Yield <span class="text-red-500">*</span>
               </label>
               <InputNumber
@@ -90,7 +111,10 @@
 
             <!-- Unit -->
             <div class="col-12 md:col-3">
-              <label for="yield_unit" class="block mb-2">
+              <label
+                for="yield_unit"
+                class="block mb-2"
+              >
                 Unit <span class="text-red-500">*</span>
               </label>
               <Dropdown
@@ -105,7 +129,10 @@
 
             <!-- Status -->
             <div class="col-12 md:col-6">
-              <label for="status" class="block mb-2">Status</label>
+              <label
+                for="status"
+                class="block mb-2"
+              >Status</label>
               <Dropdown
                 id="status"
                 v-model="formData.status"
@@ -118,7 +145,10 @@
 
             <!-- Description -->
             <div class="col-12 md:col-6">
-              <label for="description" class="block mb-2">Description</label>
+              <label
+                for="description"
+                class="block mb-2"
+              >Description</label>
               <Textarea
                 id="description"
                 v-model="formData.description"
@@ -143,9 +173,15 @@
             </div>
             <Divider />
 
-            <DataTable :value="formData.items" striped-rows class="p-datatable-sm">
+            <DataTable
+              :value="formData.items"
+              striped-rows
+              class="p-datatable-sm"
+            >
               <template #empty>
-                <div class="text-center p-4">No materials added yet</div>
+                <div class="text-center p-4">
+                  No materials added yet
+                </div>
               </template>
 
               <Column header="Raw Material">
@@ -154,7 +190,10 @@
                 </template>
               </Column>
 
-              <Column field="quantity" header="Quantity">
+              <Column
+                field="quantity"
+                header="Quantity"
+              >
                 <template #body="{ data }">
                   {{ formatNumber(data.quantity) }} {{ data.unit }}
                 </template>
@@ -190,18 +229,31 @@
             </DataTable>
 
             <!-- Total Cost Summary -->
-            <div v-if="formData.items.length > 0" class="mt-3 p-3 surface-100 border-round">
+            <div
+              v-if="formData.items.length > 0"
+              class="mt-3 p-3 surface-100 border-round"
+            >
               <div class="grid">
                 <div class="col-12 md:col-4">
-                  <div class="text-500 text-sm mb-1">Total Cost</div>
-                  <div class="text-xl font-bold text-primary">Rs. {{ totalCost.toFixed(2) }}</div>
+                  <div class="text-500 text-sm mb-1">
+                    Total Cost
+                  </div>
+                  <div class="text-xl font-bold text-primary">
+                    Rs. {{ totalCost.toFixed(2) }}
+                  </div>
                 </div>
                 <div class="col-12 md:col-4">
-                  <div class="text-500 text-sm mb-1">Cost per Unit</div>
-                  <div class="text-xl font-bold">Rs. {{ costPerUnit.toFixed(2) }}</div>
+                  <div class="text-500 text-sm mb-1">
+                    Cost per Unit
+                  </div>
+                  <div class="text-xl font-bold">
+                    Rs. {{ costPerUnit.toFixed(2) }}
+                  </div>
                 </div>
                 <div class="col-12 md:col-4">
-                  <div class="text-500 text-sm mb-1">Total Items</div>
+                  <div class="text-500 text-sm mb-1">
+                    Total Items
+                  </div>
                   <div class="text-xl font-bold">
                     {{ formData.items.length }}
                   </div>
@@ -241,7 +293,10 @@
     >
       <div class="grid justify-content-between">
         <div class="col-12">
-          <label for="raw_material" class="block mb-2">
+          <label
+            for="raw_material"
+            class="block mb-2"
+          >
             Raw Material <span class="text-red-500">*</span>
           </label>
           <Dropdown
@@ -258,7 +313,10 @@
         </div>
 
         <div class="col-12 md:col-4">
-          <label for="quantity" class="block mb-2">
+          <label
+            for="quantity"
+            class="block mb-2"
+          >
             Quantity <span class="text-red-500">*</span>
           </label>
           <InputNumber
@@ -274,7 +332,10 @@
         </div>
 
         <div class="col-12 md:col-4">
-          <label for="bom_unit" class="block mb-2">
+          <label
+            for="bom_unit"
+            class="block mb-2"
+          >
             Unit <span class="text-red-500">*</span>
           </label>
           <Dropdown
@@ -287,16 +348,28 @@
           />
         </div>
 
-        <div v-if="bomFormData.raw_material_id" class="col-12">
+        <div
+          v-if="bomFormData.raw_material_id"
+          class="col-12"
+        >
           <div class="p-3 surface-100 border-round">
-            <div class="text-sm text-500 mb-1">Estimated Cost</div>
-            <div class="text-lg font-bold">Rs. {{ bomItemCost }}</div>
+            <div class="text-sm text-500 mb-1">
+              Estimated Cost
+            </div>
+            <div class="text-lg font-bold">
+              Rs. {{ bomItemCost }}
+            </div>
           </div>
         </div>
       </div>
 
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" text @click="closeBomDialog" />
+        <Button
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          @click="closeBomDialog"
+        />
         <Button
           :label="bomEditIndex !== null ? 'Update' : 'Add'"
           icon="pi pi-check"
@@ -411,7 +484,7 @@ onMounted(async () => {
       product_sku_id: props.duplicateData.product_sku_id,
       name: props.duplicateData.name,
       description: props.duplicateData.description,
-      expected_yield: props.duplicateData.expected_yield,
+      expected_yield: parseFloat(props.duplicateData.expected_yield) || 0,
       yield_unit: props.duplicateData.yield_unit,
       status: props.duplicateData.status || 'active',
       items: props.duplicateData.items || [],
