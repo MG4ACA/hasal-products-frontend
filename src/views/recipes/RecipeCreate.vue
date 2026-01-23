@@ -2,11 +2,13 @@
 import RecipeForm from '@/components/recipes/RecipeForm.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useRecipeStore } from '@/stores/recipe';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const recipeStore = useRecipeStore();
 const { showSuccess, showError } = useToastNotification();
+const loading = ref(false);
 
 // Breadcrumb items
 const breadcrumbItems = [
@@ -19,18 +21,21 @@ const breadcrumbHome = { icon: 'pi pi-home', to: '/' };
 
 // Handle form submission
 const handleSubmit = async formData => {
+  loading.value = true;
   try {
     await recipeStore.createRecipe(formData);
     showSuccess('Recipe created successfully');
     router.push('/recipes');
   } catch (error) {
-    console.error('Failed to create recipe:', error);
-    showError(error.message || 'Failed to create recipe');
+    showError(error.response?.data?.message || error.message || 'Failed to create recipe');
+  } finally {
+    loading.value = false;
   }
 };
 
 // Handle cancel
 const handleCancel = () => {
+  recipeStore.clearDuplicateData();
   router.push('/recipes');
 };
 </script>
@@ -44,14 +49,25 @@ const handleCancel = () => {
     <div class="page-header">
       <div class="header-content">
         <div class="header-text">
-          <h1>Create Recipe</h1>
-          <p>Add a new recipe to the system</p>
+          <h1>{{ recipeStore.duplicateData ? 'Duplicate Recipe' : 'Create Recipe' }}</h1>
+          <p>
+            {{
+              recipeStore.duplicateData
+                ? 'Create a new recipe based on existing one'
+                : 'Add a new recipe to the system'
+            }}
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Recipe Form -->
-    <RecipeForm :loading="recipeStore.loading" @submit="handleSubmit" @cancel="handleCancel" />
+    <RecipeForm
+      :loading="loading"
+      :duplicate-data="recipeStore.duplicateData"
+      @submit="handleSubmit"
+      @cancel="handleCancel"
+    />
   </div>
 </template>
 

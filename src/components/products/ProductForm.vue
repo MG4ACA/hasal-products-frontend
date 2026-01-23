@@ -79,7 +79,7 @@
           <!-- SKU Management (Only in Edit Mode) -->
           <div v-if="isEditMode && productData" class="mt-4">
             <Divider />
-            <div class="flex justify-content-between align-items-center mb-3">
+            <div class="flex justify-content-between align-items-center mb-3 pt-3">
               <h3>Product SKUs</h3>
               <Button
                 label="Add SKU"
@@ -137,7 +137,7 @@
           </div>
 
           <!-- Form Actions -->
-          <div class="flex gap-2 mt-4">
+          <div class="flex gap-2 mt-6 justify-content-end">
             <Button
               type="submit"
               :label="isEditMode ? 'Update Product' : 'Create Product'"

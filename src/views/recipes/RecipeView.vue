@@ -63,19 +63,20 @@ const totalCost = computed(() => {
   const recipe = recipeStore.currentRecipe;
   if (!recipe?.items) return 0;
   return recipe.items.reduce((sum, item) => {
-    const cost = parseFloat(item.RawMaterial?.average_cost || 0) * parseFloat(item.quantity || 0);
+    const cost = parseFloat(item.material?.average_cost || 0) * parseFloat(item.quantity || 0);
     return sum + cost;
   }, 0);
 });
 
 const costPerUnit = computed(() => {
   const recipe = recipeStore.currentRecipe;
-  if (!recipe || recipe.batch_size === 0) return 0;
-  return totalCost.value / recipe.batch_size;
+  const batchSize = parseFloat(recipe?.expected_yield || 0);
+  if (!recipe || batchSize === 0) return 0;
+  return totalCost.value / batchSize;
 });
 
 const calculateItemCost = item => {
-  const cost = parseFloat(item.RawMaterial?.average_cost || 0) * parseFloat(item.quantity || 0);
+  const cost = parseFloat(item.material?.average_cost || 0) * parseFloat(item.quantity || 0);
   return formatNumber(cost);
 };
 </script>
@@ -109,15 +110,15 @@ const calculateItemCost = item => {
             <p>Recipe Details & Bill of Materials</p>
             <div class="recipe-meta">
               <span class="product-name">
-                Product: <strong>{{ recipeStore.currentRecipe?.Product?.name || 'N/A' }}</strong>
+                Product: <strong>{{ recipeStore.currentRecipe?.product?.name || 'N/A' }}</strong>
               </span>
               <span v-if="recipeStore.currentRecipe?.version" class="version-badge">
                 v{{ recipeStore.currentRecipe?.version }}
               </span>
               <span class="status-badge">
                 <Tag
-                  :value="recipeStore.currentRecipe?.status"
-                  :severity="recipeStore.currentRecipe?.status === 'active' ? 'success' : 'danger'"
+                  :value="recipeStore.currentRecipe?.is_active ? 'active' : 'inactive'"
+                  :severity="recipeStore.currentRecipe?.is_active ? 'success' : 'danger'"
                 />
               </span>
             </div>
@@ -140,19 +141,17 @@ const calculateItemCost = item => {
           <div class="card-content">
             <div class="info-row">
               <span class="label">Product:</span>
-              <span class="value">{{ recipeStore.currentRecipe?.Product?.name || 'N/A' }}</span>
+              <span class="value">{{ recipeStore.currentRecipe?.product?.name || 'N/A' }}</span>
             </div>
             <div class="info-row">
               <span class="label">SKU Variant:</span>
-              <span class="value">{{
-                recipeStore.currentRecipe?.ProductSku?.variant || 'N/A'
-              }}</span>
+              <span class="value">{{ recipeStore.currentRecipe?.productSku?.size || 'N/A' }}</span>
             </div>
             <div class="info-row">
-              <span class="label">Batch Size:</span>
+              <span class="label">Expected Yield:</span>
               <span class="value"
-                >{{ formatNumber(recipeStore.currentRecipe?.batch_size) }}
-                {{ recipeStore.currentRecipe?.unit }}</span
+                >{{ formatNumber(recipeStore.currentRecipe?.expected_yield) }}
+                {{ recipeStore.currentRecipe?.yield_unit }}</span
               >
             </div>
             <div class="info-row">
@@ -163,8 +162,8 @@ const calculateItemCost = item => {
               <span class="label">Status:</span>
               <span class="value">
                 <Tag
-                  :value="recipeStore.currentRecipe?.status"
-                  :severity="recipeStore.currentRecipe?.status === 'active' ? 'success' : 'danger'"
+                  :value="recipeStore.currentRecipe?.is_active ? 'active' : 'inactive'"
+                  :severity="recipeStore.currentRecipe?.is_active ? 'success' : 'danger'"
                 />
               </span>
             </div>
@@ -222,10 +221,10 @@ const calculateItemCost = item => {
               <template #body="{ data }">
                 <div class="material-cell">
                   <div class="font-semibold">
-                    {{ data.RawMaterial?.code }}
+                    {{ data.material?.code }}
                   </div>
                   <div class="text-sm text-600">
-                    {{ data.RawMaterial?.name }}
+                    {{ data.material?.name }}
                   </div>
                 </div>
               </template>
@@ -239,7 +238,7 @@ const calculateItemCost = item => {
 
             <Column header="Unit Cost" style="min-width: 120px">
               <template #body="{ data }">
-                Rs. {{ formatNumber(data.RawMaterial?.average_cost || 0) }}
+                Rs. {{ formatNumber(data.material?.average_cost || 0) }}
               </template>
             </Column>
 

@@ -13,6 +13,7 @@ const { showSuccess, showError } = useToastNotification();
 const recipeId = ref(route.params.id);
 const isLoading = ref(true);
 const notFound = ref(false);
+const loading = ref(false);
 
 // Breadcrumb items
 const breadcrumbItems = ref([
@@ -51,13 +52,16 @@ onMounted(async () => {
 
 // Handle form submission
 const handleSubmit = async formData => {
+  loading.value = true;
   try {
     await recipeStore.updateRecipe(recipeId.value, formData);
     showSuccess('Recipe updated successfully');
     router.push('/recipes');
   } catch (error) {
     console.error('Failed to update recipe:', error);
-    showError(error.message || 'Failed to update recipe');
+    showError(error.response?.data?.message || error.message || 'Failed to update recipe');
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -108,7 +112,7 @@ const handleCancel = () => {
       <!-- Edit Form -->
       <RecipeForm
         :recipe-id="recipeId"
-        :loading="recipeStore.loading"
+        :loading="loading"
         @submit="handleSubmit"
         @cancel="handleCancel"
       />

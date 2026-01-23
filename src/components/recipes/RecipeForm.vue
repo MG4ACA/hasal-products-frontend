@@ -73,12 +73,12 @@
 
             <!-- Batch Size -->
             <div class="col-12 md:col-3">
-              <label for="batch_size" class="block mb-2">
-                Batch Size <span class="text-red-500">*</span>
+              <label for="expected_yield" class="block mb-2">
+                Expected Yield <span class="text-red-500">*</span>
               </label>
               <InputNumber
-                id="batch_size"
-                v-model="formData.batch_size"
+                id="expected_yield"
+                v-model="formData.expected_yield"
                 class="w-full"
                 mode="decimal"
                 :min-fraction-digits="2"
@@ -90,12 +90,12 @@
 
             <!-- Unit -->
             <div class="col-12 md:col-3">
-              <label for="unit" class="block mb-2">
+              <label for="yield_unit" class="block mb-2">
                 Unit <span class="text-red-500">*</span>
               </label>
               <Dropdown
-                id="unit"
-                v-model="formData.unit"
+                id="yield_unit"
+                v-model="formData.yield_unit"
                 :options="unitOptions"
                 placeholder="Select Unit"
                 class="w-full"
@@ -172,7 +172,7 @@
                     <Button
                       icon="pi pi-pencil"
                       size="small"
-                      outlined
+                      class="p-button-rounded p-button-text"
                       type="button"
                       @click="editBomItem(index)"
                     />
@@ -180,7 +180,7 @@
                       icon="pi pi-trash"
                       severity="danger"
                       size="small"
-                      outlined
+                      class="p-button-rounded p-button-text"
                       type="button"
                       @click="deleteBomItem(index)"
                     />
@@ -239,7 +239,7 @@
       :header="bomEditIndex !== null ? 'Edit Material' : 'Add Material'"
       :modal="true"
     >
-      <div class="grid">
+      <div class="grid justify-content-between">
         <div class="col-12">
           <label for="raw_material" class="block mb-2">
             Raw Material <span class="text-red-500">*</span>
@@ -257,7 +257,7 @@
           />
         </div>
 
-        <div class="col-12 md:col-6">
+        <div class="col-12 md:col-4">
           <label for="quantity" class="block mb-2">
             Quantity <span class="text-red-500">*</span>
           </label>
@@ -273,7 +273,7 @@
           />
         </div>
 
-        <div class="col-12 md:col-6">
+        <div class="col-12 md:col-4">
           <label for="bom_unit" class="block mb-2">
             Unit <span class="text-red-500">*</span>
           </label>
@@ -290,9 +290,7 @@
         <div v-if="bomFormData.raw_material_id" class="col-12">
           <div class="p-3 surface-100 border-round">
             <div class="text-sm text-500 mb-1">Estimated Cost</div>
-            <div class="text-lg font-bold">
-              Rs. {{ calculateItemCost(bomFormData.raw_material_id, bomFormData.quantity) }}
-            </div>
+            <div class="text-lg font-bold">Rs. {{ bomItemCost }}</div>
           </div>
         </div>
       </div>
@@ -323,13 +321,20 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  loading: Boolean,
+  duplicateData: {
+    type: Object,
+    default: null,
+  },
 });
+
+const emit = defineEmits(['submit', 'cancel']);
 
 const router = useRouter();
 const recipeStore = useRecipeStore();
 const productStore = useProductStore();
 const rawMaterialStore = useRawMaterialStore();
-const toast = useToastNotification();
+const { showError, showSuccess } = useToastNotification();
 
 const loading = ref(false);
 const errors = ref({});
@@ -344,8 +349,8 @@ const formData = ref({
   product_sku_id: null,
   name: '',
   description: '',
-  batch_size: 0,
-  unit: 'kg',
+  expected_yield: 0,
+  yield_unit: 'kg',
   status: 'active',
   items: [],
 });
@@ -374,8 +379,23 @@ const totalCost = computed(() => {
 });
 
 const costPerUnit = computed(() => {
-  if (formData.value.batch_size === 0) return 0;
-  return totalCost.value / formData.value.batch_size;
+  const yieldAmount = parseFloat(formData.value.expected_yield || 0);
+  if (yieldAmount === 0 || isNaN(yieldAmount)) return 0;
+  const result = totalCost.value / yieldAmount;
+  return isNaN(result) ? 0 : result;
+});
+
+// Computed property for BOM dialog - shows estimated cost reactively
+const bomItemCost = computed(() => {
+  if (!bomFormData.value.raw_material_id || !bomFormData.value.quantity) {
+    return '0.00';
+  }
+  const material = rawMaterialStore.rawMaterials.find(
+    rm => rm.id === bomFormData.value.raw_material_id
+  );
+  if (!material) return '0.00';
+  const cost = parseFloat(material.average_cost || 0) * parseFloat(bomFormData.value.quantity || 0);
+  return cost.toFixed(2);
 });
 
 onMounted(async () => {
@@ -384,6 +404,18 @@ onMounted(async () => {
 
   if (isEditMode.value) {
     await loadRecipe(props.recipeId);
+  } else if (props.duplicateData) {
+    // Pre-fill form with duplicate data
+    formData.value = {
+      product_id: props.duplicateData.product_id,
+      product_sku_id: props.duplicateData.product_sku_id,
+      name: props.duplicateData.name,
+      description: props.duplicateData.description,
+      expected_yield: props.duplicateData.expected_yield,
+      yield_unit: props.duplicateData.yield_unit,
+      status: props.duplicateData.status || 'active',
+      items: props.duplicateData.items || [],
+    };
   }
 });
 
@@ -412,19 +444,19 @@ const loadRecipe = async id => {
       product_sku_id: recipe.product_sku_id,
       name: recipe.name,
       description: recipe.description,
-      batch_size: recipe.batch_size,
-      unit: recipe.unit,
+      expected_yield: parseFloat(recipe.expected_yield) || 0,
+      yield_unit: recipe.yield_unit,
       status: 'active', // New version is always active
       items:
         recipe.items?.map(item => ({
           raw_material_id: item.material_id,
-          quantity: item.quantity,
+          quantity: parseFloat(item.quantity) || 0,
           unit: item.unit,
         })) || [],
     };
     await onProductChange();
   } catch (error) {
-    toast.error('Failed to load recipe');
+    showError('Failed to load recipe');
   } finally {
     loading.value = false;
   }
@@ -439,7 +471,7 @@ const onProductChange = async () => {
   const product = await productStore.fetchProductById(formData.value.product_id);
   skuOptions.value =
     product.skus?.map(sku => ({
-      label: `${sku.sku_code} - ${sku.variant}`,
+      label: `sku: ${sku.size} ${sku.unit} - Rs.${sku.price}`,
       value: sku.id,
     })) || [];
 };
@@ -455,7 +487,6 @@ const calculateItemCost = (materialId, quantity) => {
   const cost = parseFloat(material.average_cost || 0) * parseFloat(quantity || 0);
   return cost.toFixed(2);
 };
-
 const editBomItem = index => {
   bomEditIndex.value = index;
   const item = formData.value.items[index];
@@ -483,7 +514,7 @@ const closeBomDialog = () => {
 
 const saveBomItem = () => {
   if (!bomFormData.value.raw_material_id || !bomFormData.value.quantity) {
-    toast.error('Please fill all required fields');
+    showError('Please fill all required fields');
     return;
   }
 
@@ -496,7 +527,7 @@ const saveBomItem = () => {
   closeBomDialog();
 };
 
-const handleSubmit = async () => {
+const handleSubmit = () => {
   errors.value = {};
 
   if (!formData.value.product_id) {
@@ -515,30 +546,26 @@ const handleSubmit = async () => {
   }
 
   if (formData.value.items.length === 0) {
-    toast.error('Please add at least one material to the recipe');
+    showError('Please add at least one material to the recipe');
     return;
   }
 
-  loading.value = true;
+  // Emit submit event with transformed data to parent
+  // Transform items to use material_id instead of raw_material_id
+  const submitData = {
+    ...formData.value,
+    items: formData.value.items.map(item => ({
+      material_id: item.raw_material_id, // Map raw_material_id to material_id
+      quantity: item.quantity,
+      unit: item.unit,
+    })),
+  };
 
-  try {
-    if (isEditMode.value) {
-      await recipeStore.updateRecipe(props.recipeId, formData.value);
-      toast.success('Recipe updated successfully (new version created)');
-    } else {
-      await recipeStore.createRecipe(formData.value);
-      toast.success('Recipe created successfully');
-    }
-    router.push('/recipes');
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save recipe');
-  } finally {
-    loading.value = false;
-  }
+  emit('submit', submitData);
 };
 
 const handleCancel = () => {
-  router.push('/recipes');
+  emit('cancel');
 };
 </script>
 

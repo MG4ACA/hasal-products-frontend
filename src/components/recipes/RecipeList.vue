@@ -32,12 +32,14 @@
 
       <Column header="SKU">
         <template #body="{ data }">
-          {{ data.productSku?.variant || 'N/A' }}
+          {{ data.productSku?.size || 'N/A' }}
         </template>
       </Column>
 
-      <Column field="batch_size" header="Batch Size">
-        <template #body="{ data }"> {{ formatNumber(data.batch_size) }} {{ data.unit }} </template>
+      <Column field="expected_yield" header="Expected Yield">
+        <template #body="{ data }">
+          {{ formatNumber(data.expected_yield) }} {{ data.yield_unit }}
+        </template>
       </Column>
 
       <Column header="Items">
@@ -46,9 +48,12 @@
         </template>
       </Column>
 
-      <Column field="status" header="Status">
+      <Column header="Status">
         <template #body="{ data }">
-          <Tag :value="data.status" :severity="data.status === 'active' ? 'success' : 'danger'" />
+          <Tag
+            :value="data.is_active ? 'active' : 'inactive'"
+            :severity="data.is_active ? 'success' : 'danger'"
+          />
         </template>
       </Column>
 
@@ -60,31 +65,38 @@
               icon="pi pi-eye"
               severity="info"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="$emit('view', data.id)"
             />
             <Button
               v-tooltip.top="'Edit (New Version)'"
               icon="pi pi-pencil"
               severity="warning"
+              class="p-button-rounded p-button-text"
               size="small"
-              outlined
               @click="$emit('edit', data.id)"
             />
             <Button
               v-tooltip.top="'Version History'"
               icon="pi pi-history"
+              class="p-button-rounded p-button-text"
               severity="secondary"
               size="small"
-              outlined
               @click="viewVersions(data.id)"
+            />
+            <Button
+              v-tooltip.top="'Duplicate Recipe'"
+              icon="pi pi-copy"
+              class="p-button-rounded p-button-text"
+              size="small"
+              @click="$emit('duplicate', data)"
             />
             <Button
               v-tooltip.top="'Delete'"
               icon="pi pi-trash"
+              class="p-button-rounded p-button-text"
               severity="danger"
               size="small"
-              outlined
               @click="$emit('delete', data)"
             />
           </div>
@@ -111,14 +123,17 @@
           </template>
         </Column>
         <Column field="name" header="Name" />
-        <Column field="batch_size" header="Batch Size">
+        <Column field="expected_yield" header="Expected Yield">
           <template #body="{ data }">
-            {{ formatNumber(data.batch_size) }} {{ data.unit }}
+            {{ formatNumber(data.expected_yield) }} {{ data.yield_unit }}
           </template>
         </Column>
-        <Column field="status" header="Status">
+        <Column header="Status">
           <template #body="{ data }">
-            <Tag :value="data.status" :severity="data.status === 'active' ? 'success' : 'danger'" />
+            <Tag
+              :value="data.is_active ? 'active' : 'inactive'"
+              :severity="data.is_active ? 'success' : 'danger'"
+            />
           </template>
         </Column>
         <Column field="created_at" header="Created">
@@ -151,7 +166,7 @@ import { ref } from 'vue';
 const recipeStore = useRecipeStore();
 const toast = useToastNotification();
 
-defineEmits(['view', 'edit', 'delete']);
+defineEmits(['view', 'edit', 'delete', 'duplicate']);
 
 const versionDialog = ref(false);
 const versionHistory = ref([]);

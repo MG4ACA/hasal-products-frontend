@@ -38,7 +38,7 @@
               option-label="label"
               option-value="value"
               placeholder="Filter by Status"
-              @change="fetchData"
+              @change="onStatusChange"
             />
             <div class="">
               <Dropdown
@@ -76,6 +76,7 @@
           :loading="loading"
           @view="viewRecipe"
           @edit="editRecipe"
+          @duplicate="duplicateRecipe"
           @delete="confirmDelete"
         />
       </template>
@@ -104,13 +105,6 @@ import RecipeList from '@/components/recipes/RecipeList.vue';
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useProductStore } from '@/stores/product';
 import { useRecipeStore } from '@/stores/recipe';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Dropdown from 'primevue/dropdown';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Paginator from 'primevue/paginator';
 import { useConfirm } from 'primevue/useconfirm';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -148,7 +142,7 @@ const clearFilters = async () => {
   filters.status = '';
   filters.product = '';
   filters.page = 1;
-  await fetchData();
+  await recipeStore.clearFilters();
 };
 
 const pagination = ref({
@@ -176,14 +170,19 @@ const onSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     filters.page = 1;
-    fetchData();
+    recipeStore.setSearch(filters.search);
   }, 500);
+};
+
+const onStatusChange = () => {
+  filters.page = 1;
+  recipeStore.setStatusFilter(filters.status);
 };
 
 const fetchData = async () => {
   loading.value = true;
   try {
-    await recipeStore.fetchRecipes(filters);
+    await recipeStore.fetchRecipes();
     pagination.value = recipeStore.pagination;
   } catch (err) {
     showError(err.message || 'Failed to load recipes');
@@ -235,6 +234,30 @@ const viewRecipe = id => {
 
 const editRecipe = id => {
   router.push(`/recipes/${id}/edit`);
+};
+
+const duplicateRecipe = recipe => {
+  // Prepare duplicate data with "- Copy" suffix
+  const duplicateData = {
+    product_id: recipe.product_id,
+    product_sku_id: recipe.product_sku_id,
+    name: `${recipe.name} - Copy`,
+    description: recipe.description,
+    expected_yield: recipe.expected_yield,
+    yield_unit: recipe.yield_unit,
+    status: recipe.status || 'active',
+    items: recipe.items
+      ? recipe.items.map(item => ({
+          raw_material_id: item.material_id,
+          quantity: item.quantity,
+          unit: item.unit,
+        }))
+      : [],
+  };
+
+  // Store in Pinia and navigate
+  recipeStore.setDuplicateData(duplicateData);
+  router.push('/recipes/create');
 };
 
 const confirmDelete = recipe => {

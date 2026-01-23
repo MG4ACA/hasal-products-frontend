@@ -20,6 +20,7 @@ export const useRecipeStore = defineStore('recipe', () => {
     status: '',
     product_id: '',
   });
+  const duplicateData = ref(null);
 
   // Getters
   const activeRecipes = computed(() => recipes.value.filter(r => r.status === 'active'));
@@ -35,7 +36,7 @@ export const useRecipeStore = defineStore('recipe', () => {
         page: pagination.value.page,
         limit: pagination.value.limit,
         search: filters.value.search,
-        status: filters.value.status,
+        is_active: filters.value.status,
         product_id: filters.value.product_id,
       };
 
@@ -166,8 +167,8 @@ export const useRecipeStore = defineStore('recipe', () => {
         throw new Error(response.message);
       }
 
-      versionHistory.value = response.data;
-      return response.data;
+      versionHistory.value = response;
+      return response;
     } catch (err) {
       error.value = err.message || 'Failed to fetch version history';
       throw err;
@@ -287,6 +288,14 @@ export const useRecipeStore = defineStore('recipe', () => {
     error.value = null;
   };
 
+  const setDuplicateData = data => {
+    duplicateData.value = data;
+  };
+
+  const clearDuplicateData = () => {
+    duplicateData.value = null;
+  };
+
   return {
     // State
     recipes,
@@ -296,6 +305,7 @@ export const useRecipeStore = defineStore('recipe', () => {
     error,
     pagination,
     filters,
+    duplicateData,
     // Getters
     activeRecipes,
     inactiveRecipes,
@@ -316,5 +326,7 @@ export const useRecipeStore = defineStore('recipe', () => {
     setProductFilter,
     clearFilters,
     clearError,
+    setDuplicateData,
+    clearDuplicateData,
   };
 });
