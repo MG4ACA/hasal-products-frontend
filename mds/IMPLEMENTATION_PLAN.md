@@ -369,35 +369,61 @@
 - [x] Display recipe version history
 - [ ] Test recipe creation and versioning
 
-#### Production Module - Backend
+#### Production Module - Backend (Three-Step Workflow)
 
 - [x] Create Production controller (`controllers/productionController.js`)
   - [x] GET `/api/production-runs` - Get all production runs
   - [x] GET `/api/production-runs/:id` - Get production run details
-  - [x] POST `/api/production-runs` - Create production run
-  - [x] PUT `/api/production-runs/:id` - Update production run
+  - [x] POST `/api/production-runs` - Create production run (status: planned)
+  - [x] POST `/api/production-runs/:id/start` - **NEW** Start production & deduct materials (FIFO)
+  - [x] POST `/api/production-runs/:id/complete` - Complete production run & track yield
+  - [x] PUT `/api/production-runs/:id` - Update production run (planned only)
   - [x] DELETE `/api/production-runs/:id` - Delete production run
-  - [x] POST `/api/production-runs/:id/complete` - Complete production run
-  - [x] GET `/api/production-runs/:id/check-materials` - Check material availability
-- [x] Implement production logic:
-  - [x] Deduct raw materials from batches (FIFO)
-  - [x] Create production output (finished goods)
-  - [x] Update product SKU stock levels
-  - [x] Link to recipe and track materials used
+- [x] Implement three-step production logic:
+  - [x] **Step 1 CREATE:** Expected quantity planning, material scaling
+  - [x] **Step 2 START:** Material availability check, FIFO deduction (oldest batches first)
+  - [x] **Step 3 COMPLETE:** Actual quantity recording, yield efficiency calculation, waste tracking
+  - [x] Deduct raw materials from batches at START (using created_at for FIFO)
+  - [x] Create production output with actual_quantity (not expected)
+  - [x] Update product SKU stock by actual_quantity
+  - [x] Track materials used with production_materials records
+- [x] Database migration: `20260124-update-production-run-status.js`
+  - [x] Renamed: `quantity_to_produce` → `expected_quantity`
+  - [x] Added: `actual_quantity`, `waste_quantity`, `waste_reason`, `yield_efficiency`
+  - [x] Updated status enum: 'planned', 'in_progress', 'completed', 'cancelled'
+  - [x] Added: `started_at`, `started_by` timestamps
 - [x] Test all endpoints
 
-#### Production Module - Frontend
+#### Production Module - Frontend (Three-Step Workflow)
 
 - [x] Create production service (`services/productionService.js`)
+  - [x] Added `start(id)` method for START step
 - [x] Create production store (`stores/production.js`)
 - [x] Create ProductionIndex view
 - [x] Create ProductionList component
-- [x] Create ProductionForm component
-  - [x] Select recipe
-  - [x] Enter quantity to produce
-  - [x] Display material requirements
-  - [x] Check stock availability
+  - [x] Status-based action buttons (Start for planned, Complete for in_progress)
+  - [x] Edit button only for planned status
+- [x] Create ProductionRunForm component
+  - [x] Expected quantity field (renamed from quantity_to_produce)
+  - [x] Material scaling display (scaleFactor = expected/recipe_yield)
+  - [x] Recipe selection
+  - [x] Material requirements preview
+- [x] Create StartProductionDialog component (**NEW**)
+  - [x] Material availability confirmation
+  - [x] FIFO deduction information
+  - [x] Start production confirmation
+- [x] Update CompleteProductionDialog component
+  - [x] Actual quantity input
+  - [x] Waste quantity and reason fields
+  - [x] Yield efficiency indicator (color-coded)
+  - [x] Materials info: "deducted at START" message
 - [x] Create ProductionCreate view
+- [x] Create ProductionEdit view
+  - [x] Edit restrictions: only planned status
+- [x] Create ProductionView component
+  - [x] Status-based display (planned/in_progress/completed)
+  - [x] FIFO batch traceability
+  - [x] Yield metrics and waste analysis
 - [x] Create ProductionView component
 - [x] Display production history
 - [ ] Test production workflow (recipe → deduct materials → add finished goods)

@@ -584,6 +584,10 @@ const initializeForm = () => {
     return;
   }
 
+  // Calculate default expiry date (today + 365 days)
+  const defaultExpiryDate = new Date();
+  defaultExpiryDate.setDate(defaultExpiryDate.getDate() + 365);
+
   formData.value.received_items = items.map(item => {
     const quantityToReceive = parseFloat(item.quantity) - parseFloat(item.received_quantity || 0);
     const isFullyReceived = quantityToReceive <= 0;
@@ -597,7 +601,7 @@ const initializeForm = () => {
       already_received: parseFloat(item.received_quantity || 0), // Track what's already been received
       quantity_to_receive: quantityToReceive, // Remaining to receive
       quantity_received: isFullyReceived ? 0 : quantityToReceive, // Default to remaining, 0 if fully received
-      expiry_date: null,
+      expiry_date: defaultExpiryDate, // Auto-populate with today + 365 days
       error: false,
       expiryWarning: false,
       receive: !isFullyReceived, // Default: only include non-fully-received items

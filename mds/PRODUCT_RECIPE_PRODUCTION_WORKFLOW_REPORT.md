@@ -548,17 +548,19 @@ Production Run
 
 ### 5.3 Production Creation Process
 
-This is a **two-step process**: Create → Complete
+This is a **three-step process**: Create → Start → Complete
 
-#### Step 1: Create Production Run
+#### Step 1: Create Production Run (Plan)
 
 ```javascript
 POST /api/production-runs
-├── Step 1: Validate data (recipe_id, batch_number, produced_by)
+├── Step 1: Validate data (recipe_id, expected_quantity, produced_by)
 ├── Step 2: Verify recipe exists and is active
-├── Step 3: Create production_run record
-│   ├── Status = 'planned' or 'completed' (depending on use case)
+├── Step 3: Validate expected_quantity > 0
+├── Step 4: Create production_run record
+│   ├── Status = 'planned' (default)
 │   ├── Auto-generate batch number if not provided
+│   ├── Record expected_quantity (for material scaling)
 │   └── Record production date and producer
 └── Return created production run
 ```
@@ -572,30 +574,38 @@ CREATE TABLE production_runs (
     production_date DATE NOT NULL,              -- When produced
     batch_number VARCHAR(50) NOT NULL,          -- Batch identifier
     produced_by INT NOT NULL,                   -- FK to users
-    status ENUM('completed', 'cancelled'),      -- Run status
+    expected_quantity DECIMAL(10,2) NOT NULL,   -- Target output quantity
+    status ENUM('planned', 'in_progress', 'completed', 'cancelled'), -- Run status
+    actual_quantity DECIMAL(10,2),              -- Actual output (after completion)
+    waste_quantity DECIMAL(10,2),               -- Waste/loss quantity
+    waste_reason VARCHAR(255),                  -- Reason for waste
+    yield_efficiency DECIMAL(5,2),              -- (actual/expected) * 100
     notes TEXT,                                 -- Additional notes
     created_at TIMESTAMP,
+    updated_at TIMESTAMP,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id),
     FOREIGN KEY (produced_by) REFERENCES users(id),
     INDEX idx_recipe (recipe_id),
     INDEX idx_production_date (production_date),
-    INDEX idx_batch (batch_number)
+    INDEX idx_batch (batch_number),
+    INDEX idx_status (status)
 );
 ```
 
-#### Step 2: Complete Production Run (CRITICAL PROCESS)
+#### Step 2: Start Production Run (Material Deduction - CRITICAL PROCESS)
 
-This is the most complex operation in the system. It implements **FIFO batch consumption** and automatic inventory updates.
+This step checks material availability and performs FIFO deduction **BEFORE** production begins.
 
 ```javascript
-POST /api/production-runs/:id/complete
+POST /api/production-runs/:id/start
 ├── Transaction Start (CRITICAL - Must be atomic)
-├── Step 1: Validate inputs
-│   └── quantity_produced > 0
+├── Step 1: Validate production run
+│   └── Status must be 'planned'
+│   └── expected_quantity must be > 0
 ├── Step 2: Fetch production run with recipe and recipe items
 ├── Step 3: Calculate scale factor
-│   └── scale_factor = quantity_produced / recipe.batch_size
-│       Example: Want to produce 50kg, recipe is 10kg batch
+│   └── scale_factor = expected_quantity / recipe.expected_yield
+│       Example: Want to produce 50kg, recipe yield is 10kg
 │                scale_factor = 50 / 10 = 5
 ├── Step 4: For each recipe item (raw material):
 │   ├── 4.1: Calculate required quantity
@@ -604,28 +614,87 @@ POST /api/production-runs/:id/complete
 │   │                required = 2 × 5 = 10kg
 │   ├── 4.2: Fetch available batches (FIFO order)
 │   │   └── WHERE material_id = item.material_id
-│   │       AND current_quantity > 0
-│   │       AND type = 'receipt'
+│   │       AND quantity > 0
+│   │       AND batch_type = 'receipt'
 │   │       AND (expiry_date IS NULL OR expiry_date > NOW())
 │   │       ORDER BY created_at ASC  -- FIFO!
 │   ├── 4.3: Deduct from batches using FIFO
 │   │   └── For each batch (oldest first):
-│   │       ├── Take min(required_qty, batch.current_quantity)
-│   │       ├── Update batch: current_quantity -= taken
+│   │       ├── available = batch.quantity
+│   │       ├── Take min(required_qty, available)
+│   │       ├── Calculate cost: batch.unit_cost × taken
+│   │       ├── Update batch: quantity -= taken
 │   │       ├── Record in production_materials
 │   │       └── Subtract taken from required_qty
 │   │       └── Continue until required_qty = 0
 │   └── 4.4: Check if sufficient stock
 │       └── If required_qty > 0 after all batches:
-│           └── ROLLBACK and return error
-├── Step 5: Update finished goods stock
-│   └── sku.current_stock += quantity_produced
-├── Step 6: Create production output record
-│   └── Records SKU and quantity produced
-├── Step 7: Update production run status = 'completed'
+│           └── ROLLBACK and return error with details
+│               "Insufficient stock for {material}. Required: X, Available: Y"
+├── Step 5: Update production run status = 'in_progress'
+├── Transaction Commit
+└── Return updated production run with materials used
+```
+
+**Key Differences from Old Flow:**
+
+- Material check happens **BEFORE** production (not after)
+- Uses `expected_quantity` to scale materials
+- Status changes to `in_progress` (not directly to completed)
+- Materials are deducted from inventory immediately
+- Cannot edit once in_progress (materials already deducted)
+
+#### Step 3: Complete Production Run (Output Recording)
+
+#### Step 3: Complete Production Run (Output Recording)
+
+This step records the actual production output. Materials have already been deducted in Step 2.
+
+```javascript
+POST /api/production-runs/:id/complete
+├── Transaction Start (CRITICAL - Must be atomic)
+├── Step 1: Validate inputs
+│   └── quantity_produced > 0
+│   └── Status must be 'in_progress'
+├── Step 2: Fetch production run with existing production_materials
+├── Step 3: Calculate total material cost
+│   └── Read from production_materials (created in START step)
+│   └── total_cost = SUM(quantity_used × batch.unit_cost)
+├── Step 4: Calculate costs
+│   ├── total_expected = quantity_produced + waste_quantity
+│   ├── base_unit_cost = total_material_cost / total_expected
+│   ├── finished_goods_cost = base_unit_cost × quantity_produced
+│   └── waste_cost = base_unit_cost × waste_quantity (tracked separately)
+├── Step 5: Generate finished goods batch number
+│   └── Format: FG-{sku_id}-{YYYYMMDD}-{seq}
+├── Step 6: Update SKU inventory (weighted average cost)
+│   ├── current_value = current_stock × average_cost
+│   ├── new_value = quantity_produced × base_unit_cost
+│   ├── total_value = current_value + new_value
+│   ├── total_quantity = current_stock + quantity_produced
+│   ├── new_avg_cost = total_value / total_quantity
+│   └── Update: current_stock, average_cost, cost_last_updated
+├── Step 7: Create production_output record
+│   └── Records: sku_id, quantity_produced, batch_number,
+│                 unit_cost, total_cost, waste_cost
+├── Step 8: Calculate yield efficiency
+│   └── yield_efficiency = (quantity_produced / expected_quantity) × 100
+├── Step 9: Update production run
+│   ├── Status = 'completed'
+│   ├── actual_quantity = quantity_produced
+│   ├── waste_quantity, waste_reason
+│   └── yield_efficiency
 ├── Transaction Commit
 └── Return completed production run with all details
 ```
+
+**Key Changes from Old Flow:**
+
+- **NO material deduction** (already done in START)
+- Reads material costs from `production_materials` table
+- Focuses on output recording and cost calculation
+- Tracks yield efficiency (actual vs expected)
+- Separates finished goods cost from waste cost
 
 **Database Schema - production_materials:**
 
@@ -657,7 +726,7 @@ CREATE TABLE production_output (
 
 ### 5.4 FIFO (First-In-First-Out) Logic
 
-The FIFO logic ensures that oldest raw material batches are consumed first.
+The FIFO logic ensures that oldest raw material batches are consumed first. This happens during the **START** step, not the complete step.
 
 **Why FIFO?**
 
@@ -666,29 +735,38 @@ The FIFO logic ensures that oldest raw material batches are consumed first.
 3. **Cost Accuracy:** Match costs with actual consumption patterns
 4. **Compliance:** Standard practice in food manufacturing
 5. **Traceability:** Know exact batches used in production
+6. **Inventory Accuracy:** Deduct materials before production begins
 
-**FIFO Example:**
+**FIFO Example (during START step):**
 
 ```
-Scenario: Need 10kg of Turmeric Powder
+Scenario: Start production requiring 10kg of Turmeric Powder
+(Expected Quantity = 120kg, Recipe Yield = 100kg, Scale Factor = 1.2)
+(Recipe Item: 8.33kg × 1.2 = 10kg required)
 
 Available Batches (FIFO sorted):
-1. Batch B001 (Jan 5):  current_stock = 7kg  (oldest)
-2. Batch B002 (Jan 10): current_stock = 5kg
-3. Batch B003 (Jan 15): current_stock = 8kg  (newest)
+1. Batch B001 (Jan 5):  quantity = 7kg, unit_cost = $5/kg  (oldest)
+2. Batch B002 (Jan 10): quantity = 5kg, unit_cost = $6/kg
+3. Batch B003 (Jan 15): quantity = 8kg, unit_cost = $5.5/kg  (newest)
 
-Deduction Process:
+Deduction Process (at START):
 Step 1: Take 7kg from Batch B001 (exhausted, remaining = 3kg needed)
-        B001.current_stock = 0kg
+        B001.quantity = 0kg
+        Cost = 7kg × $5 = $35
 
 Step 2: Take 3kg from Batch B002 (satisfies need)
-        B002.current_stock = 2kg
+        B002.quantity = 2kg
+        Cost = 3kg × $6 = $18
 
-Result:
+Total Material Cost = $35 + $18 = $53
+
+Result (saved in production_materials table):
 - production_materials records:
   * run_id=1, batch_id=B001, quantity_used=7kg
   * run_id=1, batch_id=B002, quantity_used=3kg
-- Batch B003 remains untouched
+- Batch B003 remains untouched (for next production)
+- Production run status → 'in_progress'
+- When COMPLETE is called later, it reads these costs ($53 total)
 ```
 
 ### 5.5 Material Availability Check
@@ -1245,13 +1323,16 @@ GET    /                           # List production runs
 GET    /:id                        # Get production run details
        Response: {
            id, recipe_id, production_date, batch_number, status,
-           recipe: { id, name, version, ... },
+           expected_quantity, actual_quantity, waste_quantity,
+           yield_efficiency,
+           recipe: { id, name, version, expected_yield, yield_unit, ... },
            materials: [
                { id, batch_id, quantity_used,
-                 batch: { batch_number, material: {...} } }
+                 batch: { batch_number, unit_cost, material: {...} } }
            ],
            outputs: [
-               { id, sku_id, quantity_produced,
+               { id, sku_id, quantity_produced, batch_number,
+                 unit_cost, total_cost, waste_cost,
                  sku: { size, unit, product: {...} } }
            ]
        }
@@ -1259,40 +1340,84 @@ GET    /:id                        # Get production run details
 POST   /                           # Create production run
        Body: {
            recipe_id, production_date, batch_number,
-           produced_by, notes, status
+           expected_quantity, produced_by, notes, status
        }
-       Response: { id, recipe_id, batch_number, status, ... }
+       Validation:
+       - recipe_id: required, must exist
+       - expected_quantity: required, must be > 0
+       - produced_by: required (user ID)
+       - status: defaults to 'planned'
+       Response: { id, recipe_id, batch_number, status: 'planned', ... }
 
-PUT    /:id                        # Update run (if not completed)
-       Body: { production_date, notes, status }
+PUT    /:id                        # Update run (only if status='planned')
+       Body: { production_date, expected_quantity, notes, status }
+       Restrictions:
+       - Cannot update if status = 'in_progress' or 'completed'
+       - expected_quantity must be > 0
        Response: { id, ... }
 
-DELETE /:id                        # Delete run (if not completed)
+DELETE /:id                        # Delete run (only if status='planned')
+       Restrictions:
+       - Cannot delete if status = 'completed'
        Response: { message: "Production run deleted" }
 
-POST   /:id/complete               # EXECUTE PRODUCTION (FIFO)
+POST   /:id/start                  # START PRODUCTION (FIFO Material Deduction)
+       Body: {} (no body needed)
+       Process:
+       1. Validate status = 'planned'
+       2. Calculate scale_factor = expected_quantity / recipe.expected_yield
+       3. For each recipe item:
+          - Calculate required = item.quantity × scale_factor
+          - Fetch available batches (FIFO: ORDER BY created_at ASC)
+          - WHERE quantity > 0 AND batch_type = 'receipt'
+          - Deduct quantities using FIFO
+          - Record in production_materials
+          - Update raw_material_batches.quantity
+       4. If insufficient stock → ROLLBACK, return error
+       5. Update status to 'in_progress'
+       Response: {
+           id, status: 'in_progress',
+           materials: [{ batch_id, quantity_used, batch: {...} }],
+           ...
+       }
+       Errors:
+       - 400: "Production run must be in planned status to start"
+       - 400: "Expected quantity is required to start production"
+       - 400: "Insufficient stock for {material}. Required: X, Available: Y"
+
+POST   /:id/complete               # COMPLETE PRODUCTION (Record Output)
        Body: {
-           quantity_produced,
-           waste_quantity,
-           waste_reason,
-           outputs: [{ sku_id, quantity_produced }]
+           quantity_produced,      # Required, > 0
+           waste_quantity,         # Optional, >= 0
+           waste_reason,           # Required if waste_quantity > 0
+           production_date,        # Optional, defaults to run's date
+           notes,                  # Optional
+           outputs: [{ sku_id, quantity_produced }]  # Optional, defaults to recipe SKU
        }
        Process:
-       1. Calculate scale factor
-       2. For each recipe item:
-          - Get required quantity
-          - Fetch available batches (FIFO)
-          - Deduct quantities
-          - Record in production_materials
-          - Update raw_material_batches.current_quantity
-       3. Update product_skus.current_stock
-       4. Create production_output record
-       5. Update status to 'completed'
-       Response: { completed production run with all details }
-
-GET    /:id/check-materials        # Check if can produce
+       1. Validate status = 'in_progress'
+       2. Read material costs from production_materials table
+       3. Calculate costs (total, base_unit_cost, waste_cost)
+       4. Generate finished goods batch number
+       5. Update product_skus inventory (weighted average)
+       6. Create production_output record
+       7. Calculate yield_efficiency = (actual / expected) × 100
+       8. Update status to 'completed'
        Response: {
-           production_run_id, quantity_to_produce, can_produce,
+           id, status: 'completed',
+           actual_quantity, waste_quantity, yield_efficiency,
+           outputs: [{ batch_number, unit_cost, total_cost, ... }],
+           ...
+       }
+       Errors:
+       - 400: "Production run must be in progress to complete"
+       - 400: "Valid quantity produced is required"
+       - 400: "Please provide waste reason when waste quantity > 0"
+
+GET    /:id/check-materials        # Check if can produce (DEPRECATED - use START)
+       Note: Material check now happens automatically during START
+       Response: {
+           production_run_id, expected_quantity, can_produce,
            materials: [
                {
                    raw_material_id, raw_material_name,

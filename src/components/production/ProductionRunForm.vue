@@ -119,28 +119,14 @@
           <!-- Recipe Details (when recipe selected) -->
           <div v-if="selectedRecipe" class="mt-4">
             <h3>Recipe Details</h3>
-            <Divider />
-
-            <!-- Material Availability Warning -->
-            <InlineMessage
-              v-if="hasMaterialShortage && !checkingMaterials"
-              severity="warn"
-              class="mb-3 w-full"
-            >
-              <strong>Insufficient Materials:</strong> Some raw materials are not available in
-              required quantities. Check the materials list below.
-            </InlineMessage>
-
-            <InlineMessage v-if="checkingMaterials" severity="info" class="mb-3 w-full">
-              Checking material availability...
-            </InlineMessage>
+            <Divider class="mb-3" />
 
             <div class="grid">
               <div class="col-12 md:col-6">
                 <div class="field">
                   <label class="text-500 text-sm">Product</label>
                   <div class="text-lg font-bold">
-                    {{ selectedRecipe.product?.name }}
+                    {{ selectedRecipe.name }}
                   </div>
                 </div>
               </div>
@@ -258,8 +244,6 @@ const toast = useToastNotification();
 const errors = ref({});
 const recipeOptions = ref([]);
 const selectedRecipe = ref(null);
-const hasMaterialShortage = ref(false);
-const checkingMaterials = ref(false);
 
 const formData = ref({
   run_number: '',

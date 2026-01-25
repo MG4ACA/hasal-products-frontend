@@ -17,7 +17,7 @@
 
       <Column field="run_number" header="Run Number">
         <template #body="{ data }">
-          <span class="font-bold">{{ data.run_number }}</span>
+          <span class="font-bold">{{ data.batch_number }}</span>
         </template>
       </Column>
 

@@ -116,7 +116,7 @@ const efficiency = computed(() => {
             <div class="production-meta">
               <span class="recipe-name">
                 Recipe:
-                <strong>{{ productionStore.currentProductionRun?.Recipe?.name || 'N/A' }}</strong>
+                <strong>{{ productionStore.currentProductionRun?.recipe?.name || 'N/A' }}</strong>
               </span>
               <span class="status-badge">
                 <Tag
@@ -157,10 +157,10 @@ const efficiency = computed(() => {
             <div class="info-row">
               <span class="label">Recipe:</span>
               <span class="value">
-                {{ productionStore.currentProductionRun?.Recipe?.name }}
+                {{ productionStore.currentProductionRun?.recipe?.name }}
                 <Tag
-                  v-if="productionStore.currentProductionRun?.Recipe?.version > 1"
-                  :value="`v${productionStore.currentProductionRun?.Recipe?.version}`"
+                  v-if="productionStore.currentProductionRun?.recipe?.version > 1"
+                  :value="`v${productionStore.currentProductionRun?.recipe?.version}`"
                   severity="info"
                   style="margin-left: 0.5rem; font-size: 0.75rem"
                 />
@@ -169,8 +169,8 @@ const efficiency = computed(() => {
             <div class="info-row">
               <span class="label">Quantity Planned:</span>
               <span class="value"
-                >{{ formatNumber(productionStore.currentProductionRun?.quantity) }}
-                {{ productionStore.currentProductionRun?.unit }}</span
+                >{{ formatNumber(productionStore.currentProductionRun?.expected_quantity) }}
+                {{ productionStore.currentProductionRun?.recipe.yield_unit }}</span
               >
             </div>
             <div class="info-row">
@@ -394,8 +394,12 @@ const efficiency = computed(() => {
             <Column header="Raw Material" style="min-width: 200px">
               <template #body="{ data }">
                 <div class="material-cell">
-                  <div class="font-semibold">{{ data.RawMaterial?.code }}</div>
-                  <div class="text-sm text-600">{{ data.RawMaterial?.name }}</div>
+                  <div class="font-semibold">
+                    {{ data.batch?.material?.code }}
+                  </div>
+                  <div class="text-sm text-600">
+                    {{ data.batch?.material?.name }}
+                  </div>
                 </div>
               </template>
             </Column>
@@ -407,9 +411,7 @@ const efficiency = computed(() => {
             </Column>
 
             <Column header="Unit Cost" style="min-width: 120px">
-              <template #body="{ data }">
-                Rs. {{ formatNumber(data.RawMaterial?.average_cost || 0) }}
-              </template>
+              <template #body="{ data }"> Rs. {{ formatNumber(data.average_cost || 0) }} </template>
             </Column>
 
             <Column header="Total Cost" style="min-width: 120px">
@@ -643,7 +645,7 @@ const efficiency = computed(() => {
 
 .material-cell {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.25rem;
 }
 

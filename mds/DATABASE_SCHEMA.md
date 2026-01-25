@@ -483,23 +483,46 @@ CREATE TABLE recipe_items (
 
 #### `production_runs`
 
+**Three-Step Production Workflow:**
+
+1. **CREATE** (status: `planned`) - Plan production with expected quantity
+2. **START** (status: `in_progress`) - Check materials and deduct using FIFO
+3. **COMPLETE** (status: `completed`) - Record actual output and calculate yield
+
 ```sql
 CREATE TABLE production_runs (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    run_number VARCHAR(50) UNIQUE NOT NULL,
     recipe_id INT NOT NULL,
     production_date DATE NOT NULL,
-    batch_number VARCHAR(50) NOT NULL,
-    produced_by INT NOT NULL,
-    status ENUM('completed', 'cancelled') DEFAULT 'completed',
-    notes TEXT,
+    expected_quantity DECIMAL(10,2) NOT NULL,  -- Target output (renamed from quantity_to_produce)
+    actual_quantity DECIMAL(10,2) DEFAULT NULL,  -- Actual output (set at COMPLETE)
+    waste_quantity DECIMAL(10,2) DEFAULT NULL,  -- Material waste/loss
+    waste_reason VARCHAR(500) DEFAULT NULL,  -- Reason for waste
+    yield_efficiency DECIMAL(5,2) DEFAULT NULL,  -- (actual/expected)×100
+    status ENUM('planned', 'in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'planned',
+    started_at DATETIME DEFAULT NULL,  -- When production started (materials deducted)
+    started_by INT DEFAULT NULL,  -- User who started production
+    completed_at DATETIME DEFAULT NULL,
+    completed_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
+    notes TEXT,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id),
-    FOREIGN KEY (produced_by) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (started_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (completed_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_recipe (recipe_id),
     INDEX idx_production_date (production_date),
-    INDEX idx_batch (batch_number)
+    INDEX idx_status (status)
 );
 ```
+
+**Key Changes:**
+
+- Materials deducted at START step (not COMPLETE)
+- FIFO uses `raw_material_batches.created_at ASC` ordering
+- Stock updated by `actual_quantity` (not `expected_quantity`)
 
 #### `production_materials`
 

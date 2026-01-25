@@ -179,7 +179,7 @@ onMounted(() => {
     </div>
 
     <!-- Batch Traceability Quick Access -->
-    <div class="traceability-menu">
+    <!-- <div class="traceability-menu">
       <h3>Batch Traceability Tools</h3>
       <div class="traceability-cards">
         <div class="traceability-card" @click="navigateToBatchGenealogy">
@@ -215,7 +215,7 @@ onMounted(() => {
           <i class="pi pi-arrow-right" />
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Filters -->
     <div class="filters-section">
