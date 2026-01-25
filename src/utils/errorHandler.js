@@ -15,6 +15,10 @@ export const handleApiError = error => {
   // Log error for debugging
   console.error(`[API Error ${statusCode || 'Unknown'}]:`, message);
 
+  // Create error object with message
+  const apiError = new Error(message);
+  apiError.statusCode = statusCode;
+
   // Handle specific status codes
   switch (statusCode) {
     case 401:
@@ -22,42 +26,29 @@ export const handleApiError = error => {
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('tokenExpiresAt');
       window.location.href = '/login';
-      return {
-        error: true,
-        message: 'Session expired. Please login again.',
-        statusCode: 401,
-      };
+      apiError.message = 'Session expired. Please login again.';
+      break;
 
     case 403:
       // Forbidden - Permission denied
-      return {
-        error: true,
-        message: 'You do not have permission to perform this action.',
-        statusCode: 403,
-      };
+      apiError.message = 'You do not have permission to perform this action.';
+      break;
 
     case 404:
       // Not Found - Resource doesn't exist
-      return {
-        error: true,
-        message: message || 'Resource not found.',
-        statusCode: 404,
-      };
+      apiError.message = message || 'Resource not found.';
+      break;
 
     case 500:
       // Server Error
-      return {
-        error: true,
-        message: 'Server error. Please try again later.',
-        statusCode: 500,
-      };
+      apiError.message = 'Server error. Please try again later.';
+      break;
 
     default:
-      // Generic error
-      return {
-        error: true,
-        message: message || 'An unexpected error occurred.',
-        statusCode,
-      };
+      // Generic error - use the original message
+      apiError.message = message || 'An unexpected error occurred.';
   }
+
+  // Throw the error so it can be caught by the caller
+  throw apiError;
 };

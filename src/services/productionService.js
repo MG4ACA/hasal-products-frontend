@@ -64,10 +64,32 @@ export const productionService = {
     }
   },
 
+  // Start production run
+  async start(id) {
+    try {
+      const response = await api.post(`${PRODUCTION_BASE_URL}/${id}/start`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   // Check material availability
   async checkMaterials(id) {
     try {
       const response = await api.get(`${PRODUCTION_BASE_URL}/${id}/check-materials`);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Check material availability for recipe (before creating production run)
+  async checkMaterialsForRecipe(checkData) {
+    try {
+      // Create a temporary check by using the recipe data
+      // This simulates what materials would be needed
+      const response = await api.post(`${PRODUCTION_BASE_URL}/check-materials-preview`, checkData);
       return response.data.data;
     } catch (error) {
       return handleApiError(error);

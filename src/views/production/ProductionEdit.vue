@@ -69,6 +69,16 @@ const handleSubmit = async formData => {
 const handleCancel = () => {
   router.push('/production-runs');
 };
+
+const getStatusSeverity = status => {
+  const severityMap = {
+    planned: 'info',
+    in_progress: 'warning',
+    completed: 'success',
+    cancelled: 'danger',
+  };
+  return severityMap[status] || 'info';
+};
 </script>
 
 <template>
@@ -127,18 +137,6 @@ const handleCancel = () => {
     </template>
   </div>
 </template>
-
-<script setup>
-const getStatusSeverity = status => {
-  const severityMap = {
-    planned: 'info',
-    in_progress: 'warning',
-    completed: 'success',
-    cancelled: 'danger',
-  };
-  return severityMap[status] || 'info';
-};
-</script>
 
 <style scoped>
 .production-edit {

@@ -86,6 +86,7 @@
           @view="viewProduction"
           @edit="editProduction"
           @delete="confirmDelete"
+          @refresh="fetchData"
         />
       </template>
     </Card>
@@ -233,7 +234,7 @@ const onPageChange = event => {
 };
 
 const viewProduction = id => {
-  router.push(`/production-runs/${id}`);
+  router.push(`/production-runs/${id}/view`);
 };
 
 const editProduction = id => {

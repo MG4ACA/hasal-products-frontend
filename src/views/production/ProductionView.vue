@@ -115,7 +115,8 @@ const efficiency = computed(() => {
             <p>Production Run Details & Output Tracking</p>
             <div class="production-meta">
               <span class="recipe-name">
-                Recipe: <strong>{{ productionStore.currentProductionRun?.Recipe?.name || 'N/A' }}</strong>
+                Recipe:
+                <strong>{{ productionStore.currentProductionRun?.Recipe?.name || 'N/A' }}</strong>
               </span>
               <span class="status-badge">
                 <Tag
@@ -126,12 +127,12 @@ const efficiency = computed(() => {
             </div>
           </div>
           <div class="header-actions">
-            <Button 
+            <Button
               v-if="productionStore.currentProductionRun?.status === 'planned'"
-              label="Edit" 
-              icon="pi pi-pencil" 
-              severity="primary" 
-              @click="handleEdit" 
+              label="Edit"
+              icon="pi pi-pencil"
+              severity="primary"
+              @click="handleEdit"
             />
             <Button label="Back" icon="pi pi-arrow-left" severity="secondary" @click="handleBack" />
           </div>
@@ -149,13 +150,15 @@ const efficiency = computed(() => {
           <div class="card-content">
             <div class="info-row">
               <span class="label">Production Date:</span>
-              <span class="value">{{ formatDate(productionStore.currentProductionRun?.production_date) }}</span>
+              <span class="value">{{
+                formatDate(productionStore.currentProductionRun?.production_date)
+              }}</span>
             </div>
             <div class="info-row">
               <span class="label">Recipe:</span>
               <span class="value">
                 {{ productionStore.currentProductionRun?.Recipe?.name }}
-                <Tag 
+                <Tag
                   v-if="productionStore.currentProductionRun?.Recipe?.version > 1"
                   :value="`v${productionStore.currentProductionRun?.Recipe?.version}`"
                   severity="info"
@@ -165,7 +168,10 @@ const efficiency = computed(() => {
             </div>
             <div class="info-row">
               <span class="label">Quantity Planned:</span>
-              <span class="value">{{ formatNumber(productionStore.currentProductionRun?.quantity) }} {{ productionStore.currentProductionRun?.unit }}</span>
+              <span class="value"
+                >{{ formatNumber(productionStore.currentProductionRun?.quantity) }}
+                {{ productionStore.currentProductionRun?.unit }}</span
+              >
             </div>
             <div class="info-row">
               <span class="label">Status:</span>
@@ -178,7 +184,9 @@ const efficiency = computed(() => {
             </div>
             <div v-if="productionStore.currentProductionRun?.batch_number" class="info-row">
               <span class="label">Batch Number:</span>
-              <span class="value font-bold text-primary">{{ productionStore.currentProductionRun?.batch_number }}</span>
+              <span class="value font-bold text-primary">{{
+                productionStore.currentProductionRun?.batch_number
+              }}</span>
             </div>
           </div>
         </div>
@@ -194,17 +202,38 @@ const efficiency = computed(() => {
               <span class="label">Material Cost:</span>
               <span class="value font-semibold">Rs. {{ formatNumber(totalMaterialCost) }}</span>
             </div>
-            <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.unit_cost" class="info-row">
+            <div
+              v-if="productionStore.currentProductionRun?.outputs?.[0]?.unit_cost"
+              class="info-row"
+            >
               <span class="label">Unit Cost (Finished Goods):</span>
-              <span class="value font-semibold">Rs. {{ formatNumber(productionStore.currentProductionRun.outputs[0].unit_cost) }}</span>
+              <span class="value font-semibold"
+                >Rs.
+                {{ formatNumber(productionStore.currentProductionRun.outputs[0].unit_cost) }}</span
+              >
             </div>
-            <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.total_cost" class="info-row">
+            <div
+              v-if="productionStore.currentProductionRun?.outputs?.[0]?.total_cost"
+              class="info-row"
+            >
               <span class="label">Total Cost (Finished Goods):</span>
-              <span class="value font-bold text-green-600">Rs. {{ formatNumber(productionStore.currentProductionRun.outputs[0].total_cost) }}</span>
+              <span class="value font-bold text-green-600"
+                >Rs.
+                {{ formatNumber(productionStore.currentProductionRun.outputs[0].total_cost) }}</span
+              >
             </div>
-            <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.waste_cost && parseFloat(productionStore.currentProductionRun.outputs[0].waste_cost) > 0" class="info-row">
+            <div
+              v-if="
+                productionStore.currentProductionRun?.outputs?.[0]?.waste_cost &&
+                parseFloat(productionStore.currentProductionRun.outputs[0].waste_cost) > 0
+              "
+              class="info-row"
+            >
               <span class="label">Waste Cost:</span>
-              <span class="value font-bold text-red-600">Rs. {{ formatNumber(productionStore.currentProductionRun.outputs[0].waste_cost) }}</span>
+              <span class="value font-bold text-red-600"
+                >Rs.
+                {{ formatNumber(productionStore.currentProductionRun.outputs[0].waste_cost) }}</span
+              >
             </div>
           </div>
         </div>
@@ -218,22 +247,47 @@ const efficiency = computed(() => {
           <div class="card-content">
             <div v-if="productionStore.currentProductionRun?.expected_quantity" class="info-row">
               <span class="label">Expected Quantity:</span>
-              <span class="value">{{ formatNumber(productionStore.currentProductionRun.expected_quantity) }} {{ productionStore.currentProductionRun.unit }}</span>
+              <span class="value"
+                >{{ formatNumber(productionStore.currentProductionRun.expected_quantity) }}
+                {{ productionStore.currentProductionRun.unit }}</span
+              >
             </div>
             <div v-if="productionStore.currentProductionRun?.actual_quantity" class="info-row">
               <span class="label">Actual Quantity:</span>
-              <span class="value font-semibold">{{ formatNumber(productionStore.currentProductionRun.actual_quantity) }} {{ productionStore.currentProductionRun.unit }}</span>
+              <span class="value font-semibold"
+                >{{ formatNumber(productionStore.currentProductionRun.actual_quantity) }}
+                {{ productionStore.currentProductionRun.unit }}</span
+              >
             </div>
             <div v-if="productionStore.currentProductionRun?.waste_quantity" class="info-row">
               <span class="label">Waste Quantity:</span>
-              <span :class="parseFloat(productionStore.currentProductionRun.waste_quantity) > 0 ? 'value text-orange-600 font-semibold' : 'value'">{{ formatNumber(productionStore.currentProductionRun.waste_quantity) }} {{ productionStore.currentProductionRun.unit }}</span>
+              <span
+                :class="
+                  parseFloat(productionStore.currentProductionRun.waste_quantity) > 0
+                    ? 'value text-orange-600 font-semibold'
+                    : 'value'
+                "
+                >{{ formatNumber(productionStore.currentProductionRun.waste_quantity) }}
+                {{ productionStore.currentProductionRun.unit }}</span
+              >
             </div>
             <div v-if="productionStore.currentProductionRun?.yield_efficiency" class="info-row">
               <span class="label">Yield Efficiency:</span>
               <span class="value">
                 <Tag
-                  :value="parseFloat(productionStore.currentProductionRun.yield_efficiency).toFixed(2) + '%'"
-                  :severity="parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 95 ? 'success' : parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 85 ? 'info' : parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 75 ? 'warning' : 'danger'"
+                  :value="
+                    parseFloat(productionStore.currentProductionRun.yield_efficiency).toFixed(2) +
+                    '%'
+                  "
+                  :severity="
+                    parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 95
+                      ? 'success'
+                      : parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 85
+                        ? 'info'
+                        : parseFloat(productionStore.currentProductionRun.yield_efficiency) >= 75
+                          ? 'warning'
+                          : 'danger'
+                  "
                 />
               </span>
             </div>
@@ -245,7 +299,10 @@ const efficiency = computed(() => {
         </div>
 
         <!-- Finished Goods Batch -->
-        <div v-if="productionStore.currentProductionRun?.outputs?.[0]?.batch_number" class="info-card">
+        <div
+          v-if="productionStore.currentProductionRun?.outputs?.[0]?.batch_number"
+          class="info-card"
+        >
           <div class="card-header">
             <i class="pi pi-tag" />
             <h3>Finished Goods</h3>
@@ -253,11 +310,18 @@ const efficiency = computed(() => {
           <div class="card-content">
             <div class="info-row">
               <span class="label">Finished Goods Batch:</span>
-              <span class="value font-bold text-primary">{{ productionStore.currentProductionRun.outputs[0].batch_number }}</span>
+              <span class="value font-bold text-primary">{{
+                productionStore.currentProductionRun.outputs[0].batch_number
+              }}</span>
             </div>
-            <div v-if="productionStore.currentProductionRun.outputs[0].production_date" class="info-row">
+            <div
+              v-if="productionStore.currentProductionRun.outputs[0].production_date"
+              class="info-row"
+            >
               <span class="label">Production Date:</span>
-              <span class="value">{{ formatDate(productionStore.currentProductionRun.outputs[0].production_date) }}</span>
+              <span class="value">{{
+                formatDate(productionStore.currentProductionRun.outputs[0].production_date)
+              }}</span>
             </div>
           </div>
         </div>
@@ -271,12 +335,27 @@ const efficiency = computed(() => {
           <div class="card-content">
             <div class="output-item">
               <div class="output-label">Actual Output</div>
-              <div class="output-value primary">{{ formatNumber(productionStore.currentProductionRun?.actual_output || 0) }} {{ productionStore.currentProductionRun?.unit }}</div>
+              <div class="output-value primary">
+                {{ formatNumber(productionStore.currentProductionRun?.actual_output || 0) }}
+                {{ productionStore.currentProductionRun?.unit }}
+              </div>
             </div>
-            <div class="output-item" :class="{ 'has-waste': productionStore.currentProductionRun?.waste_quantity > 0 }">
+            <div
+              class="output-item"
+              :class="{ 'has-waste': productionStore.currentProductionRun?.waste_quantity > 0 }"
+            >
               <div class="output-label">Waste Quantity</div>
-              <div class="output-value" :style="{ color: productionStore.currentProductionRun?.waste_quantity > 0 ? '#dc2626' : '#16a34a' }">
-                {{ formatNumber(productionStore.currentProductionRun?.waste_quantity || 0) }} {{ productionStore.currentProductionRun?.unit }}
+              <div
+                class="output-value"
+                :style="{
+                  color:
+                    productionStore.currentProductionRun?.waste_quantity > 0
+                      ? '#dc2626'
+                      : '#16a34a',
+                }"
+              >
+                {{ formatNumber(productionStore.currentProductionRun?.waste_quantity || 0) }}
+                {{ productionStore.currentProductionRun?.unit }}
               </div>
             </div>
             <div class="output-item">
@@ -288,7 +367,10 @@ const efficiency = computed(() => {
       </div>
 
       <!-- Materials Used -->
-      <Card v-if="productionStore.currentProductionRun?.materials?.length > 0" class="materials-card">
+      <Card
+        v-if="productionStore.currentProductionRun?.materials?.length > 0"
+        class="materials-card"
+      >
         <template #title>
           <div class="flex align-items-center gap-2">
             <i class="pi pi-box" />
@@ -331,9 +413,7 @@ const efficiency = computed(() => {
             </Column>
 
             <Column header="Total Cost" style="min-width: 120px">
-              <template #body="{ data }">
-                Rs. {{ formatNumber(data.cost || 0) }}
-              </template>
+              <template #body="{ data }"> Rs. {{ formatNumber(data.cost || 0) }} </template>
             </Column>
           </DataTable>
 
@@ -348,7 +428,10 @@ const efficiency = computed(() => {
       </Card>
 
       <!-- Completion Information -->
-      <Card v-if="productionStore.currentProductionRun?.status === 'completed'" class="completion-card">
+      <Card
+        v-if="productionStore.currentProductionRun?.status === 'completed'"
+        class="completion-card"
+      >
         <template #title>
           <div class="flex align-items-center gap-2">
             <i class="pi pi-check-circle" />
@@ -359,11 +442,15 @@ const efficiency = computed(() => {
           <div class="completion-info">
             <div class="info-item">
               <span class="label">Completed At:</span>
-              <span class="value">{{ formatDate(productionStore.currentProductionRun?.completed_at) }}</span>
+              <span class="value">{{
+                formatDate(productionStore.currentProductionRun?.completed_at)
+              }}</span>
             </div>
             <div class="info-item">
               <span class="label">Completed By:</span>
-              <span class="value">{{ productionStore.currentProductionRun?.completed_by_name || 'N/A' }}</span>
+              <span class="value">{{
+                productionStore.currentProductionRun?.completed_by_name || 'N/A'
+              }}</span>
             </div>
           </div>
         </template>
@@ -386,11 +473,15 @@ const efficiency = computed(() => {
       <div class="timestamps">
         <div class="timestamp-item">
           <span class="label">Created:</span>
-          <span class="value">{{ formatDate(productionStore.currentProductionRun?.created_at) }}</span>
+          <span class="value">{{
+            formatDate(productionStore.currentProductionRun?.created_at)
+          }}</span>
         </div>
         <div class="timestamp-item">
           <span class="label">Updated:</span>
-          <span class="value">{{ formatDate(productionStore.currentProductionRun?.updated_at) }}</span>
+          <span class="value">{{
+            formatDate(productionStore.currentProductionRun?.updated_at)
+          }}</span>
         </div>
       </div>
     </template>
@@ -699,244 +790,5 @@ const efficiency = computed(() => {
     flex-direction: column;
     gap: 0.75rem;
   }
-}
-</style>
-
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">Product</label>
-                <div class="text-lg">
-                  {{ productionRun.Recipe?.Product?.name }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">SKU</label>
-                <div class="text-lg">
-                  {{ productionRun.Recipe?.ProductSku?.variant }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">Batch Size</label>
-                <div class="text-lg">
-                  {{ formatNumber(productionRun.Recipe?.batch_size) }}
-                  {{ productionRun.Recipe?.unit }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Materials Used -->
-        <div class="mb-4">
-          <h3>Materials Used (FIFO)</h3>
-          <Divider />
-
-          <DataTable :value="productionRun.materials" striped-rows class="p-datatable-sm">
-            <template #empty>
-              <div class="text-center p-4">No materials recorded yet</div>
-            </template>
-
-            <Column field="raw_material_name" header="Raw Material" />
-            <Column field="quantity_used" header="Quantity Used">
-              <template #body="{ data }">
-                {{ formatNumber(data.quantity_used) }} {{ data.unit }}
-              </template>
-            </Column>
-            <Column field="batch_number" header="Batch Number" />
-            <Column field="cost" header="Cost">
-              <template #body="{ data }"> Rs. {{ formatNumber(data.cost) }} </template>
-            </Column>
-          </DataTable>
-
-          <div v-if="productionRun.materials?.length > 0" class="mt-3 p-3 surface-100 border-round">
-            <div class="text-500 text-sm mb-1">Total Material Cost</div>
-            <div class="text-xl font-bold text-primary">Rs. {{ totalMaterialCost.toFixed(2) }}</div>
-          </div>
-        </div>
-
-        <!-- Production Output -->
-        <div v-if="productionRun.status === 'completed'" class="mb-4">
-          <h3>Production Output</h3>
-          <Divider />
-
-          <DataTable :value="productionRun.outputs" striped-rows class="p-datatable-sm">
-            <template #empty>
-              <div class="text-center p-4">No output recorded</div>
-            </template>
-
-            <Column field="batch_number" header="Batch Number" />
-            <Column field="quantity" header="Quantity">
-              <template #body="{ data }">
-                {{ formatNumber(data.quantity) }} {{ data.unit }}
-              </template>
-            </Column>
-            <Column field="production_date" header="Production Date">
-              <template #body="{ data }">
-                {{ formatDate(data.production_date) }}
-              </template>
-            </Column>
-            <Column field="expiry_date" header="Expiry Date">
-              <template #body="{ data }">
-                {{ formatDate(data.expiry_date) }}
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-
-        <!-- Completion Details -->
-        <div v-if="productionRun.status === 'completed'" class="mb-4">
-          <h3>Completion Details</h3>
-          <Divider />
-          <div class="grid">
-            <div class="col-12 md:col-4">
-              <div class="field">
-                <label class="text-500 text-sm">Expected Output</label>
-                <div class="text-lg">
-                  {{ formatNumber(productionRun.quantity) }} {{ productionRun.unit }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-4">
-              <div class="field">
-                <label class="text-500 text-sm">Actual Output</label>
-                <div class="text-lg font-bold text-primary">
-                  {{ formatNumber(productionRun.actual_output) }} {{ productionRun.unit }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-4">
-              <div class="field">
-                <label class="text-500 text-sm">Waste Quantity</label>
-                <div
-                  class="text-lg"
-                  :class="productionRun.waste_quantity > 0 ? 'text-red-600' : ''"
-                >
-                  {{ formatNumber(productionRun.waste_quantity || 0) }} {{ productionRun.unit }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">Completed At</label>
-                <div class="text-lg">
-                  {{ formatDate(productionRun.completed_at) }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">Completed By</label>
-                <div class="text-lg">
-                  {{ productionRun.completed_by_name || 'N/A' }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Timestamps -->
-        <div>
-          <h3>Timestamps</h3>
-          <Divider />
-          <div class="grid">
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">Created At</label>
-                <div class="text-lg">
-                  {{ formatDate(productionRun.created_at) }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="text-500 text-sm">Last Updated</label>
-                <div class="text-lg">
-                  {{ formatDate(productionRun.updated_at) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </Card>
-
-    <div v-else class="text-center p-5">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
-      <p>Loading production run details...</p>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import { useToastNotification } from '@/composables/useToastNotification';
-import { useProductionStore } from '@/stores/production';
-import { formatDate, formatNumber } from '@/utils/formatters';
-import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-
-const router = useRouter();
-const route = useRoute();
-const productionStore = useProductionStore();
-const toast = useToastNotification();
-
-const productionRun = ref(null);
-
-const totalMaterialCost = computed(() => {
-  if (!productionRun.value?.materials) return 0;
-  return productionRun.value.materials.reduce((sum, material) => {
-    return sum + parseFloat(material.cost || 0);
-  }, 0);
-});
-
-const getStatusSeverity = status => {
-  const severityMap = {
-    planned: 'info',
-    in_progress: 'warning',
-    completed: 'success',
-    cancelled: 'danger',
-  };
-  return severityMap[status] || 'info';
-};
-
-onMounted(async () => {
-  await loadProductionRun();
-});
-
-const loadProductionRun = async () => {
-  try {
-    productionRun.value = await productionStore.fetchProductionRunById(route.params.id);
-  } catch (error) {
-    toast.error('Failed to load production run details');
-    router.push('/production-runs');
-  }
-};
-
-const editRun = () => {
-  router.push(`/production-runs/${route.params.id}/edit`);
-};
-
-const goBack = () => {
-  router.push('/production-runs');
-};
-</script>
-
-<style scoped>
-.field {
-  margin-bottom: 1rem;
-}
-
-.font-bold {
-  font-weight: 600;
 }
 </style>

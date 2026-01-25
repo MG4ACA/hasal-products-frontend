@@ -62,14 +62,14 @@
               <small v-if="errors.recipe_id" class="p-error">{{ errors.recipe_id }}</small>
             </div>
 
-            <!-- Quantity -->
+            <!-- Expected Quantity -->
             <div class="col-12 md:col-3">
-              <label for="quantity" class="block mb-2">
-                Quantity <span class="text-red-500">*</span>
+              <label for="expected_quantity" class="block mb-2">
+                Expected Quantity <span class="text-red-500">*</span>
               </label>
               <InputNumber
-                id="quantity"
-                v-model="formData.quantity"
+                id="expected_quantity"
+                v-model="formData.expected_quantity"
                 class="w-full"
                 mode="decimal"
                 :min-fraction-digits="2"
@@ -81,8 +81,13 @@
 
             <!-- Unit -->
             <div class="col-12 md:col-3">
-              <label for="unit" class="block mb-2">Unit</label>
-              <InputText id="unit" v-model="formData.unit" class="w-full" disabled />
+              <label for="expected_unit" class="block mb-2">Unit</label>
+              <InputText
+                id="expected_unit"
+                v-model="formData.expected_unit"
+                class="w-full"
+                disabled
+              />
             </div>
 
             <!-- Status -->
@@ -116,6 +121,20 @@
             <h3>Recipe Details</h3>
             <Divider />
 
+            <!-- Material Availability Warning -->
+            <InlineMessage
+              v-if="hasMaterialShortage && !checkingMaterials"
+              severity="warn"
+              class="mb-3 w-full"
+            >
+              <strong>Insufficient Materials:</strong> Some raw materials are not available in
+              required quantities. Check the materials list below.
+            </InlineMessage>
+
+            <InlineMessage v-if="checkingMaterials" severity="info" class="mb-3 w-full">
+              Checking material availability...
+            </InlineMessage>
+
             <div class="grid">
               <div class="col-12 md:col-6">
                 <div class="field">
@@ -130,60 +149,60 @@
                 <div class="field">
                   <label class="text-500 text-sm">SKU</label>
                   <div class="text-lg">
-                    {{ selectedRecipe.productSku?.size }}
+                    {{ selectedRecipe.productSku?.size }} {{ selectedRecipe.productSku?.unit }}
                   </div>
                 </div>
               </div>
 
-              <div class="col-12 md:col-4">
+              <div class="col-12 md:col-6">
                 <div class="field">
                   <label class="text-500 text-sm">Expected Yield</label>
-                  <div class="text-lg">
+                  <div class="text-lg font-bold text-primary">
                     {{ formatNumber(selectedRecipe.expected_yield) }}
                     {{ selectedRecipe.yield_unit }}
                   </div>
                 </div>
               </div>
 
-              <div class="col-12 md:col-4">
+              <div class="col-12 md:col-6">
                 <div class="field">
-                  <label class="text-500 text-sm">Number of Batches</label>
-                  <div class="text-lg font-bold text-primary">
-                    {{ numberOfBatches.toFixed(2) }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-12 md:col-4">
-                <div class="field">
-                  <label class="text-500 text-sm">Expected Output</label>
-                  <div class="text-lg font-bold">
-                    {{ formatNumber(formData.quantity) }} {{ formData.unit }}
-                  </div>
+                  <label class="text-500 text-sm">Recipe Version</label>
+                  <div class="text-lg">v{{ selectedRecipe.version }}</div>
                 </div>
               </div>
             </div>
 
             <!-- Required Materials -->
             <div class="mt-3">
-              <h4>Required Materials</h4>
+              <h4>
+                Required Materials
+                <span
+                  v-if="
+                    formData.expected_quantity &&
+                    formData.expected_quantity !== selectedRecipe.expected_yield
+                  "
+                  class="text-primary"
+                >
+                  (scaled for {{ formatNumber(formData.expected_quantity) }}
+                  {{ formData.expected_unit }})
+                </span>
+                <span v-else class="text-500">(per batch)</span>
+              </h4>
               <DataTable :value="requiredMaterials" class="p-datatable-sm">
                 <Column field="name" header="Raw Material">
                   <template #body="{ data }">
                     {{ data.material?.name }}
                   </template>
                 </Column>
-                <Column field="quantity_per_batch" header="Per Batch">
+                <Column field="quantity" header="Required Quantity">
                   <template #body="{ data }">
                     {{ formatNumber(data.quantity) }} {{ data.unit }}
                   </template>
                 </Column>
-                <Column header="Total Required">
-                  <template #body="{ data }">
-                    {{ formatNumber(data.quantity * numberOfBatches) }} {{ data.unit }}
-                  </template>
-                </Column>
               </DataTable>
+              <small class="text-500 mt-2 block">
+                Note: Material availability will be checked when you complete the production run.
+              </small>
             </div>
           </div>
 
@@ -213,6 +232,7 @@
 
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
+import { useAuthStore } from '@/stores/auth';
 import { useRecipeStore } from '@/stores/recipe';
 import { formatNumber } from '@/utils/formatters';
 import { computed, onMounted, ref } from 'vue';
@@ -232,17 +252,20 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 
 const recipeStore = useRecipeStore();
+const authStore = useAuthStore();
 const toast = useToastNotification();
 
 const errors = ref({});
 const recipeOptions = ref([]);
 const selectedRecipe = ref(null);
+const hasMaterialShortage = ref(false);
+const checkingMaterials = ref(false);
 
 const formData = ref({
   run_number: '',
   recipe_id: null,
-  quantity: 0,
-  unit: '',
+  expected_quantity: 0,
+  expected_unit: '',
   production_date: new Date(),
   status: 'planned',
   notes: '',
@@ -255,20 +278,34 @@ const statusOptions = [
 
 const isEditMode = computed(() => !!props.runId);
 
-const numberOfBatches = computed(() => {
-  if (!selectedRecipe.value || !formData.value.quantity) return 0;
-  return formData.value.quantity / selectedRecipe.value.expected_yield;
-});
-
 const requiredMaterials = computed(() => {
-  return selectedRecipe.value?.items || [];
+  if (!selectedRecipe.value?.items) return [];
+
+  // Calculate scale factor based on expected_quantity vs recipe's expected_yield
+  const scaleFactor =
+    formData.value.expected_quantity && selectedRecipe.value.expected_yield
+      ? formData.value.expected_quantity / selectedRecipe.value.expected_yield
+      : 1;
+
+  // Scale each material quantity
+  return selectedRecipe.value.items.map(item => ({
+    ...item,
+    quantity: item.quantity * scaleFactor,
+  }));
 });
 
 onMounted(async () => {
   await loadRecipes();
 
   if (props.initialData) {
-    formData.value = { ...formData.value, ...props.initialData };
+    formData.value = {
+      ...formData.value,
+      ...props.initialData,
+      // Convert numeric strings to numbers for InputNumber components
+      expected_quantity: props.initialData.expected_quantity
+        ? parseFloat(props.initialData.expected_quantity)
+        : formData.value.expected_quantity,
+    };
     if (props.initialData.recipe_id) {
       await onRecipeChange();
     }
@@ -288,13 +325,17 @@ const loadRecipes = async () => {
 const onRecipeChange = async () => {
   if (!formData.value.recipe_id) {
     selectedRecipe.value = null;
-    formData.value.unit = '';
+    formData.value.expected_unit = '';
     return;
   }
 
   try {
     selectedRecipe.value = await recipeStore.fetchRecipeById(formData.value.recipe_id);
-    formData.value.unit = selectedRecipe.value.yield_unit;
+    formData.value.expected_unit = selectedRecipe.value.yield_unit;
+    // Set default expected quantity to recipe's expected yield
+    if (!formData.value.expected_quantity) {
+      formData.value.expected_quantity = parseFloat(selectedRecipe.value.expected_yield) || 0;
+    }
   } catch (error) {
     toast.error('Failed to load recipe details');
   }
@@ -308,19 +349,25 @@ const handleSubmit = () => {
     return;
   }
 
-  if (!formData.value.quantity || formData.value.quantity <= 0) {
-    toast.error('Quantity must be greater than 0');
+  if (!formData.value.expected_quantity || formData.value.expected_quantity <= 0) {
+    toast.error('Expected quantity must be greater than 0');
     return;
   }
 
-  // Emit submit event with form data to parent
+  if (!authStore.user?.id) {
+    toast.error('User not authenticated');
+    return;
+  }
+
+  // Emit submit event with correct backend format
   const submitData = {
     recipe_id: formData.value.recipe_id,
-    quantity: formData.value.quantity,
-    unit: formData.value.unit,
     production_date: formData.value.production_date,
-    status: formData.value.status,
+    expected_quantity: formData.value.expected_quantity,
+    batch_number: null, // Backend will auto-generate
+    produced_by: authStore.user.id,
     notes: formData.value.notes,
+    status: formData.value.status,
   };
 
   emit('submit', submitData);

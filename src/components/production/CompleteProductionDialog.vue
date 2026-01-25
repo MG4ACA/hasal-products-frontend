@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    v-model:visible="visible"
+    v-model:visible="dialogVisible"
     :style="{ width: '800px' }"
     header="Complete Production Run"
     :modal="true"
@@ -12,31 +12,31 @@
         <Card class="surface-100 mb-3">
           <template #content>
             <div class="grid">
-              <div class="col-6">
+              <div class="col-12 md:col-6">
                 <div class="text-sm text-500">Batch Number</div>
                 <div class="font-semibold">
                   {{ productionRun.batch_number }}
                 </div>
               </div>
-              <div class="col-6">
+              <div class="col-12 md:col-6">
                 <div class="text-sm text-500">Recipe</div>
                 <div class="font-semibold">
                   {{ productionRun.recipe?.name }} (v{{ productionRun.recipe?.version }})
                 </div>
               </div>
-              <div class="col-6">
-                <div class="text-sm text-500">Expected Output</div>
-                <div class="font-semibold">
-                  {{ productionRun.expected_quantity || productionRun.quantity }}
-                  {{ productionRun.unit }}
-                </div>
-              </div>
-              <div class="col-6">
+              <div class="col-12 md:col-6">
                 <div class="text-sm text-500">Target SKU</div>
                 <div class="font-semibold">
                   {{ productionRun.recipe?.product?.name }} -
                   {{ productionRun.recipe?.productSku?.size }}
                   {{ productionRun.recipe?.productSku?.unit }}
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="text-sm text-500">Expected Output</div>
+                <div class="font-semibold text-primary text-lg">
+                  {{ formatNumber(productionRun.expected_quantity || productionRun.quantity) }}
+                  {{ productionRun.unit }}
                 </div>
               </div>
             </div>
@@ -147,9 +147,10 @@
                 <div class="text-sm text-500">Variance</div>
                 <div
                   class="text-lg font-semibold"
-                  :class="variance >= 0 ? 'text-green-600' : 'text-red-600'"
+                  :class="varianceAmount >= 0 ? 'text-green-600' : 'text-red-600'"
                 >
-                  {{ variance >= 0 ? '+' : '' }}{{ variance.toFixed(2) }} {{ productionRun.unit }}
+                  {{ varianceAmount >= 0 ? '+' : '' }}{{ varianceAmount.toFixed(2) }}
+                  {{ productionRun.unit }}
                 </div>
               </div>
               <div class="col-3">
@@ -199,6 +200,7 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import productionService from '@/services/productionService';
+import { formatNumber } from '@/utils/formatters';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Card from 'primevue/card';
@@ -211,7 +213,7 @@ import Textarea from 'primevue/textarea';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
-  modelValue: {
+  visible: {
     type: Boolean,
     required: true,
   },
@@ -221,10 +223,15 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue', 'completed']);
+const emit = defineEmits(['update:visible', 'completed']);
 
-const toast = useToastNotification();
+const { showSuccess, showError } = useToastNotification();
 const loading = ref(false);
+
+const dialogVisible = computed({
+  get: () => props.visible,
+  set: value => emit('update:visible', value),
+});
 
 const wasteReasonOptions = [
   'Spillage',
@@ -244,11 +251,6 @@ const formData = ref({
   notes: '',
 });
 
-const visible = computed({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value),
-});
-
 const totalOutput = computed(() => {
   return (
     parseFloat(formData.value.quantity_produced || 0) +
@@ -265,7 +267,7 @@ const yieldEfficiency = computed(() => {
   return (actual / expected) * 100;
 });
 
-const variance = computed(() => {
+const varianceAmount = computed(() => {
   const expected = parseFloat(
     props.productionRun?.expected_quantity || props.productionRun?.quantity || 0
   );
@@ -288,6 +290,29 @@ const yieldEfficiencyClass = computed(() => {
   return 'border-1 border-red-500';
 });
 
+const getYieldEfficiencyClass = () => {
+  const eff = yieldEfficiency.value;
+  if (eff >= 95) return 'surface-green-100';
+  if (eff >= 85) return 'surface-blue-100';
+  if (eff >= 75) return 'surface-orange-100';
+  return 'surface-red-100';
+};
+
+const getYieldEfficiencyLabel = () => {
+  const eff = yieldEfficiency.value;
+  if (eff >= 95) return 'Excellent';
+  if (eff >= 85) return 'Good';
+  if (eff >= 75) return 'Fair';
+  return 'Poor';
+};
+
+const getVarianceClass = () => {
+  const variance = varianceAmount.value;
+  if (variance > 0) return 'text-green-600';
+  if (variance < 0) return 'text-red-600';
+  return 'text-500';
+};
+
 watch(
   () => props.productionRun,
   newVal => {
@@ -306,12 +331,12 @@ watch(
 
 const handleComplete = async () => {
   if (!formData.value.quantity_produced || formData.value.quantity_produced <= 0) {
-    toast.error('Please enter actual output quantity');
+    showError('Please enter actual output quantity');
     return;
   }
 
   if (formData.value.waste_quantity > 0 && !formData.value.waste_reason) {
-    toast.error('Please provide waste reason when waste quantity > 0');
+    showError('Please provide waste reason when waste quantity > 0');
     return;
   }
 
@@ -332,18 +357,18 @@ const handleComplete = async () => {
     };
 
     await productionService.complete(props.productionRun.id, completionData);
-    toast.success('Production run completed successfully');
-    visible.value = false;
+    showSuccess('Production run completed successfully');
+    emit('update:visible', false);
     emit('completed');
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to complete production run');
+    showError(error.response?.data?.message || 'Failed to complete production run');
   } finally {
     loading.value = false;
   }
 };
 
 const handleCancel = () => {
-  visible.value = false;
+  emit('update:visible', false);
 };
 </script>
 

@@ -23,10 +23,10 @@
 
       <Column header="Recipe">
         <template #body="{ data }">
-          {{ data.Recipe?.name || 'N/A' }}
+          {{ data.recipe?.name || 'N/A' }}
           <Tag
-            v-if="data.Recipe?.version > 1"
-            :value="`v${data.Recipe.version}`"
+            v-if="data.recipe?.version > 1"
+            :value="`v${data.recipe.version}`"
             severity="info"
             class="ml-1"
           />
@@ -35,12 +35,14 @@
 
       <Column header="Product">
         <template #body="{ data }">
-          {{ data.Recipe?.Product?.name || 'N/A' }}
+          {{ data.recipe?.productSku?.product?.name || 'N/A' }}
         </template>
       </Column>
 
-      <Column field="quantity" header="Quantity">
-        <template #body="{ data }"> {{ formatNumber(data.quantity) }} {{ data.unit }} </template>
+      <Column field="expected_quantity" header="Expected Quantity">
+        <template #body="{ data }">
+          {{ formatNumber(data.expected_quantity) }} {{ data.recipe?.yield_unit || data.unit }}
+        </template>
       </Column>
 
       <Column field="production_date" header="Production Date">
@@ -62,7 +64,7 @@
               v-tooltip.top="'View'"
               icon="pi pi-eye"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="$emit('view', data.id)"
             />
             <Button
@@ -71,16 +73,23 @@
               icon="pi pi-pencil"
               severity="warning"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="$emit('edit', data.id)"
             />
             <Button
-              v-if="data.status === 'planned' || data.status === 'in_progress'"
+              v-if="data.status === 'planned'"
+              v-tooltip.top="'Start Production'"
+              icon="pi pi-play"
+              size="small"
+              class="p-button-rounded p-button-text"
+              @click="startRun(data)"
+            />
+            <Button
+              v-if="data.status === 'in_progress'"
               v-tooltip.top="'Complete'"
               icon="pi pi-check"
-              severity="success"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="completeRun(data)"
             />
             <Button
@@ -89,8 +98,17 @@
               icon="pi pi-trash"
               severity="danger"
               size="small"
-              outlined
+              class="p-button-rounded p-button-text"
               @click="$emit('delete', data)"
+            />
+            <Button
+              v-if="data.status === 'in_progress'"
+              v-tooltip.top="'Cancel'"
+              icon="pi pi-times"
+              severity="danger"
+              size="small"
+              class="p-button-rounded p-button-text"
+              @click="$emit('cancel', data)"
             />
             <Button
               v-if="data.status === 'planned' || data.status === 'in_progress'"
@@ -99,6 +117,7 @@
               severity="help"
               size="small"
               outlined
+              class="p-button-rounded p-button-text"
               @click="checkMaterials(data)"
             />
           </div>
@@ -184,76 +203,19 @@
       </template>
     </Dialog>
 
+    <!-- Start Production Dialog -->
+    <StartProductionDialog
+      v-model:visible="startDialog"
+      :production-run="selectedRun"
+      @started="handleProductionStarted"
+    />
+
     <!-- Complete Production Dialog -->
-    <Dialog
+    <CompleteProductionDialog
       v-model:visible="completeDialog"
-      :style="{ width: '600px' }"
-      header="Complete Production Run"
-      :modal="true"
-    >
-      <div v-if="selectedRun">
-        <div class="mb-3">
-          <h4>{{ selectedRun.run_number }}</h4>
-          <p>Recipe: {{ selectedRun.Recipe?.name }}</p>
-          <p>Expected Output: {{ formatNumber(selectedRun.quantity) }} {{ selectedRun.unit }}</p>
-        </div>
-
-        <Divider />
-
-        <div class="grid">
-          <div class="col-12">
-            <label for="actual_output" class="block mb-2">
-              Actual Output <span class="text-red-500">*</span>
-            </label>
-            <InputNumber
-              id="actual_output"
-              v-model="completionData.actual_output"
-              class="w-full"
-              mode="decimal"
-              :min-fraction-digits="2"
-              :max-fraction-digits="2"
-              :min="0"
-            />
-          </div>
-
-          <div class="col-12">
-            <label for="waste_quantity" class="block mb-2">Waste Quantity</label>
-            <InputNumber
-              id="waste_quantity"
-              v-model="completionData.waste_quantity"
-              class="w-full"
-              mode="decimal"
-              :min-fraction-digits="2"
-              :max-fraction-digits="2"
-              :min="0"
-            />
-          </div>
-
-          <div class="col-12">
-            <label for="notes" class="block mb-2">Notes</label>
-            <Textarea id="notes" v-model="completionData.notes" rows="3" class="w-full" />
-          </div>
-        </div>
-
-        <div class="mt-3 p-3 surface-100 border-round">
-          <p class="text-sm text-500 mb-1">
-            <i class="pi pi-info-circle mr-1" />
-            Materials will be deducted using FIFO (First In, First Out) method
-          </p>
-        </div>
-      </div>
-
-      <template #footer>
-        <Button label="Cancel" icon="pi pi-times" text @click="completeDialog = false" />
-        <Button
-          label="Complete Production"
-          icon="pi pi-check"
-          severity="success"
-          :loading="loading"
-          @click="handleComplete"
-        />
-      </template>
-    </Dialog>
+      :production-run="selectedRun"
+      @completed="handleProductionCompleted"
+    />
   </div>
 </template>
 
@@ -261,6 +223,8 @@
 import { useToastNotification } from '@/composables/useToastNotification';
 import { formatDate, formatNumber } from '@/utils/formatters';
 import { ref } from 'vue';
+import CompleteProductionDialog from './CompleteProductionDialog.vue';
+import StartProductionDialog from './StartProductionDialog.vue';
 
 const props = defineProps({
   productionRuns: {
@@ -273,21 +237,16 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['view', 'edit', 'delete']);
+const emit = defineEmits(['view', 'edit', 'delete', 'refresh']);
 
-const toast = useToastNotification();
+const { showSuccess } = useToastNotification();
 
 const deleteDialog = ref(false);
 const materialDialog = ref(false);
+const startDialog = ref(false);
 const completeDialog = ref(false);
 const selectedRun = ref(null);
 const materialCheck = ref(null);
-
-const completionData = ref({
-  actual_output: 0,
-  waste_quantity: 0,
-  notes: '',
-});
 
 const getStatusSeverity = status => {
   const severityMap = {
@@ -304,21 +263,27 @@ const checkMaterials = async run => {
   materialDialog.value = true;
 };
 
+const startRun = run => {
+  selectedRun.value = run;
+  startDialog.value = true;
+};
+
 const completeRun = run => {
   selectedRun.value = run;
-  completionData.value = {
-    actual_output: run.quantity,
-    waste_quantity: 0,
-    notes: '',
-  };
   completeDialog.value = true;
 };
 
-const handleComplete = async () => {
-  if (!completionData.value.actual_output) {
-    toast.error('Please enter actual output');
-    return;
-  }
+const handleProductionStarted = () => {
+  startDialog.value = false;
+  selectedRun.value = null;
+  emit('refresh');
+};
+
+const handleProductionCompleted = () => {
+  completeDialog.value = false;
+  selectedRun.value = null;
+  showSuccess('Production run completed successfully');
+  emit('refresh');
 };
 </script>
 
