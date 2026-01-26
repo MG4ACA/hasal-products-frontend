@@ -2,8 +2,8 @@
 
 **Project:** POS & Inventory Management System  
 **Database:** MySQL  
-**Version:** 1.2 (Updated with Payment Status)  
-**Date:** January 18, 2026
+**Version:** 1.3 (Updated with Phase 2 Fraud Prevention)  
+**Date:** January 27, 2026
 
 ---
 
@@ -725,6 +725,7 @@ CREATE TABLE sales_invoices (
     check_number VARCHAR(50),
     check_date DATE,
     clearance_date DATE,
+    check_status ENUM('pending', 'cleared', 'bounced'), -- Phase 2: Check lifecycle tracking
     notes TEXT,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -758,10 +759,20 @@ CREATE TABLE invoice_items (
     is_return BOOLEAN DEFAULT FALSE,
     return_reason ENUM('damaged', 'expired', 'excess', 'quality_issue', 'other'),
     return_to_stock BOOLEAN DEFAULT FALSE, -- TRUE if usable, FALSE if disposed
+    -- Phase 2: Return Validation Fields
+    original_invoice_id INT, -- Reference to original purchase invoice
+    original_invoice_item_id INT, -- Specific item being returned
+    return_policy_override BOOLEAN DEFAULT FALSE, -- Admin override for out-of-policy returns
+    return_policy_override_reason TEXT, -- Reason for policy override
+    return_policy_override_by INT, -- User ID who approved override
     FOREIGN KEY (invoice_id) REFERENCES sales_invoices(id) ON DELETE CASCADE,
     FOREIGN KEY (sku_id) REFERENCES product_skus(id),
+    FOREIGN KEY (original_invoice_id) REFERENCES sales_invoices(id),
+    FOREIGN KEY (original_invoice_item_id) REFERENCES invoice_items(id),
+    FOREIGN KEY (return_policy_override_by) REFERENCES users(id),
     INDEX idx_invoice (invoice_id),
-    INDEX idx_is_return (is_return)
+    INDEX idx_is_return (is_return),
+    INDEX idx_original_invoice (original_invoice_id)
 );
 ```
 
@@ -783,13 +794,21 @@ CREATE TABLE payments (
     clearance_date DATE,
     reference VARCHAR(100),
     notes TEXT,
+    -- Phase 2: Check Bounce Handling Fields
+    payment_status ENUM('pending', 'cleared', 'bounced') DEFAULT 'pending', -- Check lifecycle status
+    bounce_date DATE, -- Date when check bounced
+    bounce_fee DECIMAL(10,2), -- Fee charged for bounced check
+    bounce_reason TEXT, -- Reason for check bounce
+    reversed_by INT, -- User ID who processed the bounce
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (outlet_id) REFERENCES outlets(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (reversed_by) REFERENCES users(id),
     INDEX idx_outlet (outlet_id),
     INDEX idx_payment_date (payment_date),
-    INDEX idx_check_number (check_number)
+    INDEX idx_check_number (check_number),
+    INDEX idx_payment_status (payment_status)
 );
 ```
 
