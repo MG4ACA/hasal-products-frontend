@@ -7,6 +7,7 @@ import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
+import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
@@ -64,6 +65,13 @@ const returnSku = ref(null);
 const returnQuantity = ref(1);
 const returnReason = ref('damaged');
 const returnToStock = ref(false);
+
+// Phase 1: Credit limit warning
+const creditWarning = ref(null);
+const showCreditWarningBanner = ref(false);
+const showCreditLimitModal = ref(false);
+const creditOverrideReason = ref('');
+const CREDIT_WARNING_THRESHOLD = 0.8; // 80%
 
 // Computed
 const productOptions = computed(() => productStore.products || []);
@@ -165,10 +173,10 @@ watch(selectedSku, newSku => {
   if (newSku) {
     const sku = skuOptions.value.find(s => s.id === newSku);
     if (sku) {
-      itemPrice.value = sku.price;
+      itemPrice.value = parseFloat(sku.price) || 0;
       // Apply outlet default discount if available
       if (selectedOutlet.value && selectedOutlet.value.default_discount) {
-        itemDiscount.value = selectedOutlet.value.default_discount;
+        itemDiscount.value = parseFloat(selectedOutlet.value.default_discount) || 0;
       }
       // Validate stock when SKU changes
       validateStock();
@@ -181,16 +189,81 @@ watch(itemQuantity, () => {
   validateStock();
 });
 
+// Phase 1: Watch outlet selection to check credit limit
+watch(
+  () => formData.value.outlet_id,
+  newOutletId => {
+    if (newOutletId && formData.value.payment_method === 'credit') {
+      checkCreditLimit();
+    }
+  },
+  { immediate: true }
+);
+
+// Phase 1: Watch payment method changes
+watch(
+  () => formData.value.payment_method,
+  newMethod => {
+    if (newMethod === 'credit' && formData.value.outlet_id) {
+      checkCreditLimit();
+    } else {
+      creditWarning.value = null;
+      showCreditWarningBanner.value = false;
+    }
+  }
+);
+
+// Phase 1: Watch grand total changes
+watch(grandTotal, () => {
+  if (formData.value.payment_method === 'credit' && formData.value.outlet_id) {
+    checkCreditLimit();
+  }
+});
+
 watch(returnSku, newSku => {
   if (newSku) {
     const sku = returnSkuOptions.value.find(s => s.id === newSku);
     if (sku) {
-      itemPrice.value = sku.price;
+      itemPrice.value = parseFloat(sku.price) || 0;
     }
   }
 });
 
 // Methods
+const checkCreditLimit = () => {
+  if (
+    !formData.value.outlet_id ||
+    formData.value.payment_method !== 'credit' ||
+    !selectedOutlet.value
+  ) {
+    creditWarning.value = null;
+    showCreditWarningBanner.value = false;
+    return;
+  }
+
+  const currentBalance = parseFloat(selectedOutlet.value.balance || 0);
+  const creditLimit = parseFloat(selectedOutlet.value.credit_limit || 0);
+  const invoiceAmount = grandTotal.value;
+  const potentialBalance = currentBalance + invoiceAmount;
+  const utilizationPercent = creditLimit > 0 ? (potentialBalance / creditLimit) * 100 : 0;
+
+  if (potentialBalance >= creditLimit * CREDIT_WARNING_THRESHOLD) {
+    creditWarning.value = {
+      message: `Approaching/Exceeding credit limit (${utilizationPercent.toFixed(1)}%)`,
+      currentBalance: currentBalance.toFixed(2),
+      creditLimit: creditLimit.toFixed(2),
+      invoiceAmount: invoiceAmount.toFixed(2),
+      potentialBalance: potentialBalance.toFixed(2),
+      utilizationPercent: utilizationPercent.toFixed(1),
+      isExceeded: potentialBalance > creditLimit,
+    };
+    showCreditWarningBanner.value = true;
+  } else {
+    creditWarning.value = null;
+    showCreditWarningBanner.value = false;
+  }
+};
+
 const addSalesItem = () => {
   if (!selectedSku.value || itemQuantity.value <= 0 || itemPrice.value <= 0) {
     return;
@@ -271,9 +344,37 @@ const formatCurrency = amount => {
 };
 
 const handleSubmit = () => {
-  if (isFormValid.value) {
-    emit('submit', formData.value);
+  if (!isFormValid.value) {
+    return;
   }
+
+  // Phase 1: Check credit limit before submit
+  if (creditWarning.value && creditWarning.value.isExceeded) {
+    // Show modal for admin override
+    showCreditLimitModal.value = true;
+    return;
+  }
+
+  emit('submit', formData.value);
+};
+
+// Phase 1: Handle admin override
+const handleAdminOverride = () => {
+  if (!creditOverrideReason.value.trim()) {
+    return; // Modal will show validation
+  }
+
+  // Add override reason to form data
+  formData.value.credit_limit_override_reason = creditOverrideReason.value;
+
+  // Close modal and submit
+  showCreditLimitModal.value = false;
+  emit('submit', formData.value);
+};
+
+const cancelOverride = () => {
+  showCreditLimitModal.value = false;
+  creditOverrideReason.value = '';
 };
 
 // Load data on mount
@@ -445,7 +546,8 @@ onMounted(async () => {
       <TabPanel header="Sales Items">
         <div class="mb-4">
           <h3 class="text-lg font-semibold mb-3">Add Item</h3>
-          <div class="add-item-form">
+          <div class="add-item-form surface-ground-card">
+            <small v-if="stockError" class="p-error">{{ stockError }}</small>
             <div class="form-row">
               <div class="field flex-1">
                 <label for="product">Product</label>
@@ -461,12 +563,13 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="field flex-1">
+              <div class="field">
                 <label for="sku">SKU</label>
                 <Dropdown
                   id="sku"
                   v-model="selectedSku"
                   :options="skuOptions"
+                  option-value="id"
                   :disabled="!selectedProduct"
                   placeholder="Select SKU"
                   :class="{ 'p-invalid': stockError }"
@@ -494,10 +597,9 @@ onMounted(async () => {
                     </div>
                   </template>
                 </Dropdown>
-                <small v-if="stockError" class="p-error">{{ stockError }}</small>
               </div>
 
-              <div class="field" style="width: 120px">
+              <div class="field">
                 <label for="quantity">Quantity</label>
                 <InputNumber
                   id="quantity"
@@ -508,7 +610,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="field" style="width: 140px">
+              <div class="field">
                 <label for="price">Unit Price</label>
                 <InputNumber
                   id="price"
@@ -520,7 +622,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="field" style="width: 120px">
+              <div class="field">
                 <label for="discount">Discount %</label>
                 <InputNumber
                   id="discount"
@@ -532,7 +634,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="field" style="width: 100px">
+              <div class="field">
                 <label>&nbsp;</label>
                 <Button
                   icon="pi pi-plus"
@@ -627,6 +729,55 @@ onMounted(async () => {
             </template>
           </Column>
         </DataTable>
+
+        <!-- Phase 1: Credit Limit Warning Banner -->
+        <div v-if="showCreditWarningBanner && creditWarning" class="field col-span-2">
+          <div
+            :class="[
+              'px-4 py-3  rounded border-l-4',
+              creditWarning.isExceeded
+                ? 'bg-red-100 border-red-600'
+                : 'bg-yellow-100 border-yellow-600',
+            ]"
+          >
+            <div class="flex items-start">
+              <div class="flex-1">
+                <h4
+                  :class="[
+                    'font-semibold mb-2 font',
+                    creditWarning.isExceeded ? 'text-red-700' : 'text-yellow-700',
+                  ]"
+                >
+                  {{
+                    creditWarning.isExceeded
+                      ? '⛔ Credit Limit Exceeded'
+                      : '⚠️ Credit Limit Warning'
+                  }}
+                </h4>
+                <div class="flex justify-content-between">
+                  <div>
+                    <strong>Current Balance:</strong> Rs. {{ creditWarning.currentBalance }}
+                  </div>
+                  <div><strong>Credit Limit:</strong> Rs. {{ creditWarning.creditLimit }}</div>
+                  <div><strong>This Invoice:</strong> Rs. {{ creditWarning.invoiceAmount }}</div>
+                  <div
+                    :class="
+                      creditWarning.isExceeded ? 'text-red-700 font-semibold' : 'text-yellow-700'
+                    "
+                  >
+                    <strong>New Balance:</strong> Rs. {{ creditWarning.potentialBalance }} ({{
+                      creditWarning.utilizationPercent
+                    }}%)
+                  </div>
+                </div>
+                <div v-if="creditWarning.isExceeded" class="mt-3 text-sm text-red-700 text-center">
+                  <i class="pi pi-info-circle mr-1" />
+                  Admin authorization required to proceed with this invoice.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </TabPanel>
 
       <!-- Returns Tab -->
@@ -655,6 +806,7 @@ onMounted(async () => {
                   id="return_sku"
                   v-model="returnSku"
                   :options="returnSkuOptions"
+                  option-value="id"
                   :disabled="!returnProduct"
                   placeholder="Select SKU"
                   class="w-full"
@@ -840,10 +992,84 @@ onMounted(async () => {
         />
       </div>
     </div>
+
+    <!-- Phase 1: Credit Limit Override Modal -->
+    <Dialog
+      v-model:visible="showCreditLimitModal"
+      modal
+      :closable="false"
+      :style="{ width: '600px' }"
+    >
+      <template #header>
+        <div class="flex items-center">
+          <i class="pi pi-exclamation-triangle text-red-500 text-2xl mr-3" />
+          <h3 class="text-xl font-semibold">Credit Limit Exceeded - Admin Override Required</h3>
+        </div>
+      </template>
+
+      <div v-if="creditWarning" class="space-y-4">
+        <div class="bg-red-50 border border-red-200 rounded p-4">
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <strong>Current Balance:</strong>
+              <div class="text-lg">Rs. {{ creditWarning.currentBalance }}</div>
+            </div>
+            <div>
+              <strong>Credit Limit:</strong>
+              <div class="text-lg">Rs. {{ creditWarning.creditLimit }}</div>
+            </div>
+            <div>
+              <strong>This Invoice:</strong>
+              <div class="text-lg">Rs. {{ creditWarning.invoiceAmount }}</div>
+            </div>
+            <div>
+              <strong>New Balance:</strong>
+              <div class="text-lg font-semibold text-red-700">
+                Rs. {{ creditWarning.potentialBalance }}
+                <span class="text-base">({{ creditWarning.utilizationPercent }}%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="override_reason" class="font-semibold">
+            Admin Override Reason *
+            <small class="text-gray-500 font-normal ml-2">
+              (Required - Explain why exceeding credit limit is acceptable)
+            </small>
+          </label>
+          <Textarea
+            id="override_reason"
+            v-model="creditOverrideReason"
+            rows="4"
+            placeholder="e.g., Customer has pending payment arriving tomorrow, One-time exception for VIP client, Large order with special approval, etc."
+            class="w-full"
+          />
+          <small v-if="!creditOverrideReason.trim()" class="p-error">
+            Override reason is required
+          </small>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="cancelOverride" />
+        <Button
+          label="Authorize & Submit"
+          icon="pi pi-check"
+          severity="danger"
+          :disabled="!creditOverrideReason.trim()"
+          @click="handleAdminOverride"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <style scoped>
+:deep(.p-inputnumber-input) {
+  width: 120px;
+}
 .invoice-form {
   background: white;
   padding: 1.5rem;

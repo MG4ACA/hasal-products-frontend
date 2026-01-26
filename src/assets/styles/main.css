@@ -148,6 +148,10 @@
   background: var(--surface-ground) !important;
 }
 
+.surface-ground-card {
+  background: var(--surface-ground) !important;
+}
+
 .p-badge.p-badge-dot {
   width: 1.5rem;
   height: 1.5rem;

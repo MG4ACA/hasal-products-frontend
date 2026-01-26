@@ -46,6 +46,8 @@ const handleSubmit = async data => {
         ? formatDate(data.check_clearance_date)
         : null,
       notes: data.notes,
+      // Phase 1: Include credit limit override reason if provided
+      credit_limit_override_reason: data.credit_limit_override_reason || null,
       items: data.items.map(item => ({
         sku_id: item.sku_id,
         quantity: item.is_return ? -Math.abs(item.quantity) : item.quantity,
