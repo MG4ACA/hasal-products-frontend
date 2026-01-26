@@ -419,86 +419,176 @@ ORDER BY r.version DESC;
 
 ## Module 3: Production Management
 
-### Test 3.1: Create Production Run
+### Production Workflow Overview
 
-**Objective:** Verify production run creation with material calculation
+**IMPORTANT:** Production now follows a **three-step workflow**:
+
+1. **CREATE** (status: planned) - Plan production with expected quantity
+2. **START** (status: in_progress) - Check materials and deduct using FIFO
+3. **COMPLETE** (status: completed) - Record actual output and calculate yield
+
+### Test 3.1: Create Production Run with Expected Quantity
+
+**Objective:** Verify production run creation with expected quantity planning
 
 **Steps:**
 
 1. Navigate to Production page (`/production-runs`)
 2. Click "New Production Run" button
-3. Select Production Date: Today's date
-4. Select Recipe: "Roasted Curry Powder Recipe (v2)"
-5. Enter Quantity: 24 kg
-6. Verify Recipe Details section shows:
-   - Product, SKU, Batch Size
-   - Number of Batches: 2.00 (24 / 12)
-   - Expected Output: 24 kg
-7. Verify Required Materials table shows:
-   - Each material with quantity per batch
-   - Total required = quantity × 2 batches
-8. Add Notes: "Test production run"
-9. Click "Create Production Run"
+3. Fill in production details:
+   - Production Date: Today's date
+   - Recipe: "Roasted Curry Powder Recipe (v2)"
+   - **Expected Quantity: 120 kg** (NEW: target output)
+4. Verify Expected Unit displays recipe's yield unit (e.g., "kg")
+5. Verify Required Materials section shows:
+   - **Header: "Materials Required (scaled for 120 kg)"** (if different from recipe yield)
+   - Material quantities scaled based on: (expected_quantity / recipe.expected_yield)
+   - Example: If recipe yields 100kg and needs 5kg turmeric:
+     - For 120kg: 5kg × (120/100) = 6kg turmeric required
+6. Add Notes: "Test production with 120kg target"
+7. Click "Create Production Run"
 
 **Expected Results:**
 
-- ✅ Run number auto-generated (e.g., PRD-2025-001)
-- ✅ Batch calculation correct (24 kg / 12 kg = 2 batches)
-- ✅ Material requirements calculated correctly
-- ✅ Status set to "Planned"
+- ✅ Production run created with status = 'planned'
+- ✅ Batch number auto-generated (e.g., PROD-20260125-001)
+- ✅ Expected quantity saved: 120 kg
+- ✅ Material quantities dynamically scaled in UI
 - ✅ Success notification displayed
 - ✅ Redirected to production list
+- ✅ List shows: Recipe name, Product name, Expected Quantity
 
 **Database Validation:**
 
 ```sql
 SELECT * FROM production_runs
-WHERE run_number LIKE 'PRD-2025-%';
--- Verify status = 'planned', quantity = 24
+WHERE batch_number LIKE 'PROD-2026%'
+ORDER BY created_at DESC LIMIT 1;
+-- Verify: status = 'planned', expected_quantity = 120.00
 ```
 
 ---
 
-### Test 3.2: Check Material Availability
+### Test 3.2: Start Production Run (Material Check & FIFO Deduction)
 
-**Objective:** Verify material availability checking before production
+**Objective:** Verify START step performs material availability check and FIFO deduction
+
+**Prerequisites:**
+
+- Production run with status = 'planned'
+- Ensure raw material batches have sufficient stock
+- Have multiple batches of same material (different dates) to test FIFO
 
 **Steps:**
 
-1. From production list, click "Check Materials" button (help icon)
-2. Verify Material Availability dialog shows:
-   - Production run details
-   - Table with each material's required vs available quantities
-   - Status tags (Sufficient/Insufficient)
-   - Overall status message
+1. From production list, locate the planned production run
+2. Verify button visibility:
+   - ✅ "Edit" button visible (can edit while planned)
+   - ✅ "Start" button visible (green play icon)
+   - ✅ "Delete" button visible
+3. Click "Start Production" button
+4. In Start Production Dialog, verify:
+   - Production run details displayed
+   - Expected quantity shown
+   - Recipe information displayed
+   - **Information box** explaining START actions:
+     - Material availability check (FIFO)
+     - Material deduction from inventory
+     - Status update to 'in_progress'
+5. Click "Start Production" button in dialog
 
-**Expected Results:**
+**Expected Results - Successful Start:**
 
-- ✅ Dialog displays all required materials
-- ✅ Required quantities calculated correctly
-- ✅ Available quantities from raw_material_batches
-- ✅ Status tags show green for sufficient, red for insufficient
-- ✅ Overall message: "✓ All materials available" or "✗ Insufficient materials"
+- ✅ Material availability checked
+- ✅ FIFO deduction performed for all materials
+- ✅ `production_materials` records created
+- ✅ `raw_material_batches.quantity` decremented (oldest batches first)
+- ✅ Status updated to 'in_progress'
+- ✅ Success toast: "Production started successfully"
+- ✅ Dialog closes and list refreshes
+- ✅ Button visibility changes:
+  - ❌ "Edit" button hidden (cannot edit in-progress)
+  - ❌ "Start" button hidden
+  - ✅ "Complete" button visible (green check icon)
+  - ✅ "View" button visible
+
+**Expected Results - Insufficient Materials:**
+
+- ✅ Error toast displayed with specific material and quantities
+- ✅ Example: "Insufficient stock for Coriander Seeds. Required: 60.00, Available: 7.00"
+- ✅ No database changes (transaction rolled back)
+- ✅ Status remains 'planned'
 
 **Database Validation:**
 
 ```sql
-SELECT rm.name,
-       SUM(rmb.quantity_remaining) as available
-FROM raw_material_batches rmb
-JOIN raw_materials rm ON rm.id = rmb.raw_material_id
-WHERE rmb.quantity_remaining > 0
-GROUP BY rm.id, rm.name;
--- Compare with required quantities
+-- 1. Verify production_materials created with FIFO
+SELECT pm.id, pm.production_run_id, pm.batch_id, pm.quantity_used,
+       rmb.batch_number, rmb.material_id, rmb.quantity,
+       rm.name as material_name,
+       rmb.unit_cost
+FROM production_materials pm
+JOIN raw_material_batches rmb ON rmb.id = pm.batch_id
+JOIN raw_materials rm ON rm.id = rmb.material_id
+WHERE pm.production_run_id = [run_id]
+ORDER BY rmb.created_at ASC;
+-- Verify: oldest batches used first, quantities correct
+
+-- 2. Verify batch quantities decremented
+SELECT id, batch_number, material_id,
+       initial_quantity, quantity,
+       (initial_quantity - quantity) as consumed
+FROM raw_material_batches
+WHERE material_id IN (
+    SELECT material_id FROM recipe_items WHERE recipe_id = [recipe_id]
+)
+AND quantity < initial_quantity
+ORDER BY created_at ASC;
+-- Verify: oldest batches consumed first
+
+-- 3. Verify production run status updated
+SELECT id, batch_number, status, expected_quantity
+FROM production_runs
+WHERE id = [run_id];
+-- Verify: status = 'in_progress'
 ```
 
 ---
 
-### Test 3.3: Edit Production Run (Planned Status)
+### Test 3.3: Edit Production Run (Status-Based Restrictions)
 
-**Objective:** Verify planned runs can be edited
+**Objective:** Verify edit restrictions based on production run status
 
-**Steps:**with FIFO and Waste Tracking
+**Note:** Test content needs cleanup. For clean test documentation, see: `mds/testing/PRODUCTION_TESTING_THREE_STEP_WORKFLOW.md`
+
+**Test 3.3a: Edit Planned Run**
+
+**Steps:**
+
+1. Locate production run with status "Planned"
+2. Click "Edit" button
+3. Modify Expected Quantity from 120 kg to 150 kg
+4. Verify material requirements update automatically
+5. Click "Update Production Run"
+
+**Expected Results:**
+
+- ✅ Edit works for Planned status only
+- ✅ Materials rescale when expected_quantity changes
+- ✅ Success notification displayed
+
+**Test 3.3b: Cannot Edit In-Progress or Completed Runs**
+
+**Expected Results:**
+
+- ✅ Edit button hidden for In Progress and Completed statuses
+- ✅ Only Planned runs can be edited
+
+---
+
+### Test 3.4: Complete Production Run with Yield Tracking
+
+**Note:** For detailed test steps, see: `mds/testing/PRODUCTION_TESTING_THREE_STEP_WORKFLOW.md`
 
 **Objective:** Verify production completion with FIFO batch consumption, waste tracking, and cost calculations
 

@@ -43,7 +43,7 @@
               option-label="label"
               option-value="value"
               placeholder="Filter by Status"
-              @change="fetchData"
+              @change="onStatusChange"
             />
             <Dropdown
               v-model="filters.product_id"
@@ -51,7 +51,7 @@
               option-label="label"
               option-value="value"
               placeholder="Filter by Product"
-              @change="fetchData"
+              @change="onProductChange"
             />
             <Dropdown
               v-model="filters.recipe_id"
@@ -59,7 +59,7 @@
               option-label="label"
               option-value="value"
               placeholder="Filter by Recipe"
-              @change="fetchData"
+              @change="onRecipeChange"
             />
             <Avatar
               v-badge.info="activeFilterCount"
@@ -162,7 +162,7 @@ const clearFilters = async () => {
   filters.product_id = '';
   filters.recipe_id = '';
   filters.page = 1;
-  await fetchData();
+  await productionStore.clearFilters();
 };
 
 const pagination = ref({
@@ -212,14 +212,14 @@ const onSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     filters.page = 1;
-    fetchData();
+    productionStore.setSearch(filters.search);
   }, 500);
 };
 
 const fetchData = async () => {
   loading.value = true;
   try {
-    await productionStore.fetchProductionRuns(filters);
+    await productionStore.fetchProductionRuns();
     pagination.value = productionStore.pagination;
   } catch (err) {
     showError(err.message || 'Failed to load production runs');
@@ -230,7 +230,22 @@ const fetchData = async () => {
 
 const onPageChange = event => {
   filters.page = event.page + 1;
-  fetchData();
+  productionStore.setPage(event.page + 1);
+};
+
+const onStatusChange = () => {
+  filters.page = 1;
+  productionStore.setStatusFilter(filters.status);
+};
+
+const onProductChange = () => {
+  filters.page = 1;
+  productionStore.setProductFilter(filters.product_id);
+};
+
+const onRecipeChange = () => {
+  filters.page = 1;
+  productionStore.setRecipeFilter(filters.recipe_id);
 };
 
 const viewProduction = id => {

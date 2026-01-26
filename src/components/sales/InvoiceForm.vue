@@ -67,6 +67,11 @@ const returnToStock = ref(false);
 
 // Computed
 const productOptions = computed(() => productStore.products || []);
+const employeeOptions = computed(() => {
+  // Filter for sales_ref type employees that are active
+  return employeeStore.employees.filter(e => e.type === 'sales_ref' && e.status === 'active');
+});
+
 const skuOptions = computed(() => {
   if (!selectedProduct.value) return [];
   const product = productStore.products.find(p => p.id === selectedProduct.value);
@@ -275,7 +280,10 @@ const handleSubmit = () => {
 onMounted(async () => {
   await Promise.all([
     outletStore.fetchOutlets({ status: 'active' }),
-    employeeStore.fetchEmployees({ type: 'sales_ref', status: 'active' }),
+    (async () => {
+      employeeStore.setFilters({ type: 'sales_ref', status: 'active' });
+      await employeeStore.fetchEmployees();
+    })(),
     routeStore.fetchRoutes({ status: 'active' }),
     productStore.fetchProducts({ status: 'active' }),
   ]);
@@ -325,8 +333,8 @@ onMounted(async () => {
             <Dropdown
               id="sales_ref"
               v-model="formData.sales_ref_id"
-              :options="employeeStore.employees"
-              option-label="first_name"
+              :options="employeeOptions"
+              option-label="name"
               option-value="id"
               placeholder="Select Sales Rep"
               :filter="true"
@@ -334,15 +342,14 @@ onMounted(async () => {
             >
               <template #value="slotProps">
                 <div v-if="slotProps.value">
-                  {{ employeeStore.employees.find(e => e.id === slotProps.value)?.first_name }}
-                  {{ employeeStore.employees.find(e => e.id === slotProps.value)?.last_name }}
+                  {{ employeeOptions.find(e => e.id === slotProps.value)?.name }}
                 </div>
                 <span v-else>{{ slotProps.placeholder }}</span>
               </template>
               <template #option="slotProps">
                 <div>
-                  {{ slotProps.option.first_name }} {{ slotProps.option.last_name }}
-                  <span class="text-sm text-gray-500">({{ slotProps.option.employee_code }})</span>
+                  {{ slotProps.option.name }}
+                  <span class="text-sm text-gray-500">({{ slotProps.option.code }})</span>
                 </div>
               </template>
             </Dropdown>

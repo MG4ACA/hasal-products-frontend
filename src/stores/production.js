@@ -16,8 +16,10 @@ export const useProductionStore = defineStore('production', () => {
     totalPages: 0,
   });
   const filters = ref({
+    search: '',
     status: '',
     product_id: '',
+    recipe_id: '',
     date_from: '',
     date_to: '',
   });
@@ -38,8 +40,10 @@ export const useProductionStore = defineStore('production', () => {
       const params = {
         page: pagination.value.page,
         limit: pagination.value.limit,
+        search: filters.value.search,
         status: filters.value.status,
         product_id: filters.value.product_id,
+        recipe_id: filters.value.recipe_id,
         date_from: filters.value.date_from,
         date_to: filters.value.date_to,
       };
@@ -227,6 +231,18 @@ export const useProductionStore = defineStore('production', () => {
     fetchProductionRuns();
   };
 
+  const setRecipeFilter = recipeId => {
+    filters.value.recipe_id = recipeId;
+    pagination.value.page = 1;
+    fetchProductionRuns();
+  };
+
+  const setSearch = search => {
+    filters.value.search = search;
+    pagination.value.page = 1;
+    fetchProductionRuns();
+  };
+
   const setDateRange = (dateFrom, dateTo) => {
     filters.value.date_from = dateFrom;
     filters.value.date_to = dateTo;
@@ -236,8 +252,10 @@ export const useProductionStore = defineStore('production', () => {
 
   const clearFilters = () => {
     filters.value = {
+      search: '',
       status: '',
       product_id: '',
+      recipe_id: '',
       date_from: '',
       date_to: '',
     };
@@ -274,6 +292,8 @@ export const useProductionStore = defineStore('production', () => {
     setLimit,
     setStatusFilter,
     setProductFilter,
+    setRecipeFilter,
+    setSearch,
     setDateRange,
     clearFilters,
     clearError,

@@ -178,7 +178,7 @@ onMounted(() => {
             <label>Sales Reference</label>
             <div class="value">
               <Tag v-if="invoice.sales_ref" severity="info">
-                {{ invoice.sales_ref?.first_name }} {{ invoice.sales_ref?.last_name }}
+                {{ invoice.sales_ref?.name }}
               </Tag>
               <span v-else>-</span>
             </div>

@@ -50,8 +50,8 @@ const paymentMethodOptions = [
 const outletOptions = computed(() => [{ name: 'All Outlets', id: null }, ...outletStore.outlets]);
 
 const salesRefOptions = computed(() => [
-  { first_name: 'All', last_name: 'Sales Reps', id: null },
-  ...employeeStore.employees,
+  { name: 'All Sales Reps', id: null },
+  ...employeeStore.employees.filter(e => e.type === 'sales_ref' && e.status === 'active'),
 ]);
 
 const routeOptions = computed(() => [{ name: 'All Routes', id: null }, ...routeStore.routes]);
@@ -192,8 +192,12 @@ onMounted(async () => {
 
     <div class="page-header">
       <div>
-        <h1 class="page-title">Sales Invoices</h1>
-        <p class="page-subtitle">Manage sales invoices and returns</p>
+        <h1 class="page-title">
+          Sales Invoices
+        </h1>
+        <p class="page-subtitle">
+          Manage sales invoices and returns
+        </p>
       </div>
       <div class="header-actions">
         <Button
@@ -203,7 +207,11 @@ onMounted(async () => {
           severity="primary"
           @click="fetchInvoices"
         />
-        <Button label="Create Invoice" icon="pi pi-plus" @click="handleCreate" />
+        <Button
+          label="Create Invoice"
+          icon="pi pi-plus"
+          @click="handleCreate"
+        />
       </div>
     </div>
 
@@ -239,19 +247,23 @@ onMounted(async () => {
             id="sales_ref"
             v-model="filters.sales_ref_id"
             :options="salesRefOptions"
+            option-label="name"
             option-value="id"
             placeholder="Select Sales Rep"
             class="w-full"
           >
             <template #value="slotProps">
               <div v-if="slotProps.value">
-                {{ salesRefOptions.find(e => e.id === slotProps.value)?.first_name }}
-                {{ salesRefOptions.find(e => e.id === slotProps.value)?.last_name }}
+                {{ salesRefOptions.find(e => e.id === slotProps.value)?.name }}
               </div>
               <span v-else>{{ slotProps.placeholder }}</span>
             </template>
             <template #option="slotProps">
-              {{ slotProps.option.first_name }} {{ slotProps.option.last_name }}
+              {{ slotProps.option.name }}
+              <span
+                v-if="slotProps.option.code"
+                class="text-sm text-gray-500"
+              >({{ slotProps.option.code }})</span>
             </template>
           </Dropdown>
         </div>
@@ -327,7 +339,11 @@ onMounted(async () => {
           class="p-overlay-badge"
           @click="isFiltersActive && clearFilters()"
         />
-        <Button label="Apply Filters" icon="pi pi-search" @click="handleSearch" />
+        <Button
+          label="Apply Filters"
+          icon="pi pi-search"
+          @click="handleSearch"
+        />
       </div>
     </div>
 
