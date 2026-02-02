@@ -192,12 +192,8 @@ onMounted(async () => {
 
     <div class="page-header">
       <div>
-        <h1 class="page-title">
-          Sales Invoices
-        </h1>
-        <p class="page-subtitle">
-          Manage sales invoices and returns
-        </p>
+        <h1 class="page-title">Sales Invoices</h1>
+        <p class="page-subtitle">Manage sales invoices and returns</p>
       </div>
       <div class="header-actions">
         <Button
@@ -207,22 +203,19 @@ onMounted(async () => {
           severity="primary"
           @click="fetchInvoices"
         />
-        <Button
-          label="Create Invoice"
-          icon="pi pi-plus"
-          @click="handleCreate"
-        />
+        <Button label="Create Invoice" icon="pi pi-plus" @click="handleCreate" />
       </div>
     </div>
 
     <div class="filters-card">
       <div class="filters-grid">
+        <!-- Row 1 -->
         <div class="field">
-          <label for="search">Search Invoice Number</label>
+          <label for="search">Search Invoice</label>
           <InputText
             id="search"
             v-model="filters.search"
-            placeholder="Search by invoice number..."
+            placeholder="Invoice number..."
             class="w-full"
             @keyup.enter="handleSearch"
           />
@@ -242,14 +235,14 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label for="sales_ref">Sales Reference</label>
+          <label for="sales_ref">Sales Rep</label>
           <Dropdown
             id="sales_ref"
             v-model="filters.sales_ref_id"
             :options="salesRefOptions"
             option-label="name"
             option-value="id"
-            placeholder="Select Sales Rep"
+            placeholder="Select Rep"
             class="w-full"
           >
             <template #value="slotProps">
@@ -260,10 +253,9 @@ onMounted(async () => {
             </template>
             <template #option="slotProps">
               {{ slotProps.option.name }}
-              <span
-                v-if="slotProps.option.code"
-                class="text-sm text-gray-500"
-              >({{ slotProps.option.code }})</span>
+              <span v-if="slotProps.option.code" class="text-sm text-gray-500"
+                >({{ slotProps.option.code }})</span
+              >
             </template>
           </Dropdown>
         </div>
@@ -282,7 +274,7 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label for="payment_status">Payment Status</label>
+          <label for="payment_status">Status</label>
           <Dropdown
             id="payment_status"
             v-model="filters.payment_status"
@@ -294,8 +286,9 @@ onMounted(async () => {
           />
         </div>
 
+        <!-- Row 2 -->
         <div class="field">
-          <label for="payment_method">Payment Method</label>
+          <label for="payment_method">Method</label>
           <Dropdown
             id="payment_method"
             v-model="filters.payment_method"
@@ -330,20 +323,16 @@ onMounted(async () => {
             class="w-full"
           />
         </div>
-      </div>
 
-      <div class="filters-actions">
-        <Avatar
-          v-badge.info="activeFilterCount"
-          :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
-          class="p-overlay-badge"
-          @click="isFiltersActive && clearFilters()"
-        />
-        <Button
-          label="Apply Filters"
-          icon="pi pi-search"
-          @click="handleSearch"
-        />
+        <div class="filters-actions field">
+          <Button label="Apply" icon="pi pi-search" @click="handleSearch" />
+          <Avatar
+            v-badge.info="activeFilterCount"
+            :icon="isFiltersActive ? 'pi pi-filter-slash' : 'pi pi-filter'"
+            class="p-overlay-badge"
+            @click="isFiltersActive && clearFilters()"
+          />
+        </div>
       </div>
     </div>
 
@@ -402,9 +391,9 @@ onMounted(async () => {
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
-  margin-bottom: 1rem;
+  align-items: end;
 }
 
 .field {
@@ -421,8 +410,8 @@ onMounted(async () => {
 
 .filters-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 0.75rem;
+  flex-direction: row;
 }
 
 .content-card {

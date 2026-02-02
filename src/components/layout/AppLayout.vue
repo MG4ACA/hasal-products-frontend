@@ -18,7 +18,7 @@ import Topbar from './Topbar.vue';
 <style scoped>
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .main-content {
