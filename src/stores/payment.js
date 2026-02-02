@@ -188,6 +188,54 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   };
 
+  // Phase 2: Clear check
+  const clearCheck = async (paymentId, clearanceData) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await paymentService.clearCheck(paymentId, clearanceData);
+
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
+      // Update pending checks list
+      pendingChecks.value = pendingChecks.value.filter(p => p.id !== paymentId);
+
+      return response;
+    } catch (err) {
+      error.value = err.message || 'Error clearing check';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // Phase 2: Bounce check
+  const bounceCheck = async (paymentId, bounceData) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await paymentService.bounceCheck(paymentId, bounceData);
+
+      if (response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
+      // Remove bounced check from pending checks list
+      pendingChecks.value = pendingChecks.value.filter(p => p.id !== paymentId);
+
+      return response;
+    } catch (err) {
+      error.value = err.message || 'Error bouncing check';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   // Actions - Supplier Payments
   const fetchSupplierPayments = async (filters = {}) => {
     loading.value = true;
@@ -321,6 +369,8 @@ export const usePaymentStore = defineStore('payment', () => {
     deletePayment,
     fetchOutstandingInvoices,
     fetchPendingChecks,
+    clearCheck,
+    bounceCheck,
     fetchSupplierPayments,
     fetchSupplierPaymentsBySupplierId,
     createSupplierPayment,

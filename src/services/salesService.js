@@ -83,6 +83,18 @@ const salesService = {
       return handleApiError(error);
     }
   },
+
+  // Phase 2: Get purchase history for return validation
+  async getPurchaseHistory(outletId, skuId) {
+    try {
+      const response = await api.get('/sales-invoices/purchase-history', {
+        params: { outlet_id: outletId, sku_id: skuId },
+      });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default salesService;

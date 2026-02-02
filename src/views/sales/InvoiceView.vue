@@ -268,10 +268,10 @@ onMounted(() => {
             <template #body="slotProps">
               <div>
                 <div class="font-semibold">
-                  {{ slotProps.data.product_sku?.product?.name }}
+                  {{ slotProps.data.sku?.product?.name }}
                 </div>
                 <div class="text-sm text-gray-500">
-                  {{ slotProps.data.product_sku?.size }}{{ slotProps.data.product_sku?.unit }}
+                  {{ slotProps.data.sku?.size }}{{ slotProps.data.sku?.unit }}
                 </div>
               </div>
             </template>
@@ -338,10 +338,10 @@ onMounted(() => {
             <template #body="slotProps">
               <div>
                 <div class="font-semibold">
-                  {{ slotProps.data.product_sku?.product?.name }}
+                  {{ slotProps.data.sku?.product?.name }}
                 </div>
                 <div class="text-sm text-gray-500">
-                  {{ slotProps.data.product_sku?.size }}{{ slotProps.data.product_sku?.unit }}
+                  {{ slotProps.data.sku?.size }}{{ slotProps.data.sku?.unit }}
                 </div>
               </div>
             </template>

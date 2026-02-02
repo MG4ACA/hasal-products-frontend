@@ -73,6 +73,26 @@ const paymentService = {
       return handleApiError(error);
     }
   },
+
+  // Phase 2: Clear check
+  async clearCheck(paymentId, data) {
+    try {
+      const response = await api.post(`/payments/${paymentId}/clear`, data);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Phase 2: Bounce check
+  async bounceCheck(paymentId, data) {
+    try {
+      const response = await api.post(`/payments/${paymentId}/bounce`, data);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default paymentService;

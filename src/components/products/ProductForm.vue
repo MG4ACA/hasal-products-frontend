@@ -406,7 +406,7 @@ const saveSku = async () => {
     closeSkuDialog();
     await loadProduct(props.productId);
   } catch (error) {
-    showError(error.response?.data?.message || 'Failed to save SKU');
+    showError(error.message || 'Failed to save SKU');
   } finally {
     loading.value = false;
   }

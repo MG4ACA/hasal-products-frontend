@@ -56,6 +56,10 @@ const handleSubmit = async data => {
         is_return: item.is_return || false,
         return_reason: item.return_reason || null,
         return_to_stock: item.return_to_stock || false,
+        // Phase 2: Include return validation fields
+        original_invoice_id: item.original_invoice_id || null,
+        return_policy_override: item.return_policy_override || false,
+        return_policy_override_reason: item.return_policy_override_reason || null,
       })),
     };
 
