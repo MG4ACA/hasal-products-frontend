@@ -81,7 +81,7 @@ const formatType = type => {
       </template>
     </Column>
 
-    <Column field="assigned_route" header="Assigned Route">
+    <Column field="assigned_route" header="Assigned Territory">
       <template #body="{ data }">
         <span v-if="data.assignedRoute" class="route-badge">
           {{ data.assignedRoute.name }}

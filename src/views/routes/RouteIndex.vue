@@ -114,8 +114,8 @@ onMounted(() => {
   <div class="routes-page">
     <div class="page-header">
       <div>
-        <h1>Routes</h1>
-        <p>Manage delivery routes for your business</p>
+        <h1>Territories</h1>
+        <p>Manage sales territories for your business</p>
       </div>
       <div class="header-actions">
         <Button
@@ -126,7 +126,7 @@ onMounted(() => {
           @click="fetchData"
         />
         <Button
-          label="Add Route"
+          label="Add Territory"
           icon="pi pi-plus"
           @click="() => router.push('/routes/create')"
         />
@@ -139,7 +139,7 @@ onMounted(() => {
           <InputIcon class="pi pi-search" />
           <InputText
             v-model="filters.search"
-            placeholder="Search routes..."
+            placeholder="Search territories..."
             @input="onSearch"
           />
         </IconField>
@@ -163,14 +163,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <div
-      v-if="routeStore.loading"
-      class="loading-container"
-    >
-      <i
-        class="pi pi-spin pi-spinner"
-        style="font-size: 2rem"
-      />
+    <div v-if="routeStore.loading" class="loading-container">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
     </div>
 
     <!-- Routes List -->
@@ -189,10 +183,7 @@ onMounted(() => {
     <!-- Pagination -->
     <Card class="pagination-card">
       <template #content>
-        <div
-          v-if="pagination.total > 0"
-          class="pagination-container"
-        >
+        <div v-if="pagination.total > 0" class="pagination-container">
           <Paginator
             :rows="pagination.limit"
             :total-records="pagination.total"

@@ -22,7 +22,7 @@ const invoiceData = ref({
   sales_ref_id: null,
   route_id: null,
   invoice_date: new Date(),
-  payment_method: 'cash',
+  payment_method: 'credit',
   payment_status: null,
   check_number: null,
   check_date: null,

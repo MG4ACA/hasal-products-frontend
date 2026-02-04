@@ -11,7 +11,7 @@ const { showSuccess, showError } = useToastNotification();
 
 const breadcrumbItems = [
   { label: 'Dashboard', to: '/' },
-  { label: 'Routes', to: '/routes' },
+  { label: 'Territories', to: '/routes' },
   { label: 'Create' },
 ];
 
@@ -46,8 +46,8 @@ const handleCancel = () => {
     <div class="page-header">
       <div class="header-content">
         <div class="header-text">
-          <h1>Create Route</h1>
-          <p>Add a new delivery route to the system</p>
+          <h1>Create Territory</h1>
+          <p>Add a new sales territory to the system</p>
         </div>
       </div>
     </div>

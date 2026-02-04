@@ -35,7 +35,7 @@
           </RouterLink>
           <RouterLink to="/routes" class="menu-item submenu-item">
             <i class="pi pi-map" />
-            <span>Routes</span>
+            <span>Territories</span>
           </RouterLink>
           <RouterLink to="/vehicles" class="menu-item submenu-item">
             <i class="pi pi-car" />

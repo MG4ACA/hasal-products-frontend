@@ -5,19 +5,6 @@ import { useEmployeeStore } from '@/stores/employee';
 import { useOutletStore } from '@/stores/outlet';
 import { useProductStore } from '@/stores/product';
 import { useRouteStore } from '@/stores/route';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Checkbox from 'primevue/checkbox';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
-import Tag from 'primevue/tag';
-import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -45,8 +32,8 @@ const formData = computed({
 
 // Options
 const paymentMethodOptions = [
-  { label: 'Cash', value: 'cash' },
   { label: 'Credit', value: 'credit' },
+  { label: 'Cash', value: 'cash' },
   { label: 'Check', value: 'check' },
 ];
 
@@ -291,6 +278,23 @@ const checkCreditLimit = () => {
   }
 };
 
+const onOutletChange = () => {
+  if (selectedOutlet.value) {
+    // Auto-populate Route
+    if (selectedOutlet.value.route_id) {
+      formData.value.route_id = selectedOutlet.value.route_id;
+
+      // Auto-populate Sales Reference based on Route
+      const salesRef = employeeOptions.value.find(
+        e => e.assigned_route_id === selectedOutlet.value.route_id
+      );
+      if (salesRef) {
+        formData.value.sales_ref_id = salesRef.id;
+      }
+    }
+  }
+};
+
 const addSalesItem = () => {
   if (!selectedSku.value || itemQuantity.value <= 0 || itemPrice.value <= 0) {
     return;
@@ -361,7 +365,8 @@ const addReturnItem = () => {
         toast.add({
           severity: 'warn',
           summary: 'Admin Override Required',
-          detail: 'This return exceeds the policy limit. Please enable "Admin Override" and provide a reason.',
+          detail:
+            'This return exceeds the policy limit. Please enable "Admin Override" and provide a reason.',
           life: 5000,
         });
         return;
@@ -573,6 +578,7 @@ onMounted(async () => {
               placeholder="Select Outlet"
               :filter="true"
               class="w-full"
+              @change="onOutletChange"
             >
               <template #value="slotProps">
                 <div v-if="slotProps.value">
@@ -622,14 +628,14 @@ onMounted(async () => {
           </div>
 
           <div class="field">
-            <label for="route">Route</label>
+            <label for="route">Territory</label>
             <Dropdown
               id="route"
               v-model="formData.route_id"
               :options="routeStore.routes"
               option-label="name"
               option-value="id"
-              placeholder="Select Route"
+              placeholder="Select Territory"
               :filter="true"
               class="w-full"
             >
@@ -710,14 +716,9 @@ onMounted(async () => {
       <!-- Sales Items Tab -->
       <TabPanel header="Sales Items">
         <div class="mb-4">
-          <h3 class="text-lg font-semibold mb-3">
-            Add Item
-          </h3>
+          <h3 class="text-lg font-semibold mb-3">Add Item</h3>
           <div class="add-item-form surface-ground-card">
-            <small
-              v-if="stockError"
-              class="p-error"
-            >{{ stockError }}</small>
+            <small v-if="stockError" class="p-error">{{ stockError }}</small>
             <div class="form-row">
               <div class="field flex-1">
                 <label for="product">Product</label>
@@ -818,25 +819,15 @@ onMounted(async () => {
           </div>
         </div>
 
-        <DataTable
-          :value="(formData.items || []).filter(item => !item.is_return)"
-          class="mb-4"
-        >
+        <DataTable :value="(formData.items || []).filter(item => !item.is_return)" class="mb-4">
           <template #empty>
             <div class="text-center p-4 text-gray-500">
-              <i
-                class="pi pi-inbox"
-                style="font-size: 2rem"
-              />
+              <i class="pi pi-inbox" style="font-size: 2rem" />
               <p>No items added yet</p>
             </div>
           </template>
 
-          <Column
-            field="product_name"
-            header="Product"
-            style="min-width: 200px"
-          >
+          <Column field="product_name" header="Product" style="min-width: 200px">
             <template #body="slotProps">
               <div>
                 <div class="font-semibold">
@@ -849,45 +840,25 @@ onMounted(async () => {
             </template>
           </Column>
 
-          <Column
-            field="quantity"
-            header="Quantity"
-            style="width: 100px"
-          />
+          <Column field="quantity" header="Quantity" style="width: 100px" />
 
-          <Column
-            field="unit_price"
-            header="Unit Price"
-            style="width: 140px"
-          >
+          <Column field="unit_price" header="Unit Price" style="width: 140px">
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.unit_price) }}
             </template>
           </Column>
 
-          <Column
-            field="discount_percent"
-            header="Discount"
-            style="width: 100px"
-          >
-            <template #body="slotProps">
-              {{ slotProps.data.discount_percent }}%
-            </template>
+          <Column field="discount_percent" header="Discount" style="width: 100px">
+            <template #body="slotProps"> {{ slotProps.data.discount_percent }}% </template>
           </Column>
 
-          <Column
-            header="Subtotal"
-            style="width: 140px"
-          >
+          <Column header="Subtotal" style="width: 140px">
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.quantity * slotProps.data.unit_price) }}
             </template>
           </Column>
 
-          <Column
-            header="Discount Amt"
-            style="width: 140px"
-          >
+          <Column header="Discount Amt" style="width: 140px">
             <template #body="slotProps">
               {{
                 formatCurrency(
@@ -900,10 +871,7 @@ onMounted(async () => {
             </template>
           </Column>
 
-          <Column
-            header="Total"
-            style="width: 140px"
-          >
+          <Column header="Total" style="width: 140px">
             <template #body="slotProps">
               <div class="font-semibold">
                 {{
@@ -912,17 +880,14 @@ onMounted(async () => {
                       (slotProps.data.quantity *
                         slotProps.data.unit_price *
                         slotProps.data.discount_percent) /
-                      100
+                        100
                   )
                 }}
               </div>
             </template>
           </Column>
 
-          <Column
-            header="Actions"
-            style="width: 100px"
-          >
+          <Column header="Actions" style="width: 100px">
             <template #body="slotProps">
               <Button
                 v-tooltip.top="'Remove'"
@@ -937,10 +902,7 @@ onMounted(async () => {
         </DataTable>
 
         <!-- Phase 1: Credit Limit Warning Banner -->
-        <div
-          v-if="showCreditWarningBanner && creditWarning"
-          class="field col-span-2"
-        >
+        <div v-if="showCreditWarningBanner && creditWarning" class="field col-span-2">
           <div
             :class="[
               'px-4 py-3  rounded border-l-4',
@@ -979,10 +941,7 @@ onMounted(async () => {
                     }}%)
                   </div>
                 </div>
-                <div
-                  v-if="creditWarning.isExceeded"
-                  class="mt-3 text-sm text-red-700 text-center"
-                >
+                <div v-if="creditWarning.isExceeded" class="mt-3 text-sm text-red-700 text-center">
                   <i class="pi pi-info-circle mr-1" />
                   Admin authorization required to proceed with this invoice.
                 </div>
@@ -1018,10 +977,7 @@ onMounted(async () => {
               {{ currentReturnPolicy.description }}
 
               <!-- Policy Status Display -->
-              <div
-                v-if="policyStatus"
-                class="mt-2"
-              >
+              <div v-if="policyStatus" class="mt-2">
                 <Tag
                   :severity="policyStatus.severity"
                   :icon="`pi ${policyStatus.icon}`"
@@ -1058,9 +1014,7 @@ onMounted(async () => {
         </div>
 
         <div class="mb-4">
-          <h3 class="text-lg font-semibold mb-3">
-            Add Return Item
-          </h3>
+          <h3 class="text-lg font-semibold mb-3">Add Return Item</h3>
 
           <div class="add-item-form">
             <!-- Row 1: Product and SKU Selection -->
@@ -1118,33 +1072,23 @@ onMounted(async () => {
                     @click="fetchPurchaseHistory"
                   />
                   <div>
-                    <small
-                      v-if="!formData.outlet_id || !returnSku"
-                      class="text-orange-600"
-                    >
+                    <small v-if="!formData.outlet_id || !returnSku" class="text-orange-600">
                       <i class="pi pi-info-circle mr-1" />Select outlet (in Invoice Details tab) and
                       SKU to enable Purchase History lookup
                     </small>
-                    <small
-                      v-else
-                      class="text-gray-600"
-                    >
+                    <small v-else class="text-gray-600">
                       Click "Purchase History" to find the original purchase invoice for this return
                     </small>
                   </div>
                 </div>
 
                 <div class="field flex-1 mb-0">
-                  <label
-                    for="original_invoice"
-                    class="flex justify-content-between"
-                  >Original Invoice Number *
-                    <small
-                      v-if="originalInvoiceId"
-                      class="text-gray-600"
-                    >
+                  <label for="original_invoice" class="flex justify-content-between"
+                    >Original Invoice Number *
+                    <small v-if="originalInvoiceId" class="text-gray-600">
                       Invoice ID: {{ originalInvoiceId }}
-                    </small></label>
+                    </small></label
+                  >
                   <InputText
                     id="original_invoice"
                     v-model="originalInvoiceNumber"
@@ -1158,10 +1102,7 @@ onMounted(async () => {
 
             <!-- Row 2: Quantity, Reason, Return to Stock -->
             <div class="form-row mb-3">
-              <div
-                class="field"
-                style="width: 120px"
-              >
+              <div class="field" style="width: 120px">
                 <label for="return_quantity">Quantity *</label>
                 <InputNumber
                   id="return_quantity"
@@ -1184,10 +1125,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div
-                class="field"
-                style="width: 150px"
-              >
+              <div class="field" style="width: 150px">
                 <label for="return_to_stock">Return to Stock</label>
                 <div class="flex align-items-center h-full">
                   <input
@@ -1195,38 +1133,24 @@ onMounted(async () => {
                     v-model="returnToStock"
                     type="checkbox"
                     class="mr-2"
-                  >
-                  <label
-                    for="return_to_stock"
-                    class="mb-0"
-                  >Add back to stock</label>
+                  />
+                  <label for="return_to_stock" class="mb-0">Add back to stock</label>
                 </div>
               </div>
             </div>
 
             <!-- Phase 2: Admin Override Section -->
-            <div
-              v-if="isAdmin"
-              class="mb-3 p-3 bg-amber-50 border-l-4 border-amber-500 rounded"
-            >
+            <div v-if="isAdmin" class="mb-3 p-3 bg-amber-50 border-l-4 border-amber-500 rounded">
               <div class="field-checkbox mb-2">
-                <Checkbox
-                  v-model="returnPolicyOverride"
-                  input-id="policy_override"
-                  binary
-                />
-                <label
-                  for="policy_override"
-                  class="ml-2"
-                >
+                <Checkbox v-model="returnPolicyOverride" input-id="policy_override" binary />
+                <label for="policy_override" class="ml-2">
                   <strong>Admin Override</strong> - Bypass return policy validation
                 </label>
               </div>
-              <div
-                v-if="returnPolicyOverride"
-                class="field mb-0"
-              >
-                <label for="override_reason">Override Reason <span class="text-red-500">*</span></label>
+              <div v-if="returnPolicyOverride" class="field mb-0">
+                <label for="override_reason"
+                  >Override Reason <span class="text-red-500">*</span></label
+                >
                 <Textarea
                   id="override_reason"
                   v-model="returnPolicyOverrideReason"
@@ -1249,25 +1173,15 @@ onMounted(async () => {
           </div>
         </div>
 
-        <DataTable
-          :value="(formData.items || []).filter(item => item.is_return)"
-          class="mb-4"
-        >
+        <DataTable :value="(formData.items || []).filter(item => item.is_return)" class="mb-4">
           <template #empty>
             <div class="text-center p-4 text-gray-500">
-              <i
-                class="pi pi-inbox"
-                style="font-size: 2rem"
-              />
+              <i class="pi pi-inbox" style="font-size: 2rem" />
               <p>No return items added</p>
             </div>
           </template>
 
-          <Column
-            field="product_name"
-            header="Product"
-            style="min-width: 200px"
-          >
+          <Column field="product_name" header="Product" style="min-width: 200px">
             <template #body="slotProps">
               <div>
                 <div class="font-semibold">
@@ -1280,53 +1194,28 @@ onMounted(async () => {
             </template>
           </Column>
 
-          <Column
-            field="quantity"
-            header="Quantity"
-            style="width: 100px"
-          />
+          <Column field="quantity" header="Quantity" style="width: 100px" />
 
-          <Column
-            field="unit_price"
-            header="Unit Price"
-            style="width: 140px"
-          >
+          <Column field="unit_price" header="Unit Price" style="width: 140px">
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.unit_price) }}
             </template>
           </Column>
 
-          <Column
-            field="return_reason"
-            header="Reason"
-            style="width: 150px"
-          >
+          <Column field="return_reason" header="Reason" style="width: 150px">
             <template #body="slotProps">
               {{ returnReasonOptions.find(r => r.value === slotProps.data.return_reason)?.label }}
             </template>
           </Column>
 
-          <Column
-            field="return_to_stock"
-            header="To Stock"
-            style="width: 100px"
-          >
+          <Column field="return_to_stock" header="To Stock" style="width: 100px">
             <template #body="slotProps">
-              <i
-                v-if="slotProps.data.return_to_stock"
-                class="pi pi-check text-green-500"
-              />
-              <i
-                v-else
-                class="pi pi-times text-red-500"
-              />
+              <i v-if="slotProps.data.return_to_stock" class="pi pi-check text-green-500" />
+              <i v-else class="pi pi-times text-red-500" />
             </template>
           </Column>
 
-          <Column
-            header="Total"
-            style="width: 140px"
-          >
+          <Column header="Total" style="width: 140px">
             <template #body="slotProps">
               <div class="font-semibold text-red-500">
                 -{{ formatCurrency(slotProps.data.quantity * slotProps.data.unit_price) }}
@@ -1334,10 +1223,7 @@ onMounted(async () => {
             </template>
           </Column>
 
-          <Column
-            header="Actions"
-            style="width: 100px"
-          >
+          <Column header="Actions" style="width: 100px">
             <template #body="slotProps">
               <Button
                 v-tooltip.top="'Remove'"
@@ -1366,10 +1252,7 @@ onMounted(async () => {
               <span class="total-value text-red-500">-{{ formatCurrency(totalDiscount) }}</span>
             </div>
 
-            <div
-              v-if="returnsTotal > 0"
-              class="total-row"
-            >
+            <div v-if="returnsTotal > 0" class="total-row">
               <span class="total-label">Returns Total:</span>
               <span class="total-value text-red-500">-{{ formatCurrency(returnsTotal) }}</span>
             </div>
@@ -1395,20 +1278,9 @@ onMounted(async () => {
     </TabView>
 
     <div class="form-actions">
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        severity="secondary"
-        @click="$emit('cancel')"
-      />
-      <div
-        class="flex flex-column align-items-end"
-        style="flex: 1"
-      >
-        <small
-          v-if="hasInsufficientStock"
-          class="p-error mb-2"
-        >
+      <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="$emit('cancel')" />
+      <div class="flex flex-column align-items-end" style="flex: 1">
+        <small v-if="hasInsufficientStock" class="p-error mb-2">
           Cannot submit: Some items have insufficient stock
         </small>
         <Button
@@ -1430,35 +1302,24 @@ onMounted(async () => {
       <template #header>
         <div class="flex items-center">
           <i class="pi pi-exclamation-triangle text-red-500 text-2xl mr-3" />
-          <h3 class="text-xl font-semibold">
-            Credit Limit Exceeded - Admin Override Required
-          </h3>
+          <h3 class="text-xl font-semibold">Credit Limit Exceeded - Admin Override Required</h3>
         </div>
       </template>
 
-      <div
-        v-if="creditWarning"
-        class="space-y-4"
-      >
+      <div v-if="creditWarning" class="space-y-4">
         <div class="bg-red-50 border border-red-200 rounded p-4">
           <div class="grid grid-cols-2 gap-3 text-sm">
             <div>
               <strong>Current Balance:</strong>
-              <div class="text-lg">
-                Rs. {{ creditWarning.currentBalance }}
-              </div>
+              <div class="text-lg">Rs. {{ creditWarning.currentBalance }}</div>
             </div>
             <div>
               <strong>Credit Limit:</strong>
-              <div class="text-lg">
-                Rs. {{ creditWarning.creditLimit }}
-              </div>
+              <div class="text-lg">Rs. {{ creditWarning.creditLimit }}</div>
             </div>
             <div>
               <strong>This Invoice:</strong>
-              <div class="text-lg">
-                Rs. {{ creditWarning.invoiceAmount }}
-              </div>
+              <div class="text-lg">Rs. {{ creditWarning.invoiceAmount }}</div>
             </div>
             <div>
               <strong>New Balance:</strong>
@@ -1471,10 +1332,7 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label
-            for="override_reason"
-            class="font-semibold"
-          >
+          <label for="override_reason" class="font-semibold">
             Admin Override Reason *
             <small class="text-gray-500 font-normal ml-2">
               (Required - Explain why exceeding credit limit is acceptable)
@@ -1487,22 +1345,14 @@ onMounted(async () => {
             placeholder="e.g., Customer has pending payment arriving tomorrow, One-time exception for VIP client, Large order with special approval, etc."
             class="w-full"
           />
-          <small
-            v-if="!creditOverrideReason.trim()"
-            class="p-error"
-          >
+          <small v-if="!creditOverrideReason.trim()" class="p-error">
             Override reason is required
           </small>
         </div>
       </div>
 
       <template #footer>
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          severity="secondary"
-          @click="cancelOverride"
-        />
+        <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="cancelOverride" />
         <Button
           label="Authorize & Submit"
           icon="pi pi-check"
@@ -1520,10 +1370,7 @@ onMounted(async () => {
       header="Purchase History"
       :style="{ width: '900px' }"
     >
-      <div
-        v-if="purchaseHistory"
-        class="space-y-3"
-      >
+      <div v-if="purchaseHistory" class="space-y-3">
         <div class="bg-blue-50 border border-blue-200 rounded p-3">
           <div class="grid grid-cols-3 gap-3 text-sm">
             <div><strong>Product:</strong> {{ purchaseHistory.product?.name }}</div>
@@ -1539,63 +1386,30 @@ onMounted(async () => {
         >
           <template #empty>
             <div class="text-center p-4 text-gray-500">
-              <i
-                class="pi pi-info-circle"
-                style="font-size: 2rem"
-              />
+              <i class="pi pi-info-circle" style="font-size: 2rem" />
               <p>No purchase history found for this outlet and SKU</p>
             </div>
           </template>
 
-          <Column
-            field="invoice_number"
-            header="Invoice #"
-            style="width: 150px"
-          />
-          <Column
-            field="invoice_date"
-            header="Date"
-            style="width: 120px"
-          />
-          <Column
-            field="quantity"
-            header="Purchased"
-            style="width: 100px"
-          />
-          <Column
-            field="already_returned"
-            header="Returned"
-            style="width: 100px"
-          >
+          <Column field="invoice_number" header="Invoice #" style="width: 150px" />
+          <Column field="invoice_date" header="Date" style="width: 120px" />
+          <Column field="quantity" header="Purchased" style="width: 100px" />
+          <Column field="already_returned" header="Returned" style="width: 100px">
             <template #body="{ data }">
-              <Tag
-                v-if="data.already_returned > 0"
-                severity="warning"
-              >
+              <Tag v-if="data.already_returned > 0" severity="warning">
                 {{ data.already_returned }}
               </Tag>
-              <span
-                v-else
-                class="text-gray-500"
-              >0</span>
+              <span v-else class="text-gray-500">0</span>
             </template>
           </Column>
-          <Column
-            field="can_return"
-            header="Can Return"
-            style="width: 100px"
-          >
+          <Column field="can_return" header="Can Return" style="width: 100px">
             <template #body="{ data }">
               <Tag :severity="data.can_return > 0 ? 'success' : 'danger'">
                 {{ data.can_return }}
               </Tag>
             </template>
           </Column>
-          <Column
-            field="days_since_purchase"
-            header="Days Ago"
-            style="width: 100px"
-          >
+          <Column field="days_since_purchase" header="Days Ago" style="width: 100px">
             <template #body="{ data }">
               <Tag
                 :severity="
@@ -1606,35 +1420,18 @@ onMounted(async () => {
               </Tag>
             </template>
           </Column>
-          <Column
-            field="unit_price"
-            header="Price"
-            style="width: 120px"
-          >
-            <template #body="{ data }">
-              Rs. {{ parseFloat(data.unit_price).toFixed(2) }}
-            </template>
+          <Column field="unit_price" header="Price" style="width: 120px">
+            <template #body="{ data }"> Rs. {{ parseFloat(data.unit_price).toFixed(2) }} </template>
           </Column>
-          <Column
-            header="Status"
-            style="width: 140px"
-          >
+          <Column header="Status" style="width: 140px">
             <template #body="{ data }">
               <Tag
                 v-if="data.days_since_purchase > currentReturnPolicy.days"
                 severity="danger"
                 value="Out of Policy"
               />
-              <Tag
-                v-else-if="data.can_return <= 0"
-                severity="warning"
-                value="Fully Returned"
-              />
-              <Tag
-                v-else
-                severity="success"
-                value="Eligible"
-              />
+              <Tag v-else-if="data.can_return <= 0" severity="warning" value="Fully Returned" />
+              <Tag v-else severity="success" value="Eligible" />
             </template>
           </Column>
         </DataTable>

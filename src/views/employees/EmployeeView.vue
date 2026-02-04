@@ -143,19 +143,19 @@ onMounted(() => {
 
       <!-- Route Assignment Card -->
       <Card v-if="currentEmployee.assignedRoute" class="mb-4">
-        <template #title> Assigned Route </template>
+        <template #title> Assigned Territory </template>
         <template #content>
           <div class="details-grid">
             <div class="detail-item">
-              <label>Route Code:</label>
+              <label>Territory Code:</label>
               <span class="font-semibold">{{ currentEmployee.assignedRoute.code }}</span>
             </div>
             <div class="detail-item">
-              <label>Route Name:</label>
+              <label>Territory Name:</label>
               <span>{{ currentEmployee.assignedRoute.name }}</span>
             </div>
             <div class="detail-item">
-              <label>Route Status:</label>
+              <label>Territory Status:</label>
               <Tag
                 :value="currentEmployee.assignedRoute.status"
                 :severity="getStatusSeverity(currentEmployee.assignedRoute.status)"
@@ -168,9 +168,9 @@ onMounted(() => {
 
       <!-- No Route Assignment Message -->
       <Card v-else class="mb-4">
-        <template #title> Route Assignment </template>
+        <template #title> Territory Assignment </template>
         <template #content>
-          <p class="text-color-secondary">No route assigned to this employee.</p>
+          <p class="text-color-secondary">No territory assigned to this employee.</p>
         </template>
       </Card>
     </div>

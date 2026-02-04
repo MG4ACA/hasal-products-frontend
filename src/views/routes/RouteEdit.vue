@@ -15,7 +15,7 @@ const loading = ref(false);
 
 const breadcrumbItems = [
   { label: 'Dashboard', to: '/' },
-  { label: 'Routes', to: '/routes' },
+  { label: 'Territories', to: '/routes' },
   { label: 'Edit' },
 ];
 
@@ -73,8 +73,8 @@ onMounted(() => {
     <div class="page-header">
       <div class="header-content">
         <div class="header-text">
-          <h1>Edit Route</h1>
-          <p>Update route information</p>
+          <h1>Edit Territory</h1>
+          <p>Update territory information</p>
         </div>
       </div>
     </div>

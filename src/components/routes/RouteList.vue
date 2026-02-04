@@ -37,7 +37,7 @@ const getStatusSeverity = status => {
       </template>
     </Column>
 
-    <Column field="name" header="Route Name" sortable>
+    <Column field="name" header="Territory Name" sortable>
       <template #body="{ data }">
         {{ data.name }}
       </template>

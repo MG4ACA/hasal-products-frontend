@@ -273,7 +273,7 @@ const routes = [
   },
   {
     path: '/routes/create',
-    name: 'RouteCreate',
+    name: 'TerritoryCreate',
     component: RouteCreate,
     meta: { requiresAuth: true },
   },

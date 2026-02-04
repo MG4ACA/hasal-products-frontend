@@ -44,7 +44,7 @@ const getStatusSeverity = status => {
       </template>
     </Column>
 
-    <Column field="currentAssignment" header="Current Assignment">
+    <Column field="currentAssignment" header="Assigned Territory">
       <template #body="{ data }">
         <span v-if="data.currentAssignment" class="route-badge">
           {{ data.currentAssignment.route?.name || 'Unknown' }}

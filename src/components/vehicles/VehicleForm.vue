@@ -81,7 +81,7 @@ const handleSubmit = () => {
     <div class="help-text">
       <i class="pi pi-info-circle" />
       <span
-        >Note: Vehicle assignment to routes is managed separately through the assignment
+        >Note: Vehicle assignment to territories is managed separately through the assignment
         feature.</span
       >
     </div>

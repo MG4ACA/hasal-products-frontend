@@ -33,11 +33,11 @@
           @change="refreshDashboard"
         />
         <Button
+          v-tooltip.bottom="'Refresh Dashboard'"
           icon="pi pi-refresh"
           :loading="loading"
           severity="secondary"
           @click="refreshDashboard"
-          v-tooltip.bottom="'Refresh Dashboard'"
         />
       </div>
     </div>
@@ -45,61 +45,75 @@
     <!-- KPI Widgets Grid -->
     <div class="widgets-grid">
       <!-- Today's Sales -->
-      <div class="widget sales-widget">
+      <div class="widget sales-widget cursor-pointer" @click="$router.push('/sales')">
         <div class="widget-icon">
-          <i class="pi pi-shopping-cart"></i>
+          <i class="pi pi-shopping-cart" />
         </div>
         <div class="widget-content">
           <h3>{{ periodLabel }} Sales</h3>
-          <p class="value">{{ formatCurrency(stats.totalSales) }}</p>
+          <p class="value">
+            {{ formatCurrency(stats.totalSales) }}
+          </p>
           <p class="sub-text">{{ stats.invoiceCount }} invoices</p>
         </div>
       </div>
 
       <!-- Outstanding Receivables -->
-      <div class="widget receivables-widget">
+      <div class="widget receivables-widget cursor-pointer" @click="$router.push('/sales')">
         <div class="widget-icon">
-          <i class="pi pi-wallet"></i>
+          <i class="pi pi-wallet" />
         </div>
         <div class="widget-content">
           <h3>Outstanding Receivables</h3>
-          <p class="value">{{ formatCurrency(stats.outstandingReceivables) }}</p>
+          <p class="value">
+            {{ formatCurrency(stats.outstandingReceivables) }}
+          </p>
           <p class="sub-text">{{ stats.outstandingCount }} pending invoices</p>
         </div>
       </div>
 
       <!-- Payments Collected -->
-      <div class="widget payments-widget">
+      <div class="widget payments-widget cursor-pointer" @click="$router.push('/payments')">
         <div class="widget-icon">
-          <i class="pi pi-money-bill"></i>
+          <i class="pi pi-money-bill" />
         </div>
         <div class="widget-content">
           <h3>{{ periodLabel }} Collections</h3>
-          <p class="value">{{ formatCurrency(stats.paymentsCollected) }}</p>
+          <p class="value">
+            {{ formatCurrency(stats.paymentsCollected) }}
+          </p>
           <p class="sub-text">{{ stats.paymentCount }} payments</p>
         </div>
       </div>
 
       <!-- Low Stock Items -->
-      <div class="widget stock-widget" :class="{ alert: stats.lowStockItems > 0 }">
+      <div
+        class="widget stock-widget cursor-pointer"
+        :class="{ alert: stats.lowStockItems > 0 }"
+        @click="$router.push('/products')"
+      >
         <div class="widget-icon">
-          <i class="pi pi-exclamation-triangle"></i>
+          <i class="pi pi-exclamation-triangle" />
         </div>
         <div class="widget-content">
           <h3>Low Stock Items</h3>
-          <p class="value">{{ stats.lowStockItems }}</p>
+          <p class="value">
+            {{ stats.lowStockItems }}
+          </p>
           <p class="sub-text">products below threshold</p>
         </div>
       </div>
 
       <!-- Pending Purchase Orders -->
-      <div class="widget po-widget">
+      <div class="widget po-widget cursor-pointer" @click="$router.push('/purchase-orders')">
         <div class="widget-icon">
-          <i class="pi pi-file-edit"></i>
+          <i class="pi pi-file-edit" />
         </div>
         <div class="widget-content">
           <h3>Pending POs</h3>
-          <p class="value">{{ stats.pendingPurchaseOrders }}</p>
+          <p class="value">
+            {{ stats.pendingPurchaseOrders }}
+          </p>
           <p class="sub-text">awaiting delivery</p>
         </div>
       </div>
@@ -116,12 +130,12 @@
             :options="trendOptions"
             option-label="label"
             option-value="value"
-            @change="fetchSalesTrend"
             size="small"
+            @change="fetchSalesTrend"
           />
         </div>
         <div class="chart-container">
-          <canvas ref="salesTrendChart"></canvas>
+          <canvas ref="salesTrendChart" />
         </div>
       </div>
 
@@ -131,14 +145,11 @@
           <h3>Payment Methods</h3>
         </div>
         <div class="chart-container doughnut-container">
-          <canvas ref="paymentChart"></canvas>
+          <canvas ref="paymentChart" />
         </div>
-        <div class="payment-legend" v-if="paymentBreakdown.length">
+        <div v-if="paymentBreakdown.length" class="payment-legend">
           <div v-for="item in paymentBreakdown" :key="item.method" class="legend-item">
-            <span
-              class="legend-color"
-              :style="{ backgroundColor: getPaymentColor(item.method) }"
-            ></span>
+            <span class="legend-color" :style="{ backgroundColor: getPaymentColor(item.method) }" />
             <span class="legend-label">{{ item.label }}</span>
             <span class="legend-value">{{ item.percentage }}%</span>
           </div>
@@ -151,17 +162,17 @@
           <h3>Top Selling Products</h3>
         </div>
         <div class="chart-container">
-          <canvas ref="topProductsChart"></canvas>
+          <canvas ref="topProductsChart" />
         </div>
       </div>
 
-      <!-- Route Performance Chart -->
+      <!-- Territory Performance Chart -->
       <div class="chart-card route-chart-card">
         <div class="chart-header">
-          <h3>Sales by Route</h3>
+          <h3>Sales by Territory</h3>
         </div>
         <div class="chart-container">
-          <canvas ref="routeChart"></canvas>
+          <canvas ref="routeChart" />
         </div>
       </div>
     </div>

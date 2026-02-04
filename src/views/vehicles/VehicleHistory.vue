@@ -134,7 +134,7 @@ onMounted(() => {
             </div>
             <div v-else class="text-sm text-orange-600">
               <i class="pi pi-exclamation-circle mr-2" />
-              <strong>Not assigned to any route</strong>
+              <strong>Not assigned to any territory</strong>
             </div>
           </div>
         </template>
@@ -146,7 +146,7 @@ onMounted(() => {
           <div class="flex align-items-center justify-content-between">
             <div class="flex align-items-center gap-2">
               <i class="pi pi-history text-primary" />
-              <span>Route Assignment History</span>
+              <span>Territory Assignment History</span>
             </div>
             <Button
               v-tooltip="'Refresh'"

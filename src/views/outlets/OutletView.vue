@@ -170,7 +170,7 @@ onMounted(() => {
               <span class="font-semibold">{{ currentOutlet.route.code }}</span>
             </div>
             <div class="detail-item">
-              <label>Route Name:</label>
+              <label>Territory Name:</label>
               <span>{{ currentOutlet.route.name }}</span>
             </div>
             <div class="detail-item">

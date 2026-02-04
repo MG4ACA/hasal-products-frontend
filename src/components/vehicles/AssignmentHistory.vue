@@ -92,7 +92,7 @@ defineExpose({
         </div>
       </template>
 
-      <Column header="Route" style="min-width: 200px">
+      <Column header="Territory" style="min-width: 200px">
         <template #body="{ data }">
           <div>
             <div class="font-semibold text-900">

@@ -131,7 +131,7 @@ onMounted(() => {
     :closable="true"
     :draggable="false"
     :style="{ width: '500px' }"
-    header="Vehicle Route Assignment"
+    header="Vehicle Territory Assignment"
     @update:visible="closeDialog"
   >
     <div
@@ -139,14 +139,23 @@ onMounted(() => {
       class="flex justify-content-center align-items-center"
       style="min-height: 200px"
     >
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
+      <i
+        class="pi pi-spin pi-spinner"
+        style="font-size: 2rem"
+      />
     </div>
 
-    <div v-else-if="vehicle" class="p-fluid">
+    <div
+      v-else-if="vehicle"
+      class="p-fluid"
+    >
       <!-- Vehicle Info -->
       <div class="mb-4">
         <div class="flex align-items-center gap-3 mb-3">
-          <i class="pi pi-car text-primary" style="font-size: 1.5rem" />
+          <i
+            class="pi pi-car text-primary"
+            style="font-size: 1.5rem"
+          />
           <div>
             <div class="text-xl font-bold text-900">
               {{ vehicle.name }}
@@ -158,13 +167,17 @@ onMounted(() => {
         </div>
         <div class="flex justify-content-between">
           <div class="">
-            <div class="text-600 text-sm mb-1">Registration Number</div>
+            <div class="text-600 text-sm mb-1">
+              Registration Number
+            </div>
             <div class="text-900 font-semibold">
               {{ vehicle.registration_number || 'N/A' }}
             </div>
           </div>
           <div class="">
-            <div class="text-600 text-sm mb-1">Status</div>
+            <div class="text-600 text-sm mb-1">
+              Status
+            </div>
             <div>
               <Tag
                 :value="vehicle.status"
@@ -176,8 +189,13 @@ onMounted(() => {
       </div>
 
       <!-- Current Assignment -->
-      <div v-if="isAssigned" class="mb-4">
-        <div class="text-600 text-sm mb-2 font-semibold">Current Assignment</div>
+      <div
+        v-if="isAssigned"
+        class="mb-4"
+      >
+        <div class="text-600 text-sm mb-2 font-semibold">
+          Current Assignment
+        </div>
         <div class="p-3 bg-blue-50 border-round border-1 border-blue-200">
           <div class="flex align-items-center justify-content-between">
             <div class="flex align-items-center gap-2">
@@ -191,31 +209,50 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            <Tag value="Active" severity="success" />
+            <Tag
+              value="Active"
+              severity="success"
+            />
           </div>
         </div>
       </div>
 
-      <div v-else class="mb-4">
+      <div
+        v-else
+        class="mb-4"
+      >
         <div class="p-3 bg-orange-50 border-round border-1 border-orange-200 text-center">
-          <i class="pi pi-exclamation-circle text-orange-600 mb-2" style="font-size: 2rem" />
-          <p class="text-orange-700 m-0 font-semibold">Not Currently Assigned</p>
-          <p class="text-orange-600 text-sm mt-1 m-0">Assign a route to this vehicle</p>
+          <i
+            class="pi pi-exclamation-circle text-orange-600 mb-2"
+            style="font-size: 2rem"
+          />
+          <p class="text-orange-700 m-0 font-semibold">
+            Not Currently Assigned
+          </p>
+          <p class="text-orange-600 text-sm mt-1 m-0">
+            Assign a territory to this vehicle
+          </p>
         </div>
       </div>
 
       <!-- Assign New Route -->
-      <div v-if="!isAssigned" class="mb-3">
-        <label for="route" class="block mb-2 text-600 text-sm font-semibold">
+      <div
+        v-if="!isAssigned"
+        class="mb-3"
+      >
+        <label
+          for="route"
+          class="block mb-2 text-600 text-sm font-semibold"
+        >
           <i class="pi pi-sitemap mr-2" />
-          Select Route to Assign
+          Select Territory to Assign
         </label>
         <Dropdown
           id="route"
           v-model="selectedRoute"
           :options="availableRoutes"
           option-label="name"
-          placeholder="Choose a route..."
+          placeholder="Choose a territory..."
           :filter="true"
           class="w-full"
         >
@@ -243,7 +280,12 @@ onMounted(() => {
 
     <template #footer>
       <div class="flex justify-content-end gap-2">
-        <Button label="Cancel" icon="pi pi-times" text @click="closeDialog" />
+        <Button
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          @click="closeDialog"
+        />
         <Button
           v-if="!isAssigned"
           label="Assign"

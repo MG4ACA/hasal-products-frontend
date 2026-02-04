@@ -47,7 +47,7 @@ const handleCancel = () => {
       <div class="p-fluid">
         <!-- Code Field (Read-only for edit mode) -->
         <div class="field">
-          <label for="code">Route Code</label>
+          <label for="code">Territory Code</label>
           <InputText
             id="code"
             v-model="formData.code"
@@ -59,11 +59,11 @@ const handleCancel = () => {
 
         <!-- Name Field -->
         <div class="field">
-          <label for="name">Route Name <span class="required">*</span></label>
+          <label for="name">Territory Name <span class="required">*</span></label>
           <InputText
             id="name"
             v-model="formData.name"
-            placeholder="Enter route name"
+            placeholder="Enter territory name"
             :disabled="loading"
             required
           />
@@ -77,7 +77,7 @@ const handleCancel = () => {
             v-model="formData.description"
             rows="4"
             class="p-inputtext p-component"
-            placeholder="Enter route description"
+            placeholder="Enter territory description"
             :disabled="loading"
           />
         </div>
@@ -106,7 +106,7 @@ const handleCancel = () => {
             @click="handleCancel"
           />
           <Button
-            label="Save Route"
+            label="Save Territory"
             icon="pi pi-check"
             :loading="loading"
             :disabled="!formData.name || !formData.status"
