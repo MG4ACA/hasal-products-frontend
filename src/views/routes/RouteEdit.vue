@@ -27,6 +27,7 @@ const formData = ref({
   description: '',
   status: 'active',
   territory_length: null,
+  sales_ref_id: null,
 });
 
 const loadRoute = async () => {
@@ -39,6 +40,7 @@ const loadRoute = async () => {
       description: data.description || '',
       status: data.status,
       territory_length: data.territory_length || null,
+      sales_ref_id: data.sales_ref_id || null,
     };
   } catch (error) {
     showError(error.message || 'Failed to load route');

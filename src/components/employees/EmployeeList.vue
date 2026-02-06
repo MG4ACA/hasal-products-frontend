@@ -81,14 +81,6 @@ const formatType = type => {
       </template>
     </Column>
 
-    <Column field="assigned_route" header="Assigned Territory">
-      <template #body="{ data }">
-        <span v-if="data.assignedRoute" class="route-badge">
-          {{ data.assignedRoute.name }}
-        </span>
-        <span v-else class="text-gray-400">-</span>
-      </template>
-    </Column>
     <Column field="status" header="Status" sortable>
       <template #body="{ data }">
         <Tag

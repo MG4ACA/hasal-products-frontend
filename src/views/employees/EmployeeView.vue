@@ -141,36 +141,45 @@ onMounted(() => {
         </template>
       </Card>
 
-      <!-- Route Assignment Card -->
-      <Card v-if="currentEmployee.assignedRoute" class="mb-4">
-        <template #title> Assigned Territory </template>
+      <!-- Territory Assignment Card (Only for Sales Reps) -->
+      <Card v-if="currentEmployee.type === 'sales_ref'" class="mb-4">
+        <template #title> Assigned Territories </template>
         <template #content>
-          <div class="details-grid">
-            <div class="detail-item">
-              <label>Territory Code:</label>
-              <span class="font-semibold">{{ currentEmployee.assignedRoute.code }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Territory Name:</label>
-              <span>{{ currentEmployee.assignedRoute.name }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Territory Status:</label>
-              <Tag
-                :value="currentEmployee.assignedRoute.status"
-                :severity="getStatusSeverity(currentEmployee.assignedRoute.status)"
-                style="text-transform: capitalize"
-              />
-            </div>
+          <div v-if="currentEmployee.assignedRoutes && currentEmployee.assignedRoutes.length > 0">
+            <DataTable :value="currentEmployee.assignedRoutes">
+              <Column field="code" header="Territory Code" style="width: 120px">
+                <template #body="{ data }">
+                  <span class="font-semibold">{{ data.code }}</span>
+                </template>
+              </Column>
+              <Column field="name" header="Territory Name" style="width: 200px">
+                <template #body="{ data }">
+                  {{ data.name }}
+                </template>
+              </Column>
+              <Column field="territory_length" header="Length (km)" style="width: 120px">
+                <template #body="{ data }">
+                  <span v-if="data.territory_length">
+                    {{ parseFloat(data.territory_length).toFixed(2) }} km
+                  </span>
+                  <span v-else class="text-gray-400">-</span>
+                </template>
+              </Column>
+              <Column field="status" header="Status" style="width: 100px">
+                <template #body="{ data }">
+                  <Tag
+                    :value="data.status"
+                    :severity="getStatusSeverity(data.status)"
+                    style="text-transform: capitalize"
+                  />
+                </template>
+              </Column>
+            </DataTable>
           </div>
-        </template>
-      </Card>
-
-      <!-- No Route Assignment Message -->
-      <Card v-else class="mb-4">
-        <template #title> Territory Assignment </template>
-        <template #content>
-          <p class="text-color-secondary">No territory assigned to this employee.</p>
+          <div v-else class="text-center py-4 text-gray-500">
+            <i class="pi pi-inbox" style="font-size: 2rem" />
+            <p class="mt-2">No territories assigned to this sales rep</p>
+          </div>
         </template>
       </Card>
     </div>

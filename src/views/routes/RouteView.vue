@@ -94,6 +94,13 @@ onMounted(() => {
               <span>{{ currentRoute.name }}</span>
             </div>
             <div class="detail-item">
+              <label>Sales Representative:</label>
+              <span v-if="currentRoute.salesRep" class="font-semibold">
+                {{ currentRoute.salesRep.code }} - {{ currentRoute.salesRep.name }}
+              </span>
+              <span v-else class="text-gray-400">-</span>
+            </div>
+            <div class="detail-item">
               <label>Territory Length:</label>
               <span v-if="currentRoute.territory_length" class="territory-length">
                 {{ parseFloat(currentRoute.territory_length).toFixed(2) }} <strong>km</strong>

@@ -1,8 +1,11 @@
 <script setup>
+import { useEmployeeStore } from '@/stores/employee';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+
+const employeeStore = useEmployeeStore();
 
 const props = defineProps({
   modelValue: {
@@ -32,6 +35,16 @@ const statusOptions = [
   { label: 'Inactive', value: 'inactive' },
 ];
 
+// Sales rep options - only active sales_ref type employees
+const salesRepOptions = computed(() => {
+  return employeeStore.salesRefs
+    .filter(e => e.status === 'active')
+    .map(e => ({
+      label: `${e.code} - ${e.name}`,
+      value: e.id,
+    }));
+});
+
 // Territory length validation
 const territoryLengthError = computed(() => {
   if (
@@ -60,7 +73,12 @@ const territoryLengthError = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return formData.value.name && formData.value.status && !territoryLengthError.value;
+  return (
+    formData.value.name &&
+    formData.value.status &&
+    formData.value.sales_ref_id &&
+    !territoryLengthError.value
+  );
 });
 
 const handleSubmit = () => {
@@ -70,6 +88,13 @@ const handleSubmit = () => {
 const handleCancel = () => {
   emit('cancel');
 };
+
+onMounted(async () => {
+  // Fetch employees if not already loaded
+  if (employeeStore.employees.length === 0) {
+    await employeeStore.fetchEmployees();
+  }
+});
 </script>
 
 <template>
@@ -99,6 +124,25 @@ const handleCancel = () => {
               :disabled="loading"
               required
             />
+          </div>
+
+          <!-- Sales Representative Field -->
+          <div class="field">
+            <label for="sales_ref_id">Sales Representative <span class="required">*</span></label>
+            <Dropdown
+              id="sales_ref_id"
+              v-model="formData.sales_ref_id"
+              :options="salesRepOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Select Sales Representative"
+              :disabled="loading"
+              :filter="true"
+              required
+            />
+            <small class="form-help"
+              >Select the sales representative assigned to this territory</small
+            >
           </div>
         </div>
         <div class="field-container">

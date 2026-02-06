@@ -22,6 +22,7 @@ const formData = ref({
   description: '',
   status: 'active',
   territory_length: null,
+  sales_ref_id: null,
 });
 
 const handleSubmit = async data => {

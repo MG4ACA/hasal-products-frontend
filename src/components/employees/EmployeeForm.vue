@@ -137,22 +137,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Assigned Route -->
-        <div class="field">
-          <label for="assigned_route_id">Assigned Territory</label>
-          <Dropdown
-            id="assigned_route_id"
-            v-model="formData.assigned_route_id"
-            :options="routes"
-            option-label="label"
-            option-value="value"
-            placeholder="Select Territory (Optional)"
-            :disabled="loading"
-            :show-clear="true"
-          />
-          <small class="form-help"> Assign a territory for sales reps and drivers </small>
-        </div>
-
         <!-- Status -->
         <div class="field">
           <label for="status">Status <span class="required">*</span></label>

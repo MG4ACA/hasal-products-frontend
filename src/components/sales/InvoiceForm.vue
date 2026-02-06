@@ -140,6 +140,7 @@ const grandTotal = computed(() => {
 const isFormValid = computed(() => {
   return (
     formData.value.outlet_id &&
+    formData.value.sales_ref_id &&
     formData.value.invoice_date &&
     formData.value.payment_method &&
     formData.value.items &&
@@ -285,12 +286,28 @@ const onOutletChange = () => {
       formData.value.route_id = selectedOutlet.value.route_id;
 
       // Auto-populate Sales Reference based on Route
-      const salesRef = employeeOptions.value.find(
-        e => e.assigned_route_id === selectedOutlet.value.route_id
-      );
-      if (salesRef) {
-        formData.value.sales_ref_id = salesRef.id;
+      const route = routeStore.routes.find(r => r.id === selectedOutlet.value.route_id);
+      if (route && route.sales_ref_id) {
+        formData.value.sales_ref_id = route.sales_ref_id;
+      } else if (!route) {
+        // Show warning if outlet has no route assigned
+        toast.add({
+          severity: 'warn',
+          summary: 'Warning',
+          detail:
+            'Selected outlet has no territory assigned. Please assign a territory to this outlet.',
+          life: 5000,
+        });
       }
+    } else {
+      // Show warning if outlet has no route
+      toast.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail:
+          'Selected outlet has no territory assigned. Please assign a territory to this outlet.',
+        life: 5000,
+      });
     }
   }
 };
@@ -601,7 +618,7 @@ onMounted(async () => {
           </div>
 
           <div class="field">
-            <label for="sales_ref">Sales Reference</label>
+            <label for="sales_ref">Sales Reference <span class="required">*</span></label>
             <Dropdown
               id="sales_ref"
               v-model="formData.sales_ref_id"
@@ -611,6 +628,7 @@ onMounted(async () => {
               placeholder="Select Sales Rep"
               :filter="true"
               class="w-full"
+              required
             >
               <template #value="slotProps">
                 <div v-if="slotProps.value">
