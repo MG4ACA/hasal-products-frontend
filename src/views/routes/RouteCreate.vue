@@ -21,6 +21,7 @@ const formData = ref({
   name: '',
   description: '',
   status: 'active',
+  territory_length: null,
 });
 
 const handleSubmit = async data => {

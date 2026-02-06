@@ -26,6 +26,7 @@ const formData = ref({
   name: '',
   description: '',
   status: 'active',
+  territory_length: null,
 });
 
 const loadRoute = async () => {
@@ -37,6 +38,7 @@ const loadRoute = async () => {
       name: data.name,
       description: data.description || '',
       status: data.status,
+      territory_length: data.territory_length || null,
     };
   } catch (error) {
     showError(error.message || 'Failed to load route');

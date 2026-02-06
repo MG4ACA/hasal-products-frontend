@@ -43,6 +43,15 @@ const getStatusSeverity = status => {
       </template>
     </Column>
 
+    <Column field="territory_length" header="Territory Length (km)" sortable>
+      <template #body="{ data }">
+        <span v-if="data.territory_length"
+          >{{ parseFloat(data.territory_length).toFixed(2) }} km</span
+        >
+        <span v-else class="text-gray-400">-</span>
+      </template>
+    </Column>
+
     <Column field="description" header="Description">
       <template #body="{ data }">
         <span class="text-gray-600">{{ data.description || '-' }}</span>
@@ -109,5 +118,9 @@ const getStatusSeverity = status => {
 
 .text-gray-600 {
   color: #4b5563;
+}
+
+.text-gray-400 {
+  color: #d1d5db;
 }
 </style>

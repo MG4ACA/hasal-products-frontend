@@ -94,6 +94,13 @@ onMounted(() => {
               <span>{{ currentRoute.name }}</span>
             </div>
             <div class="detail-item">
+              <label>Territory Length:</label>
+              <span v-if="currentRoute.territory_length" class="territory-length">
+                {{ parseFloat(currentRoute.territory_length).toFixed(2) }} <strong>km</strong>
+              </span>
+              <span v-else>-</span>
+            </div>
+            <div class="detail-item">
               <label>Status:</label>
               <Tag
                 :value="currentRoute.status"
@@ -273,6 +280,17 @@ onMounted(() => {
 
 .font-semibold {
   font-weight: 600;
+}
+
+.territory-length {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.territory-length strong {
+  font-weight: 700;
+  margin-left: 0.25rem;
 }
 
 /* Responsive */
