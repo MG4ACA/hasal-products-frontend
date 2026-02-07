@@ -37,8 +37,10 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import Paginator from 'primevue/paginator';
+import Password from 'primevue/password';
 import ProgressBar from 'primevue/progressbar';
 import ProgressSpinner from 'primevue/progressspinner';
+import SelectButton from 'primevue/selectbutton';
 import Steps from 'primevue/steps';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
@@ -91,6 +93,8 @@ app.component('IconField', IconField);
 app.component('InputIcon', InputIcon);
 app.component('TabPanel', TabPanel);
 app.component('Checkbox', Checkbox);
+app.component('SelectButton', SelectButton);
+app.component('Password', Password);
 
 app.directive('badge', BadgeDirective);
 

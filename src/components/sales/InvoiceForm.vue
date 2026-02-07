@@ -68,8 +68,14 @@ const originalInvoiceId = ref(null); // Stores numeric ID for backend
 const originalInvoiceNumber = ref(null); // Stores invoice number for display
 const originalInvoiceDate = ref(null); // Stores invoice date for policy calculation
 const daysSincePurchase = ref(null); // Stores days since purchase
-const returnPolicyOverride = ref(false);
-const returnPolicyOverrideReason = ref('');
+
+// Legacy Returns support (for pre-system purchases)
+const returnPolicyOverrideReason = ref(''); // Used only for legacy return explanation
+const isLegacyReturn = ref(false);
+const showAdminPasswordDialog = ref(false);
+const adminPassword = ref('');
+const adminAuthData = ref(null); // Stores {adminId, adminName, adminUsername} after verification
+const verifyingPassword = ref(false);
 
 // Phase 2: Return policy constants
 const RETURN_POLICY = {
@@ -183,6 +189,41 @@ const validateStock = () => {
   return true;
 };
 
+// Phase 1: Check credit limit helper (defined before watchers that use it)
+const checkCreditLimit = () => {
+  if (
+    !formData.value.outlet_id ||
+    formData.value.payment_method !== 'credit' ||
+    !selectedOutlet.value
+  ) {
+    creditWarning.value = null;
+    showCreditWarningBanner.value = false;
+    return;
+  }
+
+  const currentBalance = parseFloat(selectedOutlet.value.balance || 0);
+  const creditLimit = parseFloat(selectedOutlet.value.credit_limit || 0);
+  const invoiceAmount = grandTotal.value;
+  const potentialBalance = currentBalance + invoiceAmount;
+  const utilizationPercent = creditLimit > 0 ? (potentialBalance / creditLimit) * 100 : 0;
+
+  if (potentialBalance >= creditLimit * CREDIT_WARNING_THRESHOLD) {
+    creditWarning.value = {
+      message: `Approaching/Exceeding credit limit (${utilizationPercent.toFixed(1)}%)`,
+      currentBalance: currentBalance.toFixed(2),
+      creditLimit: creditLimit.toFixed(2),
+      invoiceAmount: invoiceAmount.toFixed(2),
+      potentialBalance: potentialBalance.toFixed(2),
+      utilizationPercent: utilizationPercent.toFixed(1),
+      isExceeded: potentialBalance > creditLimit,
+    };
+    showCreditWarningBanner.value = true;
+  } else {
+    creditWarning.value = null;
+    showCreditWarningBanner.value = false;
+  }
+};
+
 // Watch SKU selection to set price
 watch(selectedSku, newSku => {
   if (newSku) {
@@ -245,40 +286,6 @@ watch(returnSku, newSku => {
 });
 
 // Methods
-const checkCreditLimit = () => {
-  if (
-    !formData.value.outlet_id ||
-    formData.value.payment_method !== 'credit' ||
-    !selectedOutlet.value
-  ) {
-    creditWarning.value = null;
-    showCreditWarningBanner.value = false;
-    return;
-  }
-
-  const currentBalance = parseFloat(selectedOutlet.value.balance || 0);
-  const creditLimit = parseFloat(selectedOutlet.value.credit_limit || 0);
-  const invoiceAmount = grandTotal.value;
-  const potentialBalance = currentBalance + invoiceAmount;
-  const utilizationPercent = creditLimit > 0 ? (potentialBalance / creditLimit) * 100 : 0;
-
-  if (potentialBalance >= creditLimit * CREDIT_WARNING_THRESHOLD) {
-    creditWarning.value = {
-      message: `Approaching/Exceeding credit limit (${utilizationPercent.toFixed(1)}%)`,
-      currentBalance: currentBalance.toFixed(2),
-      creditLimit: creditLimit.toFixed(2),
-      invoiceAmount: invoiceAmount.toFixed(2),
-      potentialBalance: potentialBalance.toFixed(2),
-      utilizationPercent: utilizationPercent.toFixed(1),
-      isExceeded: potentialBalance > creditLimit,
-    };
-    showCreditWarningBanner.value = true;
-  } else {
-    creditWarning.value = null;
-    showCreditWarningBanner.value = false;
-  }
-};
-
 const onOutletChange = () => {
   if (selectedOutlet.value) {
     // Auto-populate Route
@@ -348,13 +355,86 @@ const addSalesItem = () => {
   stockError.value = '';
 };
 
-const addReturnItem = () => {
+const addReturnItem = async () => {
   if (!returnSku.value || returnQuantity.value <= 0) {
     return;
   }
 
+  // Legacy Returns: Check if user checked legacy return checkbox
+  if (isLegacyReturn.value) {
+    // Legacy return validation
+
+    // 1. Require admin authorization (should already be set by watcher)
+    if (!adminAuthData.value) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Authorization Required',
+        detail: 'Please authorize with admin password first',
+        life: 3000,
+      });
+      showAdminPasswordDialog.value = true;
+      return;
+    }
+
+    // 2. Require reason explanation
+    if (!returnPolicyOverrideReason.value.trim()) {
+      toast.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Legacy return requires an explanation',
+        life: 3000,
+      });
+      return;
+    }
+
+    // All checks passed - add legacy return item
+    const sku = returnSkuOptions.value.find(s => s.id === returnSku.value);
+    const product = productStore.products.find(p => p.id === returnProduct.value);
+
+    if (!formData.value.items) {
+      formData.value.items = [];
+    }
+
+    formData.value.items.push({
+      sku_id: returnSku.value,
+      product_name: product.name,
+      sku_label: `${sku.size}${sku.unit}`,
+      quantity: returnQuantity.value,
+      unit_price: sku.price,
+      discount_percent: 0,
+      is_return: true,
+      return_reason: returnReason.value,
+      return_to_stock: returnToStock.value,
+      // Legacy return fields
+      original_invoice_id: null, // Will be set to LEGACY-SYSTEM-SETUP by backend
+      return_policy_override: true,
+      return_policy_override_reason: returnPolicyOverrideReason.value,
+      admin_id: adminAuthData.value.adminId, // Admin who authorized
+      is_legacy: true, // Mark for UI display
+    });
+
+    toast.add({
+      severity: 'success',
+      summary: 'Legacy Return Added',
+      detail: `Authorized by ${adminAuthData.value.adminName}`,
+      life: 3000,
+    });
+
+    // Reset item fields but keep authorization for multiple items
+    returnProduct.value = null;
+    returnSku.value = null;
+    returnQuantity.value = 1;
+    returnReason.value = 'damaged';
+    returnToStock.value = false;
+    returnPolicyOverrideReason.value = '';
+    // Note: Keep isLegacyReturn and adminAuthData to allow multiple legacy items
+
+    return;
+  }
+
+  // REGULAR RETURN VALIDATION (existing logic)
   // Phase 2: Validate original invoice is selected
-  if (!originalInvoiceId.value && !returnPolicyOverride.value) {
+  if (!originalInvoiceId.value) {
     toast.add({
       severity: 'error',
       summary: 'Validation Error',
@@ -364,42 +444,14 @@ const addReturnItem = () => {
     return;
   }
 
-  // Phase 2: Check if return policy is exceeded
+  // Phase 2: Show warning if return policy is exceeded (but allow the return)
   if (policyStatus.value && !policyStatus.value.isWithinPolicy) {
-    // Policy is exceeded - check if admin override is required
-    if (!isAdmin.value) {
-      // Non-admin users cannot add items that exceed policy
-      toast.add({
-        severity: 'error',
-        summary: 'Policy Violation',
-        detail: `Return exceeds policy limit (${policyStatus.value.daysSincePurchase} days ago, limit ${policyStatus.value.policyLimit} days). Contact admin for override.`,
-        life: 5000,
-      });
-      return;
-    } else {
-      // Admin must enable override and provide reason
-      if (!returnPolicyOverride.value) {
-        toast.add({
-          severity: 'warn',
-          summary: 'Admin Override Required',
-          detail:
-            'This return exceeds the policy limit. Please enable "Admin Override" and provide a reason.',
-          life: 5000,
-        });
-        return;
-      }
-    }
-  }
-
-  // Phase 2: If admin override is enabled, require reason
-  if (returnPolicyOverride.value && !returnPolicyOverrideReason.value.trim()) {
     toast.add({
-      severity: 'error',
-      summary: 'Validation Error',
-      detail: 'Admin override requires a reason',
-      life: 3000,
+      severity: 'warn',
+      summary: 'Return Policy Warning',
+      detail: `This return is outside the policy window (${policyStatus.value.daysSincePurchase} days, policy limit: ${policyStatus.value.policyLimit} days). Proceeding with return.`,
+      life: 5000,
     });
-    return;
   }
 
   const sku = returnSkuOptions.value.find(s => s.id === returnSku.value);
@@ -421,8 +473,6 @@ const addReturnItem = () => {
     return_to_stock: returnToStock.value,
     // Phase 2: Add return validation fields
     original_invoice_id: originalInvoiceId.value,
-    return_policy_override: returnPolicyOverride.value,
-    return_policy_override_reason: returnPolicyOverrideReason.value || null,
   });
 
   // Reset
@@ -435,8 +485,6 @@ const addReturnItem = () => {
   originalInvoiceNumber.value = null;
   originalInvoiceDate.value = null;
   daysSincePurchase.value = null;
-  returnPolicyOverride.value = false;
-  returnPolicyOverrideReason.value = '';
   purchaseHistory.value = null;
 };
 
@@ -463,6 +511,9 @@ const handleSubmit = () => {
     return;
   }
 
+  // Clear legacy return authorization on submit
+  adminAuthData.value = null;
+
   emit('submit', formData.value);
 };
 
@@ -483,6 +534,13 @@ const handleAdminOverride = () => {
 const cancelOverride = () => {
   showCreditLimitModal.value = false;
   creditOverrideReason.value = '';
+};
+
+const cancelForm = () => {
+  // Clear legacy return authorization on cancel
+  adminAuthData.value = null;
+  isLegacyReturn.value = false;
+  emit('cancel');
 };
 
 // Phase 2: Fetch purchase history for return validation
@@ -542,6 +600,75 @@ const currentReturnPolicy = computed(() => {
   return RETURN_POLICY[returnReason.value] || RETURN_POLICY.other;
 });
 
+// Legacy Returns: Function to verify admin password
+const verifyAdminPassword = async () => {
+  if (!adminPassword.value.trim()) {
+    toast.add({
+      severity: 'error',
+      summary: 'Validation Error',
+      detail: 'Please enter admin password',
+      life: 3000,
+    });
+    return false;
+  }
+
+  verifyingPassword.value = true;
+
+  try {
+    const response = await fetch('/api/auth/verify-admin-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authStore.token}`,
+      },
+      body: JSON.stringify({
+        password: adminPassword.value,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      toast.add({
+        severity: 'error',
+        summary: 'Authorization Failed',
+        detail: result.error || 'Invalid admin password',
+        life: 3000,
+      });
+      return false;
+    }
+
+    // Store admin authorization data
+    adminAuthData.value = {
+      adminId: result.data.adminId,
+      adminName: result.data.adminName,
+      adminUsername: result.data.adminUsername,
+    };
+
+    toast.add({
+      severity: 'success',
+      summary: 'Authorized',
+      detail: `Admin ${result.data.adminName} authorized this legacy return`,
+      life: 3000,
+    });
+
+    showAdminPasswordDialog.value = false;
+    adminPassword.value = '';
+    return true;
+  } catch (error) {
+    console.error('Password verification error:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to verify admin password',
+      life: 3000,
+    });
+    return false;
+  } finally {
+    verifyingPassword.value = false;
+  }
+};
+
 // Phase 2: Computed - Policy status based on selected invoice and return reason
 const policyStatus = computed(() => {
   if (!originalInvoiceId.value || daysSincePurchase.value === null) {
@@ -562,6 +689,20 @@ const policyStatus = computed(() => {
       ? `${daysSincePurchase.value} days ago (within ${policyLimit}-day limit)`
       : `${daysSincePurchase.value} days ago (exceeds ${policyLimit}-day limit)`,
   };
+});
+
+// Legacy Returns: Watch checkbox to trigger password dialog or clear authorization
+watch(isLegacyReturn, newValue => {
+  if (newValue) {
+    // Checkbox enabled - show password dialog if not already authorized
+    if (!adminAuthData.value) {
+      showAdminPasswordDialog.value = true;
+    }
+  } else {
+    // Checkbox disabled - clear authorization
+    adminAuthData.value = null;
+    returnPolicyOverrideReason.value = '';
+  }
 });
 
 // Load data on mount
@@ -1012,18 +1153,11 @@ onMounted(async () => {
                 <!-- Warning for policy exceeded -->
                 <div
                   v-if="!policyStatus.isWithinPolicy"
-                  class="mt-2 text-sm font-semibold"
-                  :class="{
-                    'text-red-700': !isAdmin,
-                    'text-orange-700': isAdmin,
-                  }"
+                  class="mt-2 text-sm font-semibold text-orange-700"
                 >
-                  <i class="pi pi-exclamation-circle mr-1" />
-                  <span v-if="!isAdmin">
-                    Return policy exceeded. Contact admin for override authorization.
-                  </span>
-                  <span v-else>
-                    Return policy exceeded. Use "Admin Override" below to proceed.
+                  <i class="pi pi-info-circle mr-1" />
+                  <span>
+                    Note: This return is outside the policy window. You may proceed with the return.
                   </span>
                 </div>
               </div>
@@ -1033,6 +1167,51 @@ onMounted(async () => {
 
         <div class="mb-4">
           <h3 class="text-lg font-semibold mb-3">Add Return Item</h3>
+
+          <!-- Legacy Return Checkbox & Authorization Status -->
+          <div class="mb-3 p-3 bg-amber-50 border-l-4 border-amber-500 rounded">
+            <div class="field-checkbox mb-2">
+              <Checkbox v-model="isLegacyReturn" input-id="legacy_return" binary />
+              <label for="legacy_return" class="ml-2">
+                <strong>⚠️ Legacy Return</strong> - No purchase history available (requires admin
+                authorization)
+              </label>
+            </div>
+
+            <!-- Authorization Status - Prominent Display -->
+            <div
+              v-if="isLegacyReturn && adminAuthData"
+              class="mt-3 p-2 bg-green-100 border border-green-400 rounded"
+            >
+              <div class="flex align-items-center text-green-800">
+                <i class="pi pi-check-circle mr-2 text-lg" />
+                <div>
+                  <strong>✓ Authorized</strong> by {{ adminAuthData.adminName }} ({{
+                    adminAuthData.adminUsername
+                  }})
+                  <div class="text-xs text-green-700 mt-1">
+                    You can now add multiple legacy return items without re-entering password
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Waiting for Authorization -->
+            <div
+              v-if="isLegacyReturn && !adminAuthData"
+              class="mt-3 p-2 bg-orange-100 border border-orange-400 rounded"
+            >
+              <div class="flex align-items-center text-orange-800">
+                <i class="pi pi-lock mr-2 text-lg" />
+                <div>
+                  <strong>Waiting for admin authorization...</strong>
+                  <div class="text-xs text-orange-700 mt-1">
+                    Enter admin password to enable legacy returns
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="add-item-form">
             <!-- Row 1: Product and SKU Selection -->
@@ -1076,8 +1255,8 @@ onMounted(async () => {
               </div>
             </div>
 
-            <!-- Phase 2: Purchase History & Original Invoice Selection (after SKU selected) -->
-            <div class="mb-3 p-3 bg-gray-50 border rounded">
+            <!-- Phase 2: Purchase History & Original Invoice Selection (hidden for legacy returns) -->
+            <div v-if="!isLegacyReturn" class="mb-3 p-3 bg-gray-50 border rounded">
               <div class="flex gap-3 align-items-center">
                 <div>
                   <Button
@@ -1114,6 +1293,17 @@ onMounted(async () => {
                     class="w-full"
                     disabled
                   />
+                </div>
+              </div>
+            </div>
+
+            <!-- Legacy Return Warning Banner -->
+            <div v-else class="mb-3 p-3 bg-amber-100 border border-amber-400 rounded">
+              <div class="flex align-items-center text-amber-800">
+                <i class="pi pi-exclamation-triangle mr-2 text-xl" />
+                <div>
+                  <strong>Legacy Return Mode:</strong> This return is for a purchase made before the
+                  system was implemented. Admin authorization required.
                 </div>
               </div>
             </div>
@@ -1157,23 +1347,18 @@ onMounted(async () => {
               </div>
             </div>
 
-            <!-- Phase 2: Admin Override Section -->
-            <div v-if="isAdmin" class="mb-3 p-3 bg-amber-50 border-l-4 border-amber-500 rounded">
-              <div class="field-checkbox mb-2">
-                <Checkbox v-model="returnPolicyOverride" input-id="policy_override" binary />
-                <label for="policy_override" class="ml-2">
-                  <strong>Admin Override</strong> - Bypass return policy validation
-                </label>
-              </div>
-              <div v-if="returnPolicyOverride" class="field mb-0">
-                <label for="override_reason"
-                  >Override Reason <span class="text-red-500">*</span></label
-                >
+            <!-- Legacy Return Explanation (required for all users) -->
+            <div
+              v-if="isLegacyReturn"
+              class="mb-3 p-3 bg-amber-50 border-l-4 border-amber-500 rounded"
+            >
+              <div class="field mb-0">
+                <label for="legacy_reason">Explanation <span class="text-red-500">*</span></label>
                 <Textarea
-                  id="override_reason"
+                  id="legacy_reason"
                   v-model="returnPolicyOverrideReason"
                   rows="2"
-                  placeholder="Enter reason for policy override..."
+                  placeholder="Explain why this return has no purchase history (e.g., 'Purchase made before system implementation')"
                   class="w-full"
                 />
               </div>
@@ -1296,7 +1481,7 @@ onMounted(async () => {
     </TabView>
 
     <div class="form-actions">
-      <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="$emit('cancel')" />
+      <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="cancelForm" />
       <div class="flex flex-column align-items-end" style="flex: 1">
         <small v-if="hasInsufficientStock" class="p-error mb-2">
           Cannot submit: Some items have insufficient stock
@@ -1466,6 +1651,61 @@ onMounted(async () => {
           icon="pi pi-times"
           severity="secondary"
           @click="showPurchaseHistoryDialog = false"
+        />
+      </template>
+    </Dialog>
+
+    <!-- Legacy Return: Admin Password Dialog -->
+    <Dialog
+      v-model:visible="showAdminPasswordDialog"
+      modal
+      header="Admin Authorization Required"
+      :style="{ width: '500px' }"
+      :closable="true"
+    >
+      <div class="space-y-3">
+        <div class="bg-amber-50 border border-amber-300 rounded p-3">
+          <p class="text-amber-800 mb-2">
+            <i class="pi pi-exclamation-triangle mr-2" />
+            <strong>Legacy Return Detected</strong>
+          </p>
+          <p class="text-sm text-amber-700">
+            This return has no purchase history in the system. An admin must authorize this action
+            by entering their password.
+          </p>
+        </div>
+
+        <div class="field mb-0">
+          <label for="admin_password">Admin Password <span class="text-red-500">*</span></label>
+          <Password
+            id="admin_password"
+            v-model="adminPassword"
+            placeholder="Enter admin password"
+            :feedback="false"
+            toggle-mask
+            class="w-full"
+            @keyup.enter="verifyAdminPassword"
+          />
+          <small class="text-gray-600"
+            >Any admin can authorize this legacy return by entering their password</small
+          >
+        </div>
+      </div>
+
+      <template #footer>
+        <Button
+          label="Cancel"
+          icon="pi pi-times"
+          severity="secondary"
+          @click="showAdminPasswordDialog = false"
+        />
+        <Button
+          label="Authorize"
+          icon="pi pi-check"
+          severity="success"
+          :loading="verifyingPassword"
+          :disabled="!adminPassword.trim()"
+          @click="verifyAdminPassword"
         />
       </template>
     </Dialog>

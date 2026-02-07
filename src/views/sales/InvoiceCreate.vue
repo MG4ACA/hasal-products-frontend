@@ -60,6 +60,8 @@ const handleSubmit = async data => {
         original_invoice_id: item.original_invoice_id || null,
         return_policy_override: item.return_policy_override || false,
         return_policy_override_reason: item.return_policy_override_reason || null,
+        // Legacy Returns: Include admin_id for authorization tracking
+        admin_id: item.admin_id || null,
       })),
     };
 

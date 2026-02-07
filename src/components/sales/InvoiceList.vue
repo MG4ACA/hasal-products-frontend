@@ -130,12 +130,14 @@ const getPaymentMethodTag = method => {
             class="p-button-rounded p-button-text p-button-info"
             @click="emit('view', data.id)"
           />
+          <!-- Edit button disabled - backend only supports updating notes and payment_status
           <Button
             v-tooltip.top="'Edit'"
             icon="pi pi-pencil"
             class="p-button-rounded p-button-text"
             @click="emit('edit', data.id)"
           />
+          -->
           <Button
             v-tooltip.top="'Delete'"
             icon="pi pi-trash"

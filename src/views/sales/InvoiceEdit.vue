@@ -65,8 +65,8 @@ const loadInvoice = async () => {
       notes: invoice.notes || '',
       items: (invoice.items || []).map(item => ({
         sku_id: item.sku_id,
-        product_name: item.product_sku?.product?.name || 'Unknown Product',
-        sku_label: `${item.product_sku?.size}${item.product_sku?.unit}`,
+        product_name: item.sku?.product?.name || 'Unknown Product',
+        sku_label: `${item.sku?.size || ''}${item.sku?.unit || ''}`,
         quantity: item.is_return ? -item.quantity : item.quantity,
         unit_price: item.unit_price,
         discount_percent: item.discount_percent || 0,
