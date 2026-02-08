@@ -98,7 +98,12 @@ const getPaymentMethodTag = method => {
 
     <Column field="total_amount" header="Total" sortable>
       <template #body="{ data }">
-        <span class="font-semibold">{{ formatCurrency(data.total_amount) }}</span>
+        <div>
+          <span class="font-semibold">{{ formatCurrency(data.total_amount) }}</span>
+          <div v-if="data.discount_percent > 0" class="text-xs text-gray-500">
+            {{ data.discount_percent }}% invoice discount
+          </div>
+        </div>
       </template>
     </Column>
 

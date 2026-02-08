@@ -48,6 +48,8 @@ const handleSubmit = async data => {
       notes: data.notes,
       // Phase 1: Include credit limit override reason if provided
       credit_limit_override_reason: data.credit_limit_override_reason || null,
+      // Invoice-level discount
+      invoice_discount_percent: data.invoice_discount_percent || 0,
       items: data.items.map(item => ({
         sku_id: item.sku_id,
         quantity: item.is_return ? -Math.abs(item.quantity) : item.quantity,

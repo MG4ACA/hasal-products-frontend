@@ -394,9 +394,16 @@ onMounted(() => {
           </div>
 
           <div class="total-row">
-            <span class="total-label">Total Discount:</span>
+            <span class="total-label">Total Item Discount:</span>
             <span class="total-value text-red-500"
-              >-{{ formatCurrency(invoice.total_discount_amount) }}</span
+              >-{{ formatCurrency(invoice.discount_amount) }}</span
+            >
+          </div>
+
+          <div v-if="invoice.discount_percent > 0" class="total-row">
+            <span class="total-label">Invoice Discount ({{ invoice.discount_percent }}%):</span>
+            <span class="total-value text-red-500"
+              >-{{ formatCurrency(invoice.invoice_discount_amount) }}</span
             >
           </div>
 

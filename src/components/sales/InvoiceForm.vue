@@ -93,6 +93,10 @@ const showCreditLimitModal = ref(false);
 const creditOverrideReason = ref('');
 const CREDIT_WARNING_THRESHOLD = 0.8; // 80%
 
+// Invoice-level discount
+const invoiceDiscountPercent = ref(0);
+const MAX_INVOICE_DISCOUNT = 40; // Maximum 40% warning threshold
+
 // Computed
 const productOptions = computed(() => productStore.products || []);
 const employeeOptions = computed(() => {
@@ -140,7 +144,20 @@ const returnsTotal = computed(() => {
 });
 
 const grandTotal = computed(() => {
-  return subtotal.value - totalDiscount.value - returnsTotal.value;
+  const netAfterItemDiscounts = subtotal.value - totalDiscount.value;
+  const netAmount = netAfterItemDiscounts - returnsTotal.value;
+  const invoiceDiscount = netAmount > 0 ? (netAmount * (invoiceDiscountPercent.value || 0)) / 100 : 0;
+  return netAfterItemDiscounts - invoiceDiscount;
+});
+
+const invoiceDiscountAmount = computed(() => {
+  const netAfterItemDiscounts = subtotal.value - totalDiscount.value;
+  const netAmount = netAfterItemDiscounts - returnsTotal.value;
+  return netAmount > 0 ? (netAmount * (invoiceDiscountPercent.value || 0)) / 100 : 0;
+});
+
+const invoiceDiscountWarning = computed(() => {
+  return (invoiceDiscountPercent.value || 0) > MAX_INVOICE_DISCOUNT;
 });
 
 const isFormValid = computed(() => {
@@ -514,6 +531,9 @@ const handleSubmit = () => {
   // Clear legacy return authorization on submit
   adminAuthData.value = null;
 
+  // Include invoice discount in form data
+  formData.value.invoice_discount_percent = invoiceDiscountPercent.value || 0;
+
   emit('submit', formData.value);
 };
 
@@ -525,6 +545,7 @@ const handleAdminOverride = () => {
 
   // Add override reason to form data
   formData.value.credit_limit_override_reason = creditOverrideReason.value;
+  formData.value.invoice_discount_percent = invoiceDiscountPercent.value || 0;
 
   // Close modal and submit
   showCreditLimitModal.value = false;
@@ -591,9 +612,6 @@ const selectOriginalInvoice = invoice => {
     });
   }
 };
-
-// Phase 2: Computed - Check if user is admin
-const isAdmin = computed(() => authStore.user?.role === 'admin');
 
 // Phase 2: Computed - Get policy info for current return reason
 const currentReturnPolicy = computed(() => {
@@ -1444,6 +1462,38 @@ onMounted(async () => {
       <!-- Summary Tab -->
       <TabPanel header="Summary & Notes">
         <div class="summary-section">
+          <!-- Invoice Discount Input -->
+          <div class="mb-4 p-3 surface-ground border-round">
+            <label for="invoice_discount" class="font-semibold block mb-2">
+              Invoice Discount (%)
+              <span class="text-sm font-normal text-gray-500 ml-2">
+                Applied to net amount after item discounts and returns. Max recommended: 40%
+              </span>
+            </label>
+            <div class="flex align-items-center gap-3">
+              <InputNumber
+                id="invoice_discount"
+                v-model="invoiceDiscountPercent"
+                :min="0"
+                :max="100"
+                :min-fraction-digits="0"
+                :max-fraction-digits="2"
+                suffix="%"
+                class="w-12rem"
+              />
+              <span v-if="invoiceDiscountAmount > 0" class="text-sm">
+                = {{ formatCurrency(invoiceDiscountAmount) }} discount
+              </span>
+            </div>
+            <div
+              v-if="invoiceDiscountWarning"
+              class="mt-2 p-2 bg-orange-100 border-left-3 border-orange-500 border-round text-orange-800 text-sm"
+            >
+              <i class="pi pi-exclamation-triangle mr-1" />
+              Warning: Discount exceeds {{ MAX_INVOICE_DISCOUNT }}% of the invoice total. Please verify this is intentional.
+            </div>
+          </div>
+
           <div class="totals-grid">
             <div class="total-row">
               <span class="total-label">Subtotal (Sales):</span>
@@ -1451,8 +1501,13 @@ onMounted(async () => {
             </div>
 
             <div class="total-row">
-              <span class="total-label">Total Discount:</span>
+              <span class="total-label">Total Item Discount:</span>
               <span class="total-value text-red-500">-{{ formatCurrency(totalDiscount) }}</span>
+            </div>
+
+            <div v-if="invoiceDiscountAmount > 0" class="total-row">
+              <span class="total-label">Invoice Discount ({{ invoiceDiscountPercent }}%):</span>
+              <span class="total-value text-red-500">-{{ formatCurrency(invoiceDiscountAmount) }}</span>
             </div>
 
             <div v-if="returnsTotal > 0" class="total-row">
