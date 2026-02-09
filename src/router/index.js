@@ -84,6 +84,12 @@ const PaymentCreate = () => import('@/views/payments/PaymentCreate.vue');
 const PaymentDetails = () => import('@/views/payments/PaymentDetails.vue');
 const PendingChecks = () => import('@/views/payments/PendingChecks.vue');
 
+// Expense views
+const ExpenseIndex = () => import('@/views/expenses/ExpenseIndex.vue');
+const ExpenseCreate = () => import('@/views/expenses/ExpenseCreate.vue');
+const ExpenseEdit = () => import('@/views/expenses/ExpenseEdit.vue');
+const ExpenseReport = () => import('@/views/expenses/ExpenseReport.vue');
+
 // Report views
 const ProfitAnalysis = () => import('@/views/reports/ProfitAnalysis.vue');
 const WasteCostReport = () => import('@/views/reports/WasteCostReport.vue');
@@ -407,6 +413,30 @@ const routes = [
     path: '/payments/:id',
     name: 'PaymentDetails',
     component: PaymentDetails,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/expenses',
+    name: 'Expenses',
+    component: ExpenseIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/expenses/create',
+    name: 'ExpenseCreate',
+    component: ExpenseCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/expenses/edit/:id',
+    name: 'ExpenseEdit',
+    component: ExpenseEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/expenses/report',
+    name: 'ExpenseReport',
+    component: ExpenseReport,
     meta: { requiresAuth: true },
   },
   {
