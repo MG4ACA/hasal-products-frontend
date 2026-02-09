@@ -136,6 +136,27 @@
         </div>
       </div>
 
+      <!-- Wastage Tracking Section -->
+      <div class="menu-section">
+        <div class="menu-section-header" @click="toggleSection('wastage')">
+          <div class="section-title">
+            <i class="pi pi-exclamation-triangle" />
+            <span>Wastage Tracking</span>
+          </div>
+          <i :class="['pi', expanded.wastage ? 'pi-chevron-up' : 'pi-chevron-down']" />
+        </div>
+        <div v-show="expanded.wastage" class="menu-section-items">
+          <RouterLink to="/wastage" class="menu-item submenu-item">
+            <i class="pi pi-list" />
+            <span>Wastage Records</span>
+          </RouterLink>
+          <RouterLink to="/wastage/report" class="menu-item submenu-item">
+            <i class="pi pi-chart-bar" />
+            <span>Monthly Report</span>
+          </RouterLink>
+        </div>
+      </div>
+
       <!-- Reports Section -->
       <div class="menu-section">
         <div class="menu-section-header" @click="toggleSection('reports')">
@@ -173,6 +194,7 @@ const expanded = ref({
   salesDistribution: true, // Expanded by default
   administration: false,
   expenses: false,
+  wastage: false,
   reports: false,
 });
 
@@ -184,6 +206,7 @@ const toggleSection = section => {
 <style scoped>
 .sidebar {
   width: 250px;
+  min-width: 250px;
   background-color: #627d98;
   color: white;
   display: flex;

@@ -25,6 +25,7 @@ import Topbar from './Topbar.vue';
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 }
 
 .page-content {

@@ -90,6 +90,10 @@ const ExpenseCreate = () => import('@/views/expenses/ExpenseCreate.vue');
 const ExpenseEdit = () => import('@/views/expenses/ExpenseEdit.vue');
 const ExpenseReport = () => import('@/views/expenses/ExpenseReport.vue');
 
+// Wastage views
+const WastageIndex = () => import('@/views/wastage/WastageIndex.vue');
+const WastageReport = () => import('@/views/wastage/WastageReport.vue');
+
 // Report views
 const ProfitAnalysis = () => import('@/views/reports/ProfitAnalysis.vue');
 const WasteCostReport = () => import('@/views/reports/WasteCostReport.vue');
@@ -439,6 +443,20 @@ const routes = [
     component: ExpenseReport,
     meta: { requiresAuth: true },
   },
+  // Wastage Routes
+  {
+    path: '/wastage',
+    name: 'WastageIndex',
+    component: WastageIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/wastage/report',
+    name: 'WastageReport',
+    component: WastageReport,
+    meta: { requiresAuth: true },
+  },
+  // Report Routes
   {
     path: '/reports/profit-analysis',
     name: 'ProfitAnalysis',
