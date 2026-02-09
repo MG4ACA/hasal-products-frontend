@@ -767,6 +767,163 @@
 
 ---
 
+## 💰 Phase 3C: Expense Tracking Module (Week 10.5)
+
+### Expense Tracking Module - Backend
+
+#### Database Schema
+
+- [x] Create expense table migration (`migrations/20260209000000-create-expenses-table.js`)
+  - [x] expense_date (DATE) - Date of expense
+  - [x] category (ENUM) - 8 categories: vehicle_fuel, vehicle_repair, utility_bills, store_maintenance, equipment_repair, salaries, rent, other
+  - [x] amount (DECIMAL(10,2)) - Expense amount
+  - [x] description (TEXT) - Optional description
+  - [x] vehicle_id (FK) - Reference to vehicles (for vehicle-related expenses)
+  - [x] route_id (FK) - Reference to routes (for vehicle expenses)
+  - [x] distance_km (DECIMAL(10,2)) - Distance traveled (for fuel expenses)
+  - [x] created_by (FK) - User who created the expense
+  - [x] Indexes on expense_date, category, vehicle_id, route_id
+
+#### Backend API
+
+- [x] Create Expense model (`models/Expense.js`)
+  - [x] Define model with all fields and validations
+  - [x] Associations: belongsTo Vehicle, Route, User
+- [x] Create expense controller (`controllers/expenseController.js`)
+  - [x] GET `/api/expenses` - Get all expenses with filters (date, category, vehicle)
+  - [x] GET `/api/expenses/:id` - Get expense by ID
+  - [x] POST `/api/expenses` - Create new expense
+  - [x] PUT `/api/expenses/:id` - Update expense
+  - [x] DELETE `/api/expenses/:id` - Delete expense
+  - [x] GET `/api/expenses/summary/monthly` - Monthly summary by category
+  - [x] GET `/api/expenses/categories` - Get expense categories list
+- [x] Create expense routes (`routes/expenseRoutes.js`)
+- [x] Integrate routes in `app.js`
+- [x] Implement filtering logic (date range, category, vehicle)
+- [x] Implement monthly aggregation (total by category)
+- [x] Add authentication middleware
+- [x] Test all endpoints with Postman
+
+#### Backend Validations
+
+- [x] Expense date required
+- [x] Category required (one of 8 valid values)
+- [x] Amount required, positive, max 10 digits
+- [x] Vehicle required for vehicle_fuel and vehicle_repair categories
+- [x] Route optional for vehicle expenses
+- [x] Distance optional for fuel expenses
+
+### Expense Tracking Module - Frontend
+
+#### Frontend Implementation
+
+- [x] Create expense service (`services/expenseService.js`)
+  - [x] getAllExpenses(params) - Fetch with filters
+  - [x] getExpenseById(id) - Fetch single expense
+  - [x] createExpense(data) - Create new expense
+  - [x] updateExpense(id, data) - Update expense
+  - [x] deleteExpense(id) - Delete expense
+  - [x] getMonthlySummary(params) - Get monthly report
+  - [x] getCategories() - Get category list
+- [x] Create expense store (`stores/expense.js`)
+  - [x] State: expenses, loading, pagination, filters
+  - [x] Actions: fetch, create, update, delete, monthly summary
+  - [x] Implement filter state management
+- [x] Create ExpenseIndex view (`views/expenses/ExpenseIndex.vue`)
+  - [x] DataTable with columns: date, category, amount, vehicle, description
+  - [x] Filter panel: date range, category dropdown, vehicle dropdown
+  - [x] Action buttons: Create, Edit, Delete
+  - [x] Pagination
+  - [x] Category badges with severity colors
+- [x] Create ExpenseCreate view (`views/expenses/ExpenseCreate.vue`)
+  - [x] Form with fields: date, category, amount, description
+  - [x] Conditional vehicle/route/distance fields (show for vehicle categories)
+  - [x] Validation
+  - [x] Save and redirect
+- [x] Create ExpenseEdit view (`views/expenses/ExpenseEdit.vue`)
+  - [x] Pre-populated form
+  - [x] Same fields as create
+  - [x] Update and redirect
+- [x] Create ExpenseReport view (`views/expenses/ExpenseReport.vue`)
+  - [x] Date range selector (default: current month)
+  - [x] Summary cards: Total Expenses, Number of Expenses, Average
+  - [x] Category breakdown table with count, total, percentage
+  - [x] Visual category tags with colors
+- [x] Add routes to `router/index.js`
+  - [x] `/expenses` - List view
+  - [x] `/expenses/create` - Create form
+  - [x] `/expenses/:id/edit` - Edit form
+  - [x] `/expenses/report` - Monthly report
+- [x] Add "Expenses" menu item to Sidebar
+  - [x] Icon: pi-wallet
+  - [x] Submenu: Manage Expenses, Monthly Report
+
+#### Frontend Validations
+
+- [x] Required field validation (date, category, amount)
+- [x] Positive amount validation
+- [x] Vehicle required when category is vehicle_fuel or vehicle_repair
+- [x] Date format validation
+- [x] Numeric validation for amount and distance
+
+#### UI/UX Enhancements
+
+- [x] Category severity mapping for badges:
+  - vehicle_fuel: info (blue)
+  - vehicle_repair: warning (orange)
+  - utility_bills: success (green)
+  - store_maintenance: warning (orange)
+  - equipment_repair: danger (red)
+  - salaries: contrast (dark)
+  - rent: secondary (gray)
+  - other: secondary (gray)
+- [x] Conditional field display (vehicle fields only for vehicle expenses)
+- [x] Currency formatting (Rs. with 2 decimals)
+- [x] Date formatting (YYYY-MM-DD)
+- [x] Loading states and error handling
+- [x] Success/error toast notifications
+- [x] Confirmation dialogs for delete operations
+
+### Testing
+
+- [x] Create testing documentation (`mds/EXPENSE_TRACKING_TESTING.md`)
+  - [x] Test cases for CRUD operations
+  - [x] Test cases for filtering
+  - [x] Test cases for monthly reports
+  - [x] Test cases for validation
+  - [x] Test cases for user permissions
+  - [x] Test cases for vehicle integration
+  - [x] Test cases for data integrity
+  - [x] Test cases for UI/UX
+- [ ] Execute all test cases
+- [ ] Fix bugs found during testing
+- [ ] Performance testing with large datasets
+
+### Documentation Updates
+
+- [x] Update PROJECT_STRUCTURE.md with expense files
+- [x] Update IMPLEMENTATION_PLAN.md with expense module
+- [x] Create EXPENSE_TRACKING_TESTING.md
+- [ ] Update user manual with expense tracking section
+- [ ] Add expense API endpoints to Postman collection
+- [ ] Document expense workflow
+
+**Deliverable:** ✅ Complete Expense Tracking System (Backend & Frontend)  
+**Status:** Implementation Complete - Testing Pending  
+**Completion Date:** February 9, 2026  
+**Effort:** 12 hours
+
+**Key Features:**
+
+- Track company expenses across 8 categories
+- Vehicle integration for fuel and repair expenses
+- Monthly summary reports with category breakdown
+- Date range filtering
+- Full CRUD operations with validation
+- User tracking for audit trail
+
+---
+
 ### Week 10: Testing & Documentation Updates
 
 **Deliverable:** Payment and receivables management with check tracking  
@@ -929,10 +1086,12 @@
     - [ ] Route & outlet management
     - [ ] Employee management
     - [ ] Vehicle assignment
+    - [ ] Expense tracking and monthly reports
     - [ ] Reports
   - [ ] Cashier role guide:
     - [ ] Creating sales invoices
     - [ ] Recording payments
+    - [ ] Managing expenses
     - [ ] Viewing reports
   - [ ] Troubleshooting section
   - [ ] FAQ
@@ -982,10 +1141,12 @@
   - [ ] Employee & vehicle setup
   - [ ] Sales & invoicing
   - [ ] Payments
+  - [ ] Expense tracking & monthly reports
   - [ ] Reports
 - [ ] Cashier workflow demo (30 min):
   - [ ] Creating invoices
   - [ ] Recording payments
+  - [ ] Managing expenses
 - [ ] Hands-on practice (20 min)
 - [ ] Q&A (10 min)
 
@@ -1086,9 +1247,11 @@
 | --------- | -------------------------- | ------- |
 | 1         | Project Setup & Foundation | 35      |
 | 2         | Core Modules Development   | 115     |
-| 3         | Payments & Reporting       | 42      |
+| 3A        | Payments & Reporting       | 42      |
+| 3B        | Dashboard & Reports        | 16      |
+| 3C        | Expense Tracking Module    | 12      |
 | 4         | Testing & Deployment       | 40      |
-| **TOTAL** |                            | **232** |
+| **TOTAL** |                            | **260** |
 
 ### Key Milestones
 
@@ -1107,11 +1270,12 @@
 
 ## 🎯 Success Criteria
 
-- [ ] All 11 core modules fully functional
+- [ ] All core modules fully functional (12 modules including expense tracking)
 - [ ] Authentication and authorization working
 - [ ] All CRUD operations tested
 - [ ] Reports displaying accurate data
 - [ ] Invoice PDF generation working
+- [ ] Expense tracking with monthly reports functional
 - [ ] Database properly indexed and optimized
 - [ ] Application responsive on mobile/tablet
 - [ ] No critical bugs in production

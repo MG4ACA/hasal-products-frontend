@@ -68,6 +68,11 @@ hasal-pos-frontend/
 │   │   ├── vehicles/
 │   │   ├── sales/
 │   │   ├── payments/
+│   │   ├── expenses/
+│   │   │   ├── ExpenseIndex.vue
+│   │   │   ├── ExpenseCreate.vue
+│   │   │   ├── ExpenseEdit.vue
+│   │   │   └── ExpenseReport.vue
 │   │   └── reports/
 │   ├── stores/                    # Pinia stores
 │   │   ├── auth.js
@@ -82,6 +87,7 @@ hasal-pos-frontend/
 │   │   ├── vehicle.js
 │   │   ├── sales.js
 │   │   ├── payment.js
+│   │   ├── expense.js
 │   │   └── report.js
 │   ├── router/
 │   │   └── index.js               # Vue Router configuration
@@ -99,6 +105,7 @@ hasal-pos-frontend/
 │   │   ├── vehicleService.js
 │   │   ├── salesService.js
 │   │   ├── paymentService.js
+│   │   ├── expenseService.js
 │   │   └── reportService.js
 │   ├── utils/                     # Utility functions
 │   │   ├── validators.js          # Form validation helpers
@@ -158,6 +165,7 @@ hasal-pos-backend/
 │   │   ├── InvoiceItem.js
 │   │   ├── Payment.js
 │   │   ├── SupplierPayment.js
+│   │   ├── Expense.js
 │   │   └── StockAdjustment.js
 │   ├── controllers/               # Request handlers
 │   │   ├── authController.js
@@ -172,6 +180,7 @@ hasal-pos-backend/
 │   │   ├── vehicleController.js
 │   │   ├── salesController.js
 │   │   ├── paymentController.js
+│   │   ├── expenseController.js
 │   │   └── reportController.js
 │   ├── routes/                    # Express routes
 │   │   ├── index.js               # Route aggregator
@@ -187,6 +196,7 @@ hasal-pos-backend/
 │   │   ├── vehicleRoutes.js
 │   │   ├── salesRoutes.js
 │   │   ├── paymentRoutes.js
+│   │   ├── expenseRoutes.js
 │   │   └── reportRoutes.js
 │   ├── middleware/
 │   │   ├── auth.js                # JWT authentication middleware
@@ -331,8 +341,8 @@ const colors = {
 
 ```css
 /* Font Families */
---font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-  sans-serif;
+--font-family:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
 /* Font Sizes */
 --font-size-xs: 0.75rem; /* 12px */
@@ -390,7 +400,7 @@ const props = defineProps({
   mode: {
     type: String,
     default: 'view',
-    validator: (value) => ['view', 'edit'].includes(value),
+    validator: value => ['view', 'edit'].includes(value),
   },
 });
 
@@ -488,7 +498,7 @@ export const useSupplierStore = defineStore('supplier', () => {
   const error = ref(null);
 
   // Getters
-  const activeSuppliers = computed(() => suppliers.value.filter((s) => s.status === 'active'));
+  const activeSuppliers = computed(() => suppliers.value.filter(s => s.status === 'active'));
 
   const totalBalance = computed(() => suppliers.value.reduce((sum, s) => sum + s.balance, 0));
 
@@ -508,7 +518,7 @@ export const useSupplierStore = defineStore('supplier', () => {
     }
   };
 
-  const fetchSupplier = async (id) => {
+  const fetchSupplier = async id => {
     try {
       loading.value = true;
       const response = await supplierService.getById(id);
@@ -522,7 +532,7 @@ export const useSupplierStore = defineStore('supplier', () => {
     }
   };
 
-  const createSupplier = async (data) => {
+  const createSupplier = async data => {
     try {
       loading.value = true;
       const response = await supplierService.create(data);
@@ -540,7 +550,7 @@ export const useSupplierStore = defineStore('supplier', () => {
     try {
       loading.value = true;
       const response = await supplierService.update(id, data);
-      const index = suppliers.value.findIndex((s) => s.id === id);
+      const index = suppliers.value.findIndex(s => s.id === id);
       if (index !== -1) {
         suppliers.value[index] = response.data;
       }
@@ -553,11 +563,11 @@ export const useSupplierStore = defineStore('supplier', () => {
     }
   };
 
-  const deleteSupplier = async (id) => {
+  const deleteSupplier = async id => {
     try {
       loading.value = true;
       await supplierService.delete(id);
-      suppliers.value = suppliers.value.filter((s) => s.id !== id);
+      suppliers.value = suppliers.value.filter(s => s.id !== id);
     } catch (err) {
       error.value = err.message;
       throw err;
@@ -602,22 +612,22 @@ const api = axios.create({
 
 // Request interceptor - Add auth token
 api.interceptors.request.use(
-  (config) => {
+  config => {
     const token = sessionStorage.getItem('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // Response interceptor - Handle errors
 api.interceptors.response.use(
-  (response) => response.data, // Return only data
-  (error) => {
+  response => response.data, // Return only data
+  error => {
     if (error.response) {
       // Handle 401 - Unauthorized
       if (error.response.status === 401) {
@@ -865,7 +875,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'admin');
   const isCashier = computed(() => user.value?.role === 'cashier');
 
-  const login = async (credentials) => {
+  const login = async credentials => {
     const response = await authService.login(credentials);
 
     user.value = response.data.user;
@@ -971,7 +981,7 @@ exports.authorize = (...roles) => {
 
 ```javascript
 // utils/formatters.js
-export const formatCurrency = (amount) => {
+export const formatCurrency = amount => {
   return new Intl.NumberFormat('en-LK', {
     style: 'currency',
     currency: 'LKR',
@@ -1000,21 +1010,21 @@ export const formatNumber = (number, decimals = 2) => {
 };
 
 // utils/validators.js
-export const validateEmail = (email) => {
+export const validateEmail = email => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
 
-export const validatePhone = (phone) => {
+export const validatePhone = phone => {
   const re = /^0[0-9]{9}$/; // Sri Lankan phone format
   return re.test(phone);
 };
 
-export const validateRequired = (value) => {
+export const validateRequired = value => {
   return value !== null && value !== undefined && value !== '';
 };
 
-export const validateNumber = (value) => {
+export const validateNumber = value => {
   return !isNaN(parseFloat(value)) && isFinite(value);
 };
 
@@ -1062,7 +1072,7 @@ export const STATUS = {
 // utils/batchNumberGenerator.js
 const { RawMaterialBatch } = require('../models');
 
-exports.generateBatchNumber = async (materialCode) => {
+exports.generateBatchNumber = async materialCode => {
   const today = new Date();
   const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
 
@@ -1266,7 +1276,7 @@ export function usePagination(initialPage = 1, initialLimit = 10) {
 
   const totalPages = computed(() => Math.ceil(total.value / limit.value));
 
-  const onPageChange = (event) => {
+  const onPageChange = event => {
     page.value = event.page + 1;
     limit.value = event.rows;
   };
