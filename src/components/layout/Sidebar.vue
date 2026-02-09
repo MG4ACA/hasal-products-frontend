@@ -44,31 +44,6 @@
         </div>
       </div>
 
-      <!-- Supply Chain Section -->
-      <div class="menu-section">
-        <div class="menu-section-header" @click="toggleSection('supplyChain')">
-          <div class="section-title">
-            <i class="pi pi-shopping-bag" />
-            <span>Supply Chain</span>
-          </div>
-          <i :class="['pi', expanded.supplyChain ? 'pi-chevron-up' : 'pi-chevron-down']" />
-        </div>
-        <div v-show="expanded.supplyChain" class="menu-section-items">
-          <RouterLink to="/suppliers" class="menu-item submenu-item">
-            <i class="pi pi-shopping-bag" />
-            <span>Suppliers</span>
-          </RouterLink>
-          <RouterLink to="/raw-materials" class="menu-item submenu-item">
-            <i class="pi pi-box" />
-            <span>Raw Materials</span>
-          </RouterLink>
-          <RouterLink to="/purchase-orders" class="menu-item submenu-item">
-            <i class="pi pi-file-edit" />
-            <span>Purchase Orders</span>
-          </RouterLink>
-        </div>
-      </div>
-
       <!-- Production Section -->
       <div class="menu-section">
         <div class="menu-section-header" @click="toggleSection('production')">
@@ -90,6 +65,30 @@
           <RouterLink to="/production-runs" class="menu-item submenu-item">
             <i class="pi pi-cog" />
             <span>Production Runs</span>
+          </RouterLink>
+        </div>
+      </div>
+      <!-- Supply Chain Section -->
+      <div class="menu-section">
+        <div class="menu-section-header" @click="toggleSection('supplyChain')">
+          <div class="section-title">
+            <i class="pi pi-shopping-bag" />
+            <span>Supply Chain</span>
+          </div>
+          <i :class="['pi', expanded.supplyChain ? 'pi-chevron-up' : 'pi-chevron-down']" />
+        </div>
+        <div v-show="expanded.supplyChain" class="menu-section-items">
+          <RouterLink to="/suppliers" class="menu-item submenu-item">
+            <i class="pi pi-shopping-bag" />
+            <span>Suppliers</span>
+          </RouterLink>
+          <RouterLink to="/raw-materials" class="menu-item submenu-item">
+            <i class="pi pi-box" />
+            <span>Raw Materials</span>
+          </RouterLink>
+          <RouterLink to="/purchase-orders" class="menu-item submenu-item">
+            <i class="pi pi-file-edit" />
+            <span>Purchase Orders</span>
           </RouterLink>
         </div>
       </div>
@@ -235,7 +234,7 @@ const toggleSection = section => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   transition: all 0.3s ease;
