@@ -2,8 +2,8 @@
  * Category Options - Used across the application
  */
 export const CATEGORY_OPTIONS = [
-  { label: 'Spice', value: 'spice' },
-  { label: 'Packaging', value: 'packaging' },
+  { label: 'Hasal Products', value: 'hasal products' },
+  { label: 'Repacking', value: 'repacking' },
   { label: 'Other', value: 'other' },
 ];
 

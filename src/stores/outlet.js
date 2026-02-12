@@ -61,6 +61,27 @@ export const useOutletStore = defineStore('outlet', () => {
     }
   };
 
+  const fetchAllOutlets = async () => {
+    try {
+      const params = {
+        page: 1,
+        limit: 9999, // Large limit to get all outlets
+        search: '',
+        status: 'active',
+      };
+
+      const response = await outletService.getAll(params);
+
+      if (response.error) {
+        throw new Error(response.message);
+      }
+
+      return response.outlets;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const fetchOutletById = async id => {
     try {
       loading.value = true;
@@ -266,6 +287,7 @@ export const useOutletStore = defineStore('outlet', () => {
     creditOutlets,
     // Actions
     fetchOutlets,
+    fetchAllOutlets,
     fetchOutletById,
     createOutlet,
     updateOutlet,

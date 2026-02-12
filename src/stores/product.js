@@ -59,6 +59,27 @@ export const useProductStore = defineStore('product', () => {
     }
   };
 
+  const fetchAllProducts = async () => {
+    try {
+      const params = {
+        page: 1,
+        limit: 9999, // Large limit to get all products
+        search: '',
+        status: 'active',
+      };
+
+      const response = await productService.getAll(params);
+
+      if (response.error) {
+        throw new Error(response.message);
+      }
+
+      return response.data;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const fetchProductById = async id => {
     loading.value = true;
     error.value = null;
@@ -289,6 +310,7 @@ export const useProductStore = defineStore('product', () => {
     inactiveProducts,
     // Actions
     fetchProducts,
+    fetchAllProducts,
     fetchProductById,
     createProduct,
     updateProduct,

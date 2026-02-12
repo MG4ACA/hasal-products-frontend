@@ -12,14 +12,27 @@
         <!-- Outlet Selection -->
         <div class="field">
           <label>Select Outlet <span class="required">*</span></label>
-          <Dropdown
-            v-model="paymentData.outlet_id"
-            :options="outletStore.outlets"
-            option-label="name"
-            option-value="id"
-            placeholder="Select outlet"
-            @change="loadOutstandingInvoices"
-          />
+          <AutoComplete
+            v-model="selectedOutlet"
+            :suggestions="filteredOutletOptions"
+            field="label"
+            option-label="label"
+            placeholder="Search and select outlet"
+            class="w-full"
+            @complete="onSearchOutlets"
+            @item-select="onOutletSelect"
+          >
+            <template #option="slotProps">
+              <div>
+                <div class="font-semibold">
+                  {{ slotProps.option.outlet.name }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ slotProps.option.outlet.code }} - {{ slotProps.option.outlet.address }}
+                </div>
+              </div>
+            </template>
+          </AutoComplete>
         </div>
 
         <!-- Payment Details -->
@@ -207,6 +220,11 @@ const selectedInvoices = ref([]);
 const allocations = ref({});
 const totalPaymentAmount = ref(0);
 
+// Outlet autocomplete
+const selectedOutlet = ref(null);
+const outletOptions = ref([]);
+const filteredOutletOptions = ref([]);
+
 const totalOutstanding = computed(() => {
   return outstandingInvoices.value.reduce(
     (sum, inv) => sum + parseFloat(inv.outstanding_amount || 0),
@@ -244,6 +262,25 @@ const isFormValid = computed(() => {
 
   return Object.keys(allocations.value).some(id => allocations.value[id] > 0);
 });
+
+const onSearchOutlets = event => {
+  const query = event.query.toLowerCase();
+  if (!query) {
+    filteredOutletOptions.value = outletOptions.value;
+  } else {
+    filteredOutletOptions.value = outletOptions.value.filter(outlet =>
+      outlet.label.toLowerCase().includes(query)
+    );
+  }
+};
+
+const onOutletSelect = event => {
+  if (event.value) {
+    selectedOutlet.value = event.value;
+    paymentData.value.outlet_id = event.value.value;
+    loadOutstandingInvoices();
+  }
+};
 
 const loadOutstandingInvoices = async () => {
   if (!paymentData.value.outlet_id) return;
@@ -323,7 +360,14 @@ watch(selectedInvoices, newSelection => {
 });
 
 onMounted(async () => {
-  await outletStore.fetchOutlets();
+  // Load all outlets for autocomplete
+  const allOutlets = await outletStore.fetchAllOutlets();
+  outletOptions.value = allOutlets.map(o => ({
+    label: `${o.name} (${o.code})`,
+    value: o.id,
+    outlet: o,
+  }));
+  filteredOutletOptions.value = outletOptions.value;
 });
 </script>
 

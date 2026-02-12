@@ -66,6 +66,9 @@
 .p-button-text {
   color: var(--primary-dark);
 }
+.p-selectbutton .p-button.p-highlight {
+  color: var(--primary-color) !important;
+}
 .p-icon-field > .p-input-icon {
   margin-top: -0.5rem !important;
 }

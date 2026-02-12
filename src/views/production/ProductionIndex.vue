@@ -45,13 +45,14 @@
               placeholder="Filter by Status"
               @change="onStatusChange"
             />
-            <Dropdown
-              v-model="filters.product_id"
-              :options="productOptions"
+            <AutoComplete
+              v-model="selectedProduct"
+              :suggestions="filteredProductOptions"
+              field="label"
               option-label="label"
-              option-value="value"
-              placeholder="Filter by Product"
-              @change="onProductChange"
+              placeholder="Search and filter by Product"
+              @complete="onSearchProducts"
+              @item-select="onProductSelect"
             />
             <Dropdown
               v-model="filters.recipe_id"
@@ -128,6 +129,8 @@ const confirm = useConfirm();
 
 const loading = ref(false);
 const productOptions = ref([]);
+const filteredProductOptions = ref([]);
+const selectedProduct = ref(null);
 const recipeOptions = ref([]);
 const filters = reactive({
   search: '',
@@ -161,6 +164,7 @@ const clearFilters = async () => {
   filters.status = '';
   filters.product_id = '';
   filters.recipe_id = '';
+  selectedProduct.value = null;
   filters.page = 1;
   await productionStore.clearFilters();
 };
@@ -183,13 +187,33 @@ onMounted(() => {
   Promise.all([fetchData(), loadProducts(), loadRecipes()]);
 });
 
+const onSearchProducts = event => {
+  const query = event.query.toLowerCase();
+  if (!query) {
+    filteredProductOptions.value = productOptions.value;
+  } else {
+    filteredProductOptions.value = productOptions.value.filter(product =>
+      product.label.toLowerCase().includes(query)
+    );
+  }
+};
+
+const onProductSelect = event => {
+  if (event.value) {
+    selectedProduct.value = event.value;
+    filters.product_id = event.value.value;
+    onProductChange();
+  }
+};
+
 const loadProducts = async () => {
   try {
-    await productStore.fetchProducts();
-    productOptions.value = productStore.products.map(p => ({
+    const allProducts = await productStore.fetchAllProducts();
+    productOptions.value = allProducts.map(p => ({
       label: `${p.code} - ${p.name}`,
       value: p.id,
     }));
+    filteredProductOptions.value = productOptions.value;
   } catch (err) {
     console.error('Failed to load products:', err);
   }

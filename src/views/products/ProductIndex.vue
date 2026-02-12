@@ -160,6 +160,8 @@ const fetchData = async () => {
   try {
     await productStore.fetchProducts();
     pagination.value = productStore.pagination;
+    // Sync local filters with store
+    filters.page = productStore.pagination.page;
   } catch (err) {
     showError(err.message || 'Failed to load products');
   } finally {
@@ -173,8 +175,9 @@ const handleRefresh = () => {
 };
 
 const onPageChange = event => {
-  filters.page = event.page + 1;
-  fetchData();
+  const newPage = event.page + 1;
+  filters.page = newPage;
+  productStore.setPage(newPage);
 };
 
 const navigateToCreate = () => {

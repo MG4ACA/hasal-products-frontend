@@ -144,10 +144,23 @@ export const useSupplierStore = defineStore('supplier', () => {
         throw new Error(response.message);
       }
 
-      suppliers.value = suppliers.value.filter(s => s.id !== id);
-      if (currentSupplier.value?.id === id) {
-        currentSupplier.value = null;
+      // If hard deleted (deleted: true), remove from array
+      if (response.deleted) {
+        suppliers.value = suppliers.value.filter(s => s.id !== id);
+        if (currentSupplier.value?.id === id) {
+          currentSupplier.value = null;
+        }
+      } else {
+        // If soft deleted (deleted: false), update status to inactive
+        const supplier = suppliers.value.find(s => s.id === id);
+        if (supplier) {
+          supplier.status = 'inactive';
+        }
+        if (currentSupplier.value?.id === id) {
+          currentSupplier.value.status = 'inactive';
+        }
       }
+
       return response;
     } catch (err) {
       error.value = err.message || 'Failed to delete supplier';

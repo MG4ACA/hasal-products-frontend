@@ -14,6 +14,7 @@ import App from './App.vue';
 import router from './router';
 
 // PrimeVue components
+import AutoComplete from 'primevue/autocomplete';
 import Avatar from 'primevue/avatar';
 import Badge from 'primevue/badge';
 import BadgeDirective from 'primevue/badgedirective';
@@ -64,6 +65,7 @@ app.use(ConfirmationService);
 app.directive('tooltip', Tooltip);
 
 // Register PrimeVue components
+app.component('AutoComplete', AutoComplete);
 app.component('Button', Button);
 app.component('InputText', InputText);
 app.component('InputNumber', InputNumber);

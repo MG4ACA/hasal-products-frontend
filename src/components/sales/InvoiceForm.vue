@@ -37,6 +37,10 @@ const paymentMethodOptions = [
   { label: 'Check', value: 'check' },
 ];
 
+const outletOptions = ref([]);
+const filteredOutletOptions = ref([]);
+const selectedOutlet = ref(null);
+
 const returnReasonOptions = [
   { label: 'Damaged', value: 'damaged' },
   { label: 'Expired', value: 'expired' },
@@ -116,11 +120,6 @@ const returnSkuOptions = computed(() => {
   return product?.skus || [];
 });
 
-const selectedOutlet = computed(() => {
-  if (!formData.value.outlet_id) return null;
-  return outletStore.outlets.find(o => o.id === formData.value.outlet_id);
-});
-
 const subtotal = computed(() => {
   return (formData.value.items || []).reduce((sum, item) => {
     if (item.is_return) return sum;
@@ -146,7 +145,8 @@ const returnsTotal = computed(() => {
 const grandTotal = computed(() => {
   const netAfterItemDiscounts = subtotal.value - totalDiscount.value;
   const netAmount = netAfterItemDiscounts - returnsTotal.value;
-  const invoiceDiscount = netAmount > 0 ? (netAmount * (invoiceDiscountPercent.value || 0)) / 100 : 0;
+  const invoiceDiscount =
+    netAmount > 0 ? (netAmount * (invoiceDiscountPercent.value || 0)) / 100 : 0;
   return netAfterItemDiscounts - invoiceDiscount;
 });
 
@@ -218,8 +218,15 @@ const checkCreditLimit = () => {
     return;
   }
 
-  const currentBalance = parseFloat(selectedOutlet.value.balance || 0);
-  const creditLimit = parseFloat(selectedOutlet.value.credit_limit || 0);
+  const outlet = selectedOutlet.value?.outlet;
+  if (!outlet) {
+    creditWarning.value = null;
+    showCreditWarningBanner.value = false;
+    return;
+  }
+
+  const currentBalance = parseFloat(outlet.balance || 0);
+  const creditLimit = parseFloat(outlet.credit_limit || 0);
   const invoiceAmount = grandTotal.value;
   const potentialBalance = currentBalance + invoiceAmount;
   const utilizationPercent = creditLimit > 0 ? (potentialBalance / creditLimit) * 100 : 0;
@@ -248,8 +255,9 @@ watch(selectedSku, newSku => {
     if (sku) {
       itemPrice.value = parseFloat(sku.price) || 0;
       // Apply outlet default discount if available
-      if (selectedOutlet.value && selectedOutlet.value.default_discount) {
-        itemDiscount.value = parseFloat(selectedOutlet.value.default_discount) || 0;
+      const outlet = selectedOutlet.value?.outlet;
+      if (outlet && outlet.default_discount) {
+        itemDiscount.value = parseFloat(outlet.default_discount) || 0;
       }
       // Validate stock when SKU changes
       validateStock();
@@ -303,14 +311,34 @@ watch(returnSku, newSku => {
 });
 
 // Methods
+const onSearchOutlets = event => {
+  const query = event.query.toLowerCase();
+  if (!query) {
+    filteredOutletOptions.value = outletOptions.value;
+  } else {
+    filteredOutletOptions.value = outletOptions.value.filter(outlet =>
+      outlet.label.toLowerCase().includes(query)
+    );
+  }
+};
+
+const onOutletSelect = event => {
+  if (event.value) {
+    selectedOutlet.value = event.value;
+    formData.value.outlet_id = event.value.value;
+    onOutletChange();
+  }
+};
+
 const onOutletChange = () => {
-  if (selectedOutlet.value) {
+  const outlet = selectedOutlet.value?.outlet;
+  if (outlet) {
     // Auto-populate Route
-    if (selectedOutlet.value.route_id) {
-      formData.value.route_id = selectedOutlet.value.route_id;
+    if (outlet.route_id) {
+      formData.value.route_id = outlet.route_id;
 
       // Auto-populate Sales Reference based on Route
-      const route = routeStore.routes.find(r => r.id === selectedOutlet.value.route_id);
+      const route = routeStore.routes.find(r => r.id === outlet.route_id);
       if (route && route.sales_ref_id) {
         formData.value.sales_ref_id = route.sales_ref_id;
       } else if (!route) {
@@ -725,8 +753,24 @@ watch(isLegacyReturn, newValue => {
 
 // Load data on mount
 onMounted(async () => {
+  // Load all outlets for dropdown
+  const allOutlets = await outletStore.fetchAllOutlets();
+  outletOptions.value = allOutlets.map(o => ({
+    label: `${o.name} (${o.code})`,
+    value: o.id,
+    outlet: o,
+  }));
+  filteredOutletOptions.value = outletOptions.value;
+
+  // Initialize selected outlet if already set
+  if (formData.value.outlet_id) {
+    const outlet = outletOptions.value.find(o => o.value === formData.value.outlet_id);
+    if (outlet) {
+      selectedOutlet.value = outlet;
+    }
+  }
+
   await Promise.all([
-    outletStore.fetchOutlets({ status: 'active' }),
     (async () => {
       employeeStore.setFilters({ type: 'sales_ref', status: 'active' });
       await employeeStore.fetchEmployees();
@@ -745,35 +789,28 @@ onMounted(async () => {
         <div class="form-grid">
           <div class="field">
             <label for="outlet">Outlet *</label>
-            <Dropdown
+            <AutoComplete
               id="outlet"
-              v-model="formData.outlet_id"
-              :options="outletStore.outlets"
-              option-label="name"
-              option-value="id"
-              placeholder="Select Outlet"
-              :filter="true"
+              v-model="selectedOutlet"
+              :suggestions="filteredOutletOptions"
+              field="label"
+              option-label="label"
+              placeholder="Search and select outlet"
               class="w-full"
-              @change="onOutletChange"
+              @complete="onSearchOutlets"
+              @item-select="onOutletSelect"
             >
-              <template #value="slotProps">
-                <div v-if="slotProps.value">
-                  {{ outletStore.outlets.find(o => o.id === slotProps.value)?.name }}
-                  ({{ outletStore.outlets.find(o => o.id === slotProps.value)?.code }})
-                </div>
-                <span v-else>{{ slotProps.placeholder }}</span>
-              </template>
               <template #option="slotProps">
                 <div>
                   <div class="font-semibold">
-                    {{ slotProps.option.name }}
+                    {{ slotProps.option.outlet.name }}
                   </div>
                   <div class="text-sm text-gray-500">
-                    {{ slotProps.option.code }} - {{ slotProps.option.address }}
+                    {{ slotProps.option.outlet.code }} - {{ slotProps.option.outlet.address }}
                   </div>
                 </div>
               </template>
-            </Dropdown>
+            </AutoComplete>
           </div>
 
           <div class="field">
@@ -1490,7 +1527,8 @@ onMounted(async () => {
               class="mt-2 p-2 bg-orange-100 border-left-3 border-orange-500 border-round text-orange-800 text-sm"
             >
               <i class="pi pi-exclamation-triangle mr-1" />
-              Warning: Discount exceeds {{ MAX_INVOICE_DISCOUNT }}% of the invoice total. Please verify this is intentional.
+              Warning: Discount exceeds {{ MAX_INVOICE_DISCOUNT }}% of the invoice total. Please
+              verify this is intentional.
             </div>
           </div>
 
@@ -1507,7 +1545,9 @@ onMounted(async () => {
 
             <div v-if="invoiceDiscountAmount > 0" class="total-row">
               <span class="total-label">Invoice Discount ({{ invoiceDiscountPercent }}%):</span>
-              <span class="total-value text-red-500">-{{ formatCurrency(invoiceDiscountAmount) }}</span>
+              <span class="total-value text-red-500"
+                >-{{ formatCurrency(invoiceDiscountAmount) }}</span
+              >
             </div>
 
             <div v-if="returnsTotal > 0" class="total-row">

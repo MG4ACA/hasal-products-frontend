@@ -41,15 +41,16 @@
               @change="onStatusChange"
             />
             <div class="">
-              <Dropdown
-                v-model="filters.product"
-                :options="productOptions"
+              <AutoComplete
+                v-model="selectedProduct"
+                :suggestions="filteredProductOptions"
+                field="label"
                 option-label="label"
-                option-value="value"
-                placeholder="Filter by Product"
+                placeholder="Search and filter by Product"
                 class="w-full"
                 :loading="loadingProducts"
-                @change="handleProductFilter"
+                @complete="onSearchProducts"
+                @item-select="onProductSelect"
               />
             </div>
             <Avatar
@@ -117,6 +118,9 @@ const confirm = useConfirm();
 
 const loading = ref(false);
 const loadingProducts = ref(false);
+const productOptions = ref([{ label: 'All Products', value: '' }]);
+const filteredProductOptions = ref([{ label: 'All Products', value: '' }]);
+const selectedProduct = ref(null);
 const filters = reactive({
   search: '',
   status: '',
@@ -141,6 +145,7 @@ const clearFilters = async () => {
   filters.search = '';
   filters.status = '';
   filters.product = '';
+  selectedProduct.value = null;
   filters.page = 1;
   await recipeStore.clearFilters();
 };
@@ -157,8 +162,6 @@ const statusOptions = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
 ];
-
-const productOptions = ref([{ label: 'All Products', value: '' }]);
 
 onMounted(async () => {
   fetchData();
@@ -191,17 +194,37 @@ const fetchData = async () => {
   }
 };
 
+const onSearchProducts = event => {
+  const query = event.query.toLowerCase();
+  if (!query) {
+    filteredProductOptions.value = productOptions.value;
+  } else {
+    filteredProductOptions.value = productOptions.value.filter(product =>
+      product.label.toLowerCase().includes(query)
+    );
+  }
+};
+
+const onProductSelect = event => {
+  if (event.value) {
+    selectedProduct.value = event.value;
+    filters.product = event.value.value;
+    handleProductFilter();
+  }
+};
+
 const loadProducts = async () => {
   loadingProducts.value = true;
   try {
-    await productStore.fetchProducts();
+    const allProducts = await productStore.fetchAllProducts();
     productOptions.value = [
       { label: 'All Products', value: '' },
-      ...productStore.products.map(p => ({
+      ...allProducts.map(p => ({
         label: `${p.code} - ${p.name}`,
         value: p.id,
       })),
     ];
+    filteredProductOptions.value = productOptions.value;
   } catch (error) {
     console.error('Failed to load products');
   } finally {
