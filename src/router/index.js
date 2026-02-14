@@ -95,9 +95,17 @@ const WastageIndex = () => import('@/views/wastage/WastageIndex.vue');
 const WastageReport = () => import('@/views/wastage/WastageReport.vue');
 
 // Report views
+const ReportsIndex = () => import('@/views/reports/ReportsIndex.vue');
 const ProfitAnalysis = () => import('@/views/reports/ProfitAnalysis.vue');
 const WasteCostReport = () => import('@/views/reports/WasteCostReport.vue');
 const EfficiencyReport = () => import('@/views/reports/EfficiencyReport.vue');
+const SalesReport = () => import('@/views/reports/SalesReport.vue');
+const PaymentCollectionReport = () => import('@/views/reports/PaymentCollectionReport.vue');
+const SupplierPaymentReport = () => import('@/views/reports/SupplierPaymentReport.vue');
+const OutletBalanceReport = () => import('@/views/reports/OutletBalanceReport.vue');
+const CheckStatusReport = () => import('@/views/reports/CheckStatusReport.vue');
+const InventoryReport = () => import('@/views/reports/InventoryReport.vue');
+const ProductionReport = () => import('@/views/reports/ProductionReport.vue');
 
 const routes = [
   {
@@ -457,6 +465,54 @@ const routes = [
     meta: { requiresAuth: true },
   },
   // Report Routes
+  {
+    path: '/reports',
+    name: 'ReportsIndex',
+    component: ReportsIndex,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/sales',
+    name: 'SalesReport',
+    component: SalesReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/payments',
+    name: 'PaymentCollectionReport',
+    component: PaymentCollectionReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/supplier-payments',
+    name: 'SupplierPaymentReport',
+    component: SupplierPaymentReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/outlet-balance',
+    name: 'OutletBalanceReport',
+    component: OutletBalanceReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/check-status',
+    name: 'CheckStatusReport',
+    component: CheckStatusReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/inventory',
+    name: 'InventoryReport',
+    component: InventoryReport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reports/production',
+    name: 'ProductionReport',
+    component: ProductionReport,
+    meta: { requiresAuth: true },
+  },
   {
     path: '/reports/profit-analysis',
     name: 'ProfitAnalysis',

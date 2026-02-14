@@ -336,7 +336,7 @@ const loadEfficiencyReport = async () => {
 
     efficiencyData.value = await productionService.getEfficiencyReport(params);
   } catch (error) {
-    toast.error('Failed to load efficiency report');
+    toast.showError('Failed to load efficiency report');
   } finally {
     loading.value = false;
   }

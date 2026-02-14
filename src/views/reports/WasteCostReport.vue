@@ -201,7 +201,7 @@ const loadWasteReport = async () => {
 
     wasteData.value = await productionService.getWasteCostReport(params);
   } catch (error) {
-    toast.error('Failed to load waste cost report');
+    toast.showError('Failed to load waste cost report');
   } finally {
     loading.value = false;
   }

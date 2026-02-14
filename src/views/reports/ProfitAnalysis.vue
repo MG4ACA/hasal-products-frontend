@@ -173,7 +173,7 @@
 
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
-import productService from '@/services/productService';
+import { productService } from '@/services/productService';
 import { FilterMatchMode } from 'primevue/api';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -227,7 +227,7 @@ const loadProfitData = async () => {
   try {
     profitData.value = await productService.getProfitSummary();
   } catch (error) {
-    toast.error('Failed to load profit analysis');
+    toast.showError('Failed to load profit analysis');
   } finally {
     loading.value = false;
   }

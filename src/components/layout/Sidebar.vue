@@ -161,22 +161,57 @@
         <div class="menu-section-header" @click="toggleSection('reports')">
           <div class="section-title">
             <i class="pi pi-chart-line" />
-            <span>Reports</span>
+            <span>Reports & Analytics</span>
           </div>
           <i :class="['pi', expanded.reports ? 'pi-chevron-up' : 'pi-chevron-down']" />
         </div>
         <div v-show="expanded.reports" class="menu-section-items">
+          <RouterLink to="/reports" class="menu-item submenu-item">
+            <i class="pi pi-th-large" />
+            <span>All Reports Hub</span>
+          </RouterLink>
+          <div class="submenu-divider" />
+          <RouterLink to="/reports/sales" class="menu-item submenu-item">
+            <i class="pi pi-chart-bar" />
+            <span>Sales Report</span>
+          </RouterLink>
+          <RouterLink to="/reports/payments" class="menu-item submenu-item">
+            <i class="pi pi-money-bill" />
+            <span>Payment Collection</span>
+          </RouterLink>
           <RouterLink to="/reports/profit-analysis" class="menu-item submenu-item">
-            <i class="pi pi-chart-line" />
+            <i class="pi pi-wallet" />
             <span>Profit Analysis</span>
+          </RouterLink>
+          <div class="submenu-divider" />
+          <RouterLink to="/reports/outlet-balance" class="menu-item submenu-item">
+            <i class="pi pi-building" />
+            <span>Outlet Balance</span>
+          </RouterLink>
+          <RouterLink to="/reports/check-status" class="menu-item submenu-item">
+            <i class="pi pi-credit-card" />
+            <span>Check Status</span>
+          </RouterLink>
+          <RouterLink to="/reports/supplier-payments" class="menu-item submenu-item">
+            <i class="pi pi-users" />
+            <span>Supplier Payments</span>
+          </RouterLink>
+          <div class="submenu-divider" />
+          <RouterLink to="/reports/inventory" class="menu-item submenu-item">
+            <i class="pi pi-database" />
+            <span>Inventory Valuation</span>
+          </RouterLink>
+          <RouterLink to="/reports/production" class="menu-item submenu-item">
+            <i class="pi pi-cog" />
+            <span>Production Report</span>
           </RouterLink>
           <RouterLink to="/reports/waste-cost" class="menu-item submenu-item">
             <i class="pi pi-exclamation-triangle" />
             <span>Waste Cost</span>
           </RouterLink>
           <RouterLink to="/reports/efficiency" class="menu-item submenu-item">
-            <i class="pi pi-chart-bar" />
-            <span>Efficiency</span>
+            <i class="pi pi-chart-line" />
+            <span>Production Efficiency</span>
           </RouterLink>
         </div>
       </div>
@@ -296,6 +331,12 @@ const toggleSection = section => {
 
 .submenu-item i {
   font-size: 1rem;
+}
+
+.submenu-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 0.5rem 1.5rem;
 }
 
 /* Hide sidebar when printing */
