@@ -22,6 +22,10 @@ export const useOutletStore = defineStore('outlet', () => {
     status: '',
     route_id: '',
   });
+  const sorting = ref({
+    sortField: 'id',
+    sortOrder: 'DESC',
+  });
 
   // Getters
   const activeOutlets = computed(() => outlets.value.filter(o => o.status === 'active'));
@@ -41,6 +45,8 @@ export const useOutletStore = defineStore('outlet', () => {
         search: filters.value.search,
         status: filters.value.status,
         route_id: filters.value.route_id,
+        sortField: sorting.value.sortField,
+        sortOrder: sorting.value.sortOrder,
       };
 
       const response = await outletService.getAll(params);
@@ -262,6 +268,13 @@ export const useOutletStore = defineStore('outlet', () => {
     fetchOutlets();
   };
 
+  const setSorting = (sortField, sortOrder) => {
+    sorting.value.sortField = sortField;
+    sorting.value.sortOrder = sortOrder;
+    pagination.value.page = 1;
+    fetchOutlets();
+  };
+
   const clearCurrentOutlet = () => {
     currentOutlet.value = null;
     outletBalance.value = null;
@@ -280,6 +293,7 @@ export const useOutletStore = defineStore('outlet', () => {
     error,
     pagination,
     filters,
+    sorting,
     // Getters
     activeOutlets,
     inactiveOutlets,
@@ -300,5 +314,6 @@ export const useOutletStore = defineStore('outlet', () => {
     setFilters,
     clearFilters,
     clearCurrentOutlet,
+    setSorting,
   };
 });

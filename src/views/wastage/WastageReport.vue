@@ -361,13 +361,14 @@ onMounted(() => {
 
 .month-selector {
   display: flex;
+  justify-content: flex-end;
   gap: 1rem;
   align-items: end;
 }
 
 .selector-group {
-  flex: 1;
-  max-width: 200px;
+  /* flex: 1;
+  max-width: 200px; */
 }
 
 .selector-group label {

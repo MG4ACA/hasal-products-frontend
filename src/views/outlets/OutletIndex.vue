@@ -131,6 +131,12 @@ const confirmDelete = outlet => {
   });
 };
 
+const onSort = event => {
+  const sortField = event.sortField;
+  const sortOrder = event.sortOrder === 1 ? 'ASC' : 'DESC';
+  outletStore.setSorting(sortField, sortOrder);
+};
+
 onMounted(() => {
   loadRoutes();
   fetchData();
@@ -208,6 +214,7 @@ onMounted(() => {
           @view="viewOutlet"
           @edit="editOutlet"
           @delete="confirmDelete"
+          @sort="onSort"
         />
       </template>
     </Card>

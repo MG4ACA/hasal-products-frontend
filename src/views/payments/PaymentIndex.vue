@@ -23,16 +23,18 @@
     <!-- Filters -->
     <div class="filters-section">
       <div class="filter-grid">
-        <div class="filter-item">
+        <div class="filter-item filter-item-wide">
           <label>Outlet</label>
-          <Dropdown
-            v-model="filters.outlet_id"
-            :options="outletOptions"
-            option-label="name"
-            option-value="id"
-            placeholder="All Outlets"
+          <AutoComplete
+            v-model="selectedOutlet"
+            :suggestions="filteredOutletOptions"
+            field="label"
+            option-label="label"
+            placeholder="Search and select outlet"
+            class="w-full"
             show-clear
-            @change="fetchPayments"
+            @complete="onSearchOutlets"
+            @change="onOutletSelect"
           />
         </div>
 
@@ -252,11 +254,38 @@ const clearFilters = async () => {
 const paginatorFirst = ref(0);
 
 // Options
-const outletOptions = computed(() => outletStore.outlets);
+const outletOptions = ref([]);
+const filteredOutletOptions = ref([]);
+const selectedOutlet = ref(null);
 
 const paymentMethodOptions = ref(['cash', 'bank_transfer', 'check']);
 
 const checkStatusOptions = ref(['pending', 'cleared', 'overdue']);
+
+// Outlet search methods
+const onSearchOutlets = event => {
+  const query = event.query.toLowerCase();
+  if (!query) {
+    filteredOutletOptions.value = outletOptions.value;
+  } else {
+    filteredOutletOptions.value = outletOptions.value.filter(outlet =>
+      outlet.label.toLowerCase().includes(query)
+    );
+  }
+};
+
+const onOutletSelect = event => {
+  if (event.value) {
+    selectedOutlet.value = event.value;
+    filters.value.outlet_id = event.value.value;
+    fetchPayments();
+  } else {
+    // Handle clear
+    selectedOutlet.value = null;
+    filters.value.outlet_id = null;
+    fetchPayments();
+  }
+};
 
 // Clear check dialog
 const showClearDialog = ref(false);
@@ -374,7 +403,23 @@ const getPaymentMethodSeverity = method => {
 };
 
 onMounted(async () => {
-  await outletStore.fetchOutlets();
+  // Load all outlets for autocomplete
+  const allOutlets = await outletStore.fetchAllOutlets();
+  outletOptions.value = allOutlets.map(o => ({
+    label: `${o.name} (${o.code})`,
+    value: o.id,
+    outlet: o,
+  }));
+  filteredOutletOptions.value = outletOptions.value;
+
+  // Initialize selected outlet if already set
+  if (filters.value.outlet_id) {
+    const outlet = outletOptions.value.find(o => o.value === filters.value.outlet_id);
+    if (outlet) {
+      selectedOutlet.value = outlet;
+    }
+  }
+
   await fetchPayments();
 });
 </script>
@@ -406,9 +451,19 @@ onMounted(async () => {
 }
 
 .filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
   gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-item-wide {
+  flex: 1.5;
 }
 
 .filter-item label {

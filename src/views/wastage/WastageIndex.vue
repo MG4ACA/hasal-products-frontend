@@ -3,78 +3,81 @@
     <div class="page-header">
       <div class="header-left">
         <h1>Wastage Tracking</h1>
-        <p class="subtitle">Track inventory wastage from expiry, damage, and other causes</p>
+        <p class="text-muted">Track inventory wastage from expiry, damage, and other causes</p>
       </div>
       <div class="header-actions">
+        <Button
+          v-tooltip="'Refresh'"
+          icon="pi pi-refresh"
+          rounded
+          severity="primary"
+          @click="wastageStore.fetchWastageRecords()"
+        />
         <Button label="Record Wastage" icon="pi pi-plus" @click="showRecordDialog = true" />
       </div>
     </div>
 
     <!-- Filters -->
-    <Card class="filters-card">
-      <template #content>
-        <div class="filters-grid">
-          <div class="filter-group">
-            <label>Wastage Type</label>
-            <Dropdown
-              v-model="filters.wastage_type"
-              :options="wastageTypes"
-              option-label="label"
-              option-value="value"
-              placeholder="All Types"
-              show-clear
-              @change="applyFilters"
-            />
-          </div>
-
-          <div class="filter-group">
-            <label>Item Type</label>
-            <Dropdown
-              v-model="filters.item_type"
-              :options="itemTypes"
-              option-label="label"
-              option-value="value"
-              placeholder="All Items"
-              show-clear
-              @change="applyFilters"
-            />
-          </div>
-
-          <div class="filter-group">
-            <label>Start Date</label>
-            <Calendar
-              v-model="filters.start_date"
-              date-format="yy-mm-dd"
-              show-icon
-              @date-select="applyFilters"
-            />
-          </div>
-
-          <div class="filter-group">
-            <label>End Date</label>
-            <Calendar
-              v-model="filters.end_date"
-              date-format="yy-mm-dd"
-              show-icon
-              @date-select="applyFilters"
-            />
-          </div>
-
-          <div class="filter-group">
-            <label>Search</label>
+    <div class="filters-card">
+      <div class="filters">
+        <div class="search-box">
+          <IconField>
+            <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters.search"
-              placeholder="Item name or reason..."
+              placeholder="Search item name or reason..."
+              class="search-input"
               @input="debounceSearch"
             />
-          </div>
-
-          <div class="filter-actions">
-            <Button label="Clear" outlined @click="clearFilters" />
-          </div>
+          </IconField>
         </div>
-      </template>
-    </Card>
+
+        <Dropdown
+          v-model="filters.wastage_type"
+          :options="wastageTypes"
+          option-label="label"
+          option-value="value"
+          placeholder="All Types"
+          class="filter-dropdown"
+          @change="applyFilters"
+        />
+
+        <Dropdown
+          v-model="filters.item_type"
+          :options="itemTypes"
+          option-label="label"
+          option-value="value"
+          placeholder="All Items"
+          class="filter-dropdown"
+          @change="applyFilters"
+        />
+
+        <Calendar
+          v-model="filters.start_date"
+          date-format="yy-mm-dd"
+          placeholder="Start Date"
+          show-icon
+          class="filter-calendar"
+          @date-select="applyFilters"
+        />
+
+        <Calendar
+          v-model="filters.end_date"
+          date-format="yy-mm-dd"
+          placeholder="End Date"
+          show-icon
+          class="filter-calendar"
+          @date-select="applyFilters"
+        />
+
+        <Avatar
+          v-badge.info="activeFilterCount"
+          :icon="hasActiveFilters ? 'pi pi-filter-slash' : 'pi pi-filter'"
+          class="p-overlay-badge"
+          @click="hasActiveFilters && clearFilters()"
+        />
+      </div>
+    </div>
 
     <!-- Wastage Records Table -->
     <Card class="data-table-card">
@@ -85,11 +88,6 @@
           striped-rows
           responsive-layout="scroll"
           class="p-datatable-sm"
-          :rows="pagination.limit"
-          :total-records="pagination.total"
-          lazy
-          paginator
-          @page="onPageChange"
         >
           <template #empty>
             <div class="empty-state">
@@ -135,12 +133,6 @@
 
           <Column field="reason" header="Reason" style="min-width: 200px" />
 
-          <Column field="recorded_by" header="Recorded By" style="min-width: 150px">
-            <template #body="{ data }">
-              {{ data.recordedBy?.full_name || data.recordedBy?.username }}
-            </template>
-          </Column>
-
           <Column header="Actions" style="min-width: 120px">
             <template #body="{ data }">
               <Button
@@ -164,6 +156,22 @@
             </template>
           </Column>
         </DataTable>
+      </template>
+    </Card>
+
+    <!-- Pagination -->
+    <Card class="pagination-card">
+      <template #content>
+        <div v-if="pagination.total > 0" class="pagination-container">
+          <Paginator
+            :rows="pagination.limit"
+            :total-records="pagination.total"
+            :first="(wastageStore.pagination.page - 1) * pagination.limit"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            @page="onPageChange"
+          />
+        </div>
       </template>
     </Card>
 
@@ -208,15 +216,16 @@
 
           <div class="form-group">
             <label>Item <span class="required">*</span></label>
-            <Dropdown
-              v-model="formData.item_id"
-              :options="availableItems"
+            <AutoComplete
+              v-model="selectedItem"
+              :suggestions="filteredItems"
+              field="name"
               option-label="name"
-              option-value="id"
-              placeholder="Select Item"
+              placeholder="Search and select item"
               :class="{ 'p-invalid': errors.item_id }"
               :disabled="editMode || !formData.item_type"
-              filter
+              @complete="onSearchItems"
+              @change="onItemSelect"
             />
             <small class="p-error">{{ errors.item_id }}</small>
           </div>
@@ -382,6 +391,22 @@
 import { useProductStore } from '@/stores/product';
 import { useRawMaterialStore } from '@/stores/rawMaterial';
 import { useWastageStore } from '@/stores/wastage';
+import AutoComplete from 'primevue/autocomplete';
+import Avatar from 'primevue/avatar';
+import Button from 'primevue/button';
+import Calendar from 'primevue/calendar';
+import Card from 'primevue/card';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+import Paginator from 'primevue/paginator';
+import Tag from 'primevue/tag';
+import Textarea from 'primevue/textarea';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -397,6 +422,8 @@ const showRecordDialog = ref(false);
 const showViewDialog = ref(false);
 const editMode = ref(false);
 const selectedRecord = ref(null);
+const selectedItem = ref(null);
+const filteredItems = ref([]);
 
 const wastageTypes = [
   { label: 'Expiry', value: 'expiry' },
@@ -438,6 +465,26 @@ const errors = reactive({});
 
 // Computed
 const pagination = computed(() => wastageStore.pagination);
+
+const hasActiveFilters = computed(() => {
+  return (
+    filters.wastage_type !== null ||
+    filters.item_type !== null ||
+    filters.start_date !== null ||
+    filters.end_date !== null ||
+    filters.search !== ''
+  );
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.wastage_type !== null) count++;
+  if (filters.item_type !== null) count++;
+  if (filters.start_date !== null) count++;
+  if (filters.end_date !== null) count++;
+  if (filters.search !== '') count++;
+  return count;
+});
 
 const availableItems = computed(() => {
   if (formData.item_type === 'raw_material') {
@@ -493,10 +540,36 @@ const onPageChange = event => {
   wastageStore.fetchWastageRecords();
 };
 
+const onSearchItems = event => {
+  const query = event.query.toLowerCase();
+  if (!query) {
+    filteredItems.value = availableItems.value;
+  } else {
+    filteredItems.value = availableItems.value.filter(item =>
+      item.name.toLowerCase().includes(query)
+    );
+  }
+};
+
+const onItemSelect = event => {
+  if (event.value && typeof event.value === 'object') {
+    selectedItem.value = event.value;
+    formData.item_id = event.value.id;
+    formData.unit = event.value.unit;
+  } else {
+    // Handle clear
+    selectedItem.value = null;
+    formData.item_id = null;
+    formData.unit = '';
+  }
+};
+
 const onItemTypeChange = () => {
   formData.item_id = null;
   formData.unit = '';
   formData.unit_cost = null;
+  selectedItem.value = null;
+  filteredItems.value = [];
 
   // Load items based on type
   if (formData.item_type === 'raw_material') {
@@ -526,6 +599,13 @@ const editRecord = record => {
     wastage_date: new Date(record.wastage_date),
     location: record.location,
   });
+
+  // Set selectedItem for autocomplete
+  const item = availableItems.value.find(i => i.id === record.item_id);
+  if (item) {
+    selectedItem.value = item;
+  }
+
   showRecordDialog.value = true;
 };
 
@@ -618,6 +698,8 @@ const closeDialog = () => {
   showRecordDialog.value = false;
   editMode.value = false;
   selectedRecord.value = null;
+  selectedItem.value = null;
+  filteredItems.value = [];
   Object.keys(formData).forEach(key => {
     if (key === 'wastage_date') {
       formData[key] = new Date();
@@ -703,6 +785,8 @@ onMounted(async () => {
 <style scoped>
 .wastage-index {
   padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .page-header {
@@ -714,34 +798,63 @@ onMounted(async () => {
 
 .page-header h1 {
   margin: 0;
-  font-size: 1.75rem;
-  color: #1e293b;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
 }
 
-.subtitle {
-  color: #64748b;
-  margin: 0.25rem 0 0 0;
+.text-muted {
+  color: #6b7280;
+  margin: 0.25rem 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .filters-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 1.5rem;
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.filters {
+  display: flex;
   gap: 1rem;
-  align-items: end;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.filter-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #475569;
-  font-size: 0.875rem;
+.search-box {
+  flex: 1;
+  min-width: 250px;
 }
 
+.search-input {
+  width: 100%;
+}
+
+.filter-dropdown {
+  min-width: 180px;
+}
+
+.filter-calendar {
+  width: 160px;
+}
+.data-table-card {
+  margin-bottom: 1.5rem;
+}
+
+.pagination-card {
+  margin-bottom: 0;
+}
+
+.pagination-container {
+  margin: 0;
+}
 .cost-value {
   font-weight: 600;
   color: #dc2626;
@@ -827,5 +940,30 @@ onMounted(async () => {
 .empty-state p {
   margin-top: 1rem;
   font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .wastage-index {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .page-header button {
+    width: 100%;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filter-dropdown,
+  .filter-calendar {
+    width: 100%;
+  }
 }
 </style>

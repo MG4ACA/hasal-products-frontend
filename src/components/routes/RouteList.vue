@@ -43,7 +43,7 @@ const getStatusSeverity = status => {
       </template>
     </Column>
 
-    <Column field="salesRep" header="Sales Representative" sortable>
+    <Column field="salesRep.name" header="Sales Representative" sortable>
       <template #body="{ data }">
         <span v-if="data.salesRep"> {{ data.salesRep.code }} - {{ data.salesRep.name }} </span>
         <span v-else class="text-gray-400">-</span>

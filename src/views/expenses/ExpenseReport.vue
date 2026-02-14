@@ -72,7 +72,7 @@
           </div>
         </div>
 
-        <!-- Expenses by Category -->
+        <!-- Expenses by Category and Vehicle -->
         <div v-if="summary" class="grid">
           <div class="col-12 md:col-6">
             <Card>
@@ -111,6 +111,25 @@
               </template>
             </Card>
           </div>
+
+          <!-- Vehicle-wise Expenses Chart -->
+          <div class="col-12 md:col-6">
+            <Card class="summary-card">
+              <template #title> Vehicle-wise Expenses </template>
+              <template #content>
+                <div
+                  v-if="summary.by_vehicle && summary.by_vehicle.length > 0"
+                  class="chart-container"
+                >
+                  <Chart type="bar" :data="vehicleChartData" :options="vehicleChartOptions" />
+                </div>
+                <div v-else class="text-center p-4 text-500">
+                  <i class="pi pi-info-circle text-2xl mb-2" />
+                  <p>No vehicle expenses found for the selected period</p>
+                </div>
+              </template>
+            </Card>
+          </div>
         </div>
       </template>
     </Card>
@@ -120,7 +139,8 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import { useExpenseStore } from '@/stores/expense';
-import { onMounted, ref } from 'vue';
+import Chart from 'primevue/chart';
+import { computed, onMounted, ref } from 'vue';
 
 const expenseStore = useExpenseStore();
 const { showError } = useToastNotification();
@@ -192,6 +212,71 @@ const getCategorySeverity = category => {
   return severityMap[category] || 'secondary';
 };
 
+// Vehicle Chart Data
+const vehicleChartData = computed(() => {
+  if (!summary.value || !summary.value.by_vehicle || summary.value.by_vehicle.length === 0) {
+    return { labels: [], datasets: [] };
+  }
+
+  // Sort by amount descending
+  const sortedData = [...summary.value.by_vehicle].sort(
+    (a, b) => parseFloat(b.total_amount) - parseFloat(a.total_amount)
+  );
+
+  return {
+    labels: sortedData.map(v => v.vehicle_name),
+    datasets: [
+      {
+        label: 'Total Expenses (Rs.)',
+        data: sortedData.map(v => parseFloat(v.total_amount)),
+        backgroundColor: '#42A5F5',
+        borderColor: '#1E88E5',
+        borderWidth: 1,
+      },
+    ],
+  };
+});
+
+const vehicleChartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      callbacks: {
+        label: context => {
+          const value = context.parsed.y;
+          return `Rs. ${formatCurrency(value)}`;
+        },
+      },
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        callback: value => `Rs. ${formatCurrency(value)}`,
+      },
+      title: {
+        display: true,
+        text: 'Amount (Rs.)',
+      },
+    },
+    x: {
+      title: {
+        display: true,
+        text: 'Vehicle',
+      },
+      ticks: {
+        maxRotation: 45,
+        minRotation: 45,
+      },
+    },
+  },
+});
+
 onMounted(() => {
   loadReport();
 });
@@ -208,5 +293,13 @@ onMounted(() => {
   background: #f8fafc;
   box-shadow: none;
   border: 1px solid #e2e8f0;
+}
+
+.chart-container {
+  /* height: 400px; */
+}
+
+.summary-card {
+  height: -webkit-fill-available;
 }
 </style>

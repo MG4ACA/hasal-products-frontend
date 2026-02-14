@@ -15,7 +15,11 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['view', 'edit', 'delete']);
+const emit = defineEmits(['view', 'edit', 'delete', 'sort']);
+
+const onSort = event => {
+  emit('sort', event);
+};
 
 const getStatusSeverity = status => {
   return status === 'active' ? 'success' : 'danger';
@@ -34,7 +38,7 @@ const formatCurrency = amount => {
 </script>
 
 <template>
-  <DataTable :value="outlets" :loading="loading" responsive-layout="scroll">
+  <DataTable :value="outlets" :loading="loading" responsive-layout="scroll" @sort="onSort">
     <template #empty>
       <div class="empty-state">
         <i class="pi pi-info-circle" style="font-size: 3rem" />
