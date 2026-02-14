@@ -3,7 +3,9 @@
     <div class="page-header">
       <div>
         <h1>Inventory Valuation Report</h1>
-        <p class="subtitle">Track raw materials and finished goods inventory</p>
+        <p class="subtitle">
+          Track raw materials and finished goods inventory
+        </p>
       </div>
       <div class="header-actions">
         <Button
@@ -37,20 +39,30 @@
             />
           </div>
           <div class="field align-end">
-            <Button label="Generate Report" icon="pi pi-search" @click="loadReport" />
+            <Button
+              label="Generate Report"
+              icon="pi pi-search"
+              @click="loadReport"
+            />
           </div>
         </div>
       </template>
     </Card>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
       <ProgressSpinner />
       <p>Generating report...</p>
     </div>
 
     <!-- Report Content -->
-    <div v-else-if="reportData" class="report-content">
+    <div
+      v-else-if="reportData"
+      class="report-content"
+    >
       <!-- Summary Cards -->
       <div class="summary-grid">
         <Card class="summary-card">
@@ -105,7 +117,11 @@
           <h3>Inventory Valuation Breakdown</h3>
         </template>
         <template #content>
-          <Chart type="pie" :data="valuationChartData" :options="chartOptions" />
+          <Chart
+            type="pie"
+            :data="valuationChartData"
+            :options="chartOptions"
+          />
         </template>
       </Card>
 
@@ -119,23 +135,43 @@
             responsive-layout="scroll"
             class="report-table"
           >
-            <Column field="material_name" header="Material" sortable />
-            <Column field="current_stock" header="Stock" sortable>
+            <Column
+              field="material_name"
+              header="Material"
+              sortable
+            />
+            <Column
+              field="current_stock"
+              header="Stock"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatNumber(data.current_stock) }} {{ data.unit }}
               </template>
             </Column>
-            <Column field="unit_price" header="Unit Price" sortable>
+            <Column
+              field="unit_price"
+              header="Unit Price"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatCurrency(data.unit_price) }}
               </template>
             </Column>
-            <Column field="total_value" header="Total Value" sortable>
+            <Column
+              field="total_value"
+              header="Total Value"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatCurrency(data.total_value) }}
               </template>
             </Column>
-            <Column field="reorder_level" header="Reorder Level" sortable>
+            <Column
+              field="reorder_level"
+              header="Reorder Level"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatNumber(data.reorder_level) }} {{ data.unit }}
               </template>
@@ -147,7 +183,11 @@
                   value="Low Stock"
                   severity="warning"
                 />
-                <Tag v-else value="Normal" severity="success" />
+                <Tag
+                  v-else
+                  value="Normal"
+                  severity="success"
+                />
               </template>
             </Column>
           </DataTable>
@@ -160,24 +200,48 @@
             responsive-layout="scroll"
             class="report-table"
           >
-            <Column field="product_name" header="Product" sortable />
-            <Column field="sku_code" header="SKU" sortable />
-            <Column field="current_stock" header="Stock" sortable>
+            <Column
+              field="product_name"
+              header="Product"
+              sortable
+            />
+            <Column
+              field="sku_code"
+              header="SKU"
+              sortable
+            />
+            <Column
+              field="current_stock"
+              header="Stock"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatNumber(data.current_stock) }} {{ data.unit }}
               </template>
             </Column>
-            <Column field="unit_price" header="Unit Price" sortable>
+            <Column
+              field="unit_price"
+              header="Unit Price"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatCurrency(data.unit_price) }}
               </template>
             </Column>
-            <Column field="total_value" header="Total Value" sortable>
+            <Column
+              field="total_value"
+              header="Total Value"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatCurrency(data.total_value) }}
               </template>
             </Column>
-            <Column field="reorder_level" header="Reorder Level" sortable>
+            <Column
+              field="reorder_level"
+              header="Reorder Level"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatNumber(data.reorder_level) }} {{ data.unit }}
               </template>
@@ -189,7 +253,11 @@
                   value="Low Stock"
                   severity="warning"
                 />
-                <Tag v-else value="Normal" severity="success" />
+                <Tag
+                  v-else
+                  value="Normal"
+                  severity="success"
+                />
               </template>
             </Column>
           </DataTable>
@@ -198,9 +266,15 @@
     </div>
 
     <!-- Empty State -->
-    <Card v-else class="empty-state">
+    <Card
+      v-else
+      class="empty-state"
+    >
       <template #content>
-        <i class="pi pi-inbox" style="font-size: 3rem; color: var(--surface-400)" />
+        <i
+          class="pi pi-inbox"
+          style="font-size: 3rem; color: var(--surface-400)"
+        />
         <p>Click "Generate Report" to view inventory valuation</p>
       </template>
     </Card>
@@ -211,16 +285,6 @@
 import reportService from '@/services/reportService';
 import { createCSVHeader } from '@/utils/exportHelpers';
 import { formatCurrency, formatNumber } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Chart from 'primevue/chart';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 

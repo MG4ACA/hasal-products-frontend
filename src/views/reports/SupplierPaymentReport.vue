@@ -40,8 +40,8 @@
             <Dropdown
               v-model="filters.supplier_id"
               :options="suppliers"
-              option-label="supplier_name"
-              option-value="supplier_id"
+              option-label="name"
+              option-value="id"
               placeholder="All Suppliers"
               show-clear
             />
@@ -193,16 +193,6 @@ import reportService from '@/services/reportService';
 import { supplierService } from '@/services/supplierService';
 import { createCSVHeader } from '@/utils/exportHelpers';
 import { formatCurrency, formatDate, formatPaymentMethod } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 
@@ -248,7 +238,9 @@ const loadReport = async () => {
 
 const loadSuppliers = async () => {
   try {
-    suppliers.value = await supplierService.getAllSuppliers();
+    const suppliersData = await supplierService.getAllSuppliers();
+    // Extract array from paginated response
+    suppliers.value = suppliersData.suppliers || suppliersData;
   } catch (error) {
     console.error('Failed to load suppliers:', error);
   }
@@ -276,6 +268,11 @@ const handleExportPDF = () => {
 };
 
 onMounted(() => {
+  // Set default date range to current month
+  const now = new Date();
+  filters.value.date_from = new Date(now.getFullYear(), now.getMonth(), 1);
+  filters.value.date_to = now;
+
   loadSuppliers();
 });
 </script>

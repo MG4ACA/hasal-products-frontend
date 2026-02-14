@@ -3,7 +3,9 @@
     <div class="page-header">
       <div>
         <h1>Production Efficiency Report</h1>
-        <p class="subtitle">Analyze production performance and waste costs</p>
+        <p class="subtitle">
+          Analyze production performance and waste costs
+        </p>
       </div>
       <div class="header-actions">
         <Button
@@ -29,38 +31,56 @@
         <div class="filter-grid">
           <div class="field">
             <label>Date From</label>
-            <Calendar v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
+            <Calendar
+              v-model="filters.date_from"
+              date-format="yy-mm-dd"
+              show-icon
+            />
           </div>
           <div class="field">
             <label>Date To</label>
-            <Calendar v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
+            <Calendar
+              v-model="filters.date_to"
+              date-format="yy-mm-dd"
+              show-icon
+            />
           </div>
           <div class="field">
             <label>Product</label>
             <Dropdown
               v-model="filters.product_id"
               :options="products"
-              option-label="product_name"
-              option-value="product_id"
+              option-label="name"
+              option-value="id"
               placeholder="All Products"
               show-clear
             />
           </div>
           <div class="field align-end">
-            <Button label="Generate Report" icon="pi pi-search" @click="loadReport" />
+            <Button
+              label="Generate Report"
+              icon="pi pi-search"
+              @click="loadReport"
+            />
           </div>
         </div>
       </template>
     </Card>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
       <ProgressSpinner />
       <p>Generating report...</p>
     </div>
 
     <!-- Report Content -->
-    <div v-else-if="reportData" class="report-content">
+    <div
+      v-else-if="reportData"
+      class="report-content"
+    >
       <!-- Summary Cards -->
       <div class="summary-grid">
         <Card class="summary-card">
@@ -70,7 +90,7 @@
               <span>Production Runs</span>
             </div>
             <div class="summary-value">
-              {{ reportData.summary.total_runs }}
+              {{ reportData.summary.total_production_runs }}
             </div>
           </template>
         </Card>
@@ -119,7 +139,11 @@
             <h3>Production Efficiency Trend</h3>
           </template>
           <template #content>
-            <Chart type="line" :data="efficiencyChartData" :options="lineChartOptions" />
+            <Chart
+              type="line"
+              :data="efficiencyChartData"
+              :options="lineChartOptions"
+            />
           </template>
         </Card>
         <Card class="chart-card">
@@ -127,7 +151,11 @@
             <h3>Waste Cost Breakdown</h3>
           </template>
           <template #content>
-            <Chart type="bar" :data="wasteChartData" :options="barChartOptions" />
+            <Chart
+              type="bar"
+              :data="wasteChartData"
+              :options="barChartOptions"
+            />
           </template>
         </Card>
       </div>
@@ -145,39 +173,75 @@
             responsive-layout="scroll"
             class="report-table"
           >
-            <Column field="production_date" header="Date" sortable>
+            <Column
+              field="production_date"
+              header="Date"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatDate(data.production_date) }}
               </template>
             </Column>
-            <Column field="product.product_name" header="Product" sortable />
-            <Column field="batch.batch_number" header="Batch" sortable />
-            <Column field="produced_quantity" header="Produced" sortable>
+            <Column
+              field="product_name"
+              header="Product"
+              sortable
+            />
+            <Column
+              field="batch_number"
+              header="Batch"
+              sortable
+            />
+            <Column
+              field="actual_quantity"
+              header="Produced"
+              sortable
+            >
               <template #body="{ data }">
-                {{ formatNumber(data.produced_quantity) }}
+                {{ formatNumber(data.actual_quantity) }}
               </template>
             </Column>
-            <Column field="expected_quantity" header="Expected" sortable>
+            <Column
+              field="expected_quantity"
+              header="Expected"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatNumber(data.expected_quantity) }}
               </template>
             </Column>
-            <Column field="efficiency" header="Efficiency" sortable>
+            <Column
+              field="efficiency_percentage"
+              header="Efficiency"
+              sortable
+            >
               <template #body="{ data }">
                 <Tag
-                  :value="formatPercentage(data.efficiency)"
+                  :value="formatPercentage(data.efficiency_percentage)"
                   :severity="
-                    getPercentageSeverity(data.efficiency, { excellent: 95, good: 85, warning: 75 })
+                    getPercentageSeverity(data.efficiency_percentage, {
+                      excellent: 95,
+                      good: 85,
+                      warning: 75,
+                    })
                   "
                 />
               </template>
             </Column>
-            <Column field="production_cost" header="Cost" sortable>
+            <Column
+              field="total_cost"
+              header="Cost"
+              sortable
+            >
               <template #body="{ data }">
-                {{ formatCurrency(data.production_cost) }}
+                {{ formatCurrency(data.total_cost) }}
               </template>
             </Column>
-            <Column field="waste_cost" header="Waste Cost" sortable>
+            <Column
+              field="waste_cost"
+              header="Waste Cost"
+              sortable
+            >
               <template #body="{ data }">
                 {{ formatCurrency(data.waste_cost) }}
               </template>
@@ -188,9 +252,15 @@
     </div>
 
     <!-- Empty State -->
-    <Card v-else class="empty-state">
+    <Card
+      v-else
+      class="empty-state"
+    >
       <template #content>
-        <i class="pi pi-cog" style="font-size: 3rem; color: var(--surface-400)" />
+        <i
+          class="pi pi-cog"
+          style="font-size: 3rem; color: var(--surface-400)"
+        />
         <p>Select filters and click "Generate Report" to view production analysis</p>
       </template>
     </Card>
@@ -208,15 +278,6 @@ import {
   formatPercentage,
   getPercentageSeverity,
 } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Chart from 'primevue/chart';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
@@ -234,7 +295,7 @@ const filters = ref({
 const efficiencyChartData = computed(() => {
   if (!reportData.value || !reportData.value.production_runs) return {};
   const labels = reportData.value.production_runs.map(run => formatDate(run.production_date));
-  const data = reportData.value.production_runs.map(run => run.efficiency);
+  const data = reportData.value.production_runs.map(run => run.efficiency_percentage);
   return {
     labels,
     datasets: [
@@ -251,7 +312,7 @@ const efficiencyChartData = computed(() => {
 
 const wasteChartData = computed(() => {
   if (!reportData.value || !reportData.value.production_runs) return {};
-  const labels = reportData.value.production_runs.slice(0, 10).map(run => run.product.product_name);
+  const labels = reportData.value.production_runs.slice(0, 10).map(run => run.product_name);
   const data = reportData.value.production_runs.slice(0, 10).map(run => run.waste_cost);
   return {
     labels,
@@ -322,7 +383,8 @@ const loadReport = async () => {
 const loadProducts = async () => {
   try {
     const response = await productService.getAll();
-    products.value = response;
+    // Extract array from response (products controller returns {data: [], total:...})
+    products.value = response.data || response;
   } catch (error) {
     console.error('Failed to load products:', error);
   }
@@ -357,6 +419,11 @@ const handleExportPDF = () => {
 };
 
 onMounted(() => {
+  // Set default date range to current month
+  const now = new Date();
+  filters.value.date_from = new Date(now.getFullYear(), now.getMonth(), 1);
+  filters.value.date_to = now;
+
   loadProducts();
 });
 </script>

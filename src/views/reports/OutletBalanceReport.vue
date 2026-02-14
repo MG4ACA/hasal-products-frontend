@@ -32,8 +32,8 @@
             <Dropdown
               v-model="filters.outlet_id"
               :options="outlets"
-              option-label="outlet_name"
-              option-value="outlet_id"
+              option-label="name"
+              option-value="id"
               placeholder="All Outlets"
               show-clear
             />
@@ -212,14 +212,6 @@ import { outletService } from '@/services/outletService';
 import reportService from '@/services/reportService';
 import { createCSVHeader } from '@/utils/exportHelpers';
 import { formatCurrency, getPercentageSeverity } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 
@@ -260,7 +252,9 @@ const loadReport = async () => {
 
 const loadOutlets = async () => {
   try {
-    outlets.value = await outletService.getAllOutlets();
+    const outletsData = await outletService.getAll();
+    // Extract array from paginated response
+    outlets.value = outletsData.outlets || outletsData;
   } catch (error) {
     console.error('Failed to load outlets:', error);
   }

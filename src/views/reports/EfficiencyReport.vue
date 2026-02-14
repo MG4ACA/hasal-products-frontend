@@ -134,28 +134,32 @@
 
           <Column field="batch_number" header="Batch Number" sortable />
 
-          <Column field="recipe.name" header="Recipe" sortable>
+          <Column field="recipe_name" header="Recipe" sortable>
             <template #body="{ data }">
-              {{ data.recipe.name }} <span class="text-500">(v{{ data.recipe.version }})</span>
+              {{ data.recipe_name }}
             </template>
           </Column>
 
           <Column field="expected_quantity" header="Expected" sortable>
             <template #body="{ data }">
-              {{ data.expected_quantity.toFixed(2) }}
+              {{ parseFloat(data.expected_quantity).toFixed(2) }}
             </template>
           </Column>
 
           <Column field="actual_quantity" header="Actual" sortable>
             <template #body="{ data }">
-              <span class="font-semibold">{{ data.actual_quantity.toFixed(2) }}</span>
+              <span class="font-semibold">{{ parseFloat(data.actual_quantity).toFixed(2) }}</span>
             </template>
           </Column>
 
           <Column field="waste_quantity" header="Waste" sortable>
             <template #body="{ data }">
-              <span :class="data.waste_quantity > 0 ? 'text-orange-600 font-semibold' : 'text-500'">
-                {{ data.waste_quantity.toFixed(2) }}
+              <span
+                :class="
+                  parseFloat(data.waste_quantity) > 0 ? 'text-orange-600 font-semibold' : 'text-500'
+                "
+              >
+                {{ parseFloat(data.waste_quantity).toFixed(2) }}
               </span>
             </template>
           </Column>
@@ -171,8 +175,8 @@
           <Column field="yield_efficiency" header="Efficiency" sortable>
             <template #body="{ data }">
               <Tag
-                :value="data.yield_efficiency.toFixed(2) + '%'"
-                :severity="getEfficiencySeverity(data.yield_efficiency)"
+                :value="parseFloat(data.yield_efficiency).toFixed(2) + '%'"
+                :severity="getEfficiencySeverity(parseFloat(data.yield_efficiency))"
               />
             </template>
           </Column>
@@ -215,14 +219,6 @@
 import { useToastNotification } from '@/composables/useToastNotification';
 import productionService from '@/services/productionService';
 import { useRecipeStore } from '@/stores/recipe';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Chart from 'primevue/chart';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import Tag from 'primevue/tag';
 import { computed, onMounted, ref } from 'vue';
 
 const toast = useToastNotification();
@@ -254,7 +250,7 @@ const chartData = computed(() => {
     datasets: [
       {
         label: 'Yield Efficiency (%)',
-        data: sortedData.map(d => d.yield_efficiency),
+        data: sortedData.map(d => parseFloat(d.yield_efficiency)),
         fill: false,
         borderColor: '#42A5F5',
         tension: 0.4,
@@ -367,12 +363,12 @@ const exportToCSV = () => {
       [
         formatDate(row.production_date),
         row.batch_number,
-        `"${row.recipe.name} (v${row.recipe.version})"`,
-        row.expected_quantity.toFixed(2),
-        row.actual_quantity.toFixed(2),
-        row.waste_quantity.toFixed(2),
+        `"${row.recipe_name}"`,
+        parseFloat(row.expected_quantity).toFixed(2),
+        parseFloat(row.actual_quantity).toFixed(2),
+        parseFloat(row.waste_quantity).toFixed(2),
         row.variance,
-        row.yield_efficiency.toFixed(2),
+        parseFloat(row.yield_efficiency).toFixed(2),
         `"${row.waste_reason || 'N/A'}"`,
       ].join(',')
     ),

@@ -152,12 +152,6 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import productionService from '@/services/productionService';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Tag from 'primevue/tag';
 import { onMounted, ref } from 'vue';
 
 const toast = useToastNotification();

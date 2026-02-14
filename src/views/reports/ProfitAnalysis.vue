@@ -175,14 +175,6 @@
 import { useToastNotification } from '@/composables/useToastNotification';
 import { productService } from '@/services/productService';
 import { FilterMatchMode } from 'primevue/api';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Tag from 'primevue/tag';
 import { computed, onMounted, ref } from 'vue';
 
 const toast = useToastNotification();

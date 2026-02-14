@@ -212,17 +212,6 @@
 import reportService from '@/services/reportService';
 import { createCSVHeader } from '@/utils/exportHelpers';
 import { formatCurrency, formatDate, getAgingSeverity } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Chart from 'primevue/chart';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
@@ -330,6 +319,11 @@ const handleExportPDF = () => {
 };
 
 onMounted(() => {
+  // Set default date range to current month
+  const now = new Date();
+  filters.value.date_from = new Date(now.getFullYear(), now.getMonth(), 1);
+  filters.value.date_to = now;
+
   // Load initial data if needed
 });
 </script>

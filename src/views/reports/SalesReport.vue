@@ -40,8 +40,8 @@
             <Dropdown
               v-model="filters.outlet_id"
               :options="outlets"
-              option-label="outlet_name"
-              option-value="outlet_id"
+              option-label="name"
+              option-value="id"
               placeholder="All Outlets"
               show-clear
             />
@@ -51,8 +51,8 @@
             <Dropdown
               v-model="filters.route_id"
               :options="routes"
-              option-label="route_name"
-              option-value="route_id"
+              option-label="name"
+              option-value="id"
               placeholder="All Routes"
               show-clear
             />
@@ -257,16 +257,6 @@ import reportService from '@/services/reportService';
 import { routeService } from '@/services/routeService';
 import { createCSVHeader } from '@/utils/exportHelpers';
 import { formatCurrency, formatDate } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Chart from 'primevue/chart';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
@@ -331,8 +321,9 @@ const loadReferenceData = async () => {
       outletService.getAll(),
       routeService.getAll(),
     ]);
-    outlets.value = outletsData;
-    routes.value = routesData;
+    // Extract arrays from paginated responses
+    outlets.value = outletsData.outlets || outletsData;
+    routes.value = routesData.routes || routesData;
   } catch (error) {
     console.error('Failed to load reference data:', error);
   }
@@ -417,6 +408,11 @@ const handleExportPDF = () => {
 };
 
 onMounted(() => {
+  // Set default date range to current month
+  const now = new Date();
+  filters.value.date_from = new Date(now.getFullYear(), now.getMonth(), 1);
+  filters.value.date_to = now;
+
   loadReferenceData();
 });
 </script>

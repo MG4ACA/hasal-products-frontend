@@ -40,8 +40,8 @@
             <Dropdown
               v-model="filters.outlet_id"
               :options="outlets"
-              option-label="outlet_name"
-              option-value="outlet_id"
+              option-label="name"
+              option-value="id"
               placeholder="All Outlets"
               show-clear
             />
@@ -245,17 +245,6 @@ import {
   getPaymentMethodIcon,
   getPercentageSeverity,
 } from '@/utils/reportFormatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Chart from 'primevue/chart';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dropdown from 'primevue/dropdown';
-import ProgressSpinner from 'primevue/progressspinner';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
@@ -317,7 +306,9 @@ const loadReport = async () => {
 // Load outlets
 const loadOutlets = async () => {
   try {
-    outlets.value = await outletService.getAllOutlets();
+    const outletsData = await outletService.getAll();
+    // Extract array from paginated response
+    outlets.value = outletsData.outlets || outletsData;
   } catch (error) {
     console.error('Failed to load outlets:', error);
   }
@@ -424,6 +415,11 @@ const handleExportPDF = () => {
 };
 
 onMounted(() => {
+  // Set default date range to current month
+  const now = new Date();
+  filters.value.date_from = new Date(now.getFullYear(), now.getMonth(), 1);
+  filters.value.date_to = now;
+
   loadOutlets();
 });
 </script>
