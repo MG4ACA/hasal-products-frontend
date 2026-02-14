@@ -72,4 +72,11 @@ const handleLogout = () => {
   color: #666;
   font-size: 0.9rem;
 }
+
+/* Hide topbar when printing */
+@media print {
+  .topbar {
+    display: none !important;
+  }
+}
 </style>

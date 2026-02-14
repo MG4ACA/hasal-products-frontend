@@ -10,7 +10,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['view', 'edit', 'delete']);
+const emit = defineEmits(['view', 'edit', 'delete', 'print']);
 
 const formatCurrency = amount => {
   return new Intl.NumberFormat('en-LK', {
@@ -134,6 +134,12 @@ const getPaymentMethodTag = method => {
             icon="pi pi-eye"
             class="p-button-rounded p-button-text p-button-info"
             @click="emit('view', data.id)"
+          />
+          <Button
+            v-tooltip.top="'Print'"
+            icon="pi pi-print"
+            class="p-button-rounded p-button-text p-button-info"
+            @click="emit('print', data.id)"
           />
           <!-- Edit button disabled - backend only supports updating notes and payment_status
           <Button

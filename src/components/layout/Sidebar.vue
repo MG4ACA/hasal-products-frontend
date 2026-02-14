@@ -297,4 +297,11 @@ const toggleSection = section => {
 .submenu-item i {
   font-size: 1rem;
 }
+
+/* Hide sidebar when printing */
+@media print {
+  .sidebar {
+    display: none !important;
+  }
+}
 </style>

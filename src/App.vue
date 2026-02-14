@@ -33,4 +33,38 @@ body {
   width: 100%;
   min-height: 100vh;
 }
+
+/* Print Styles - Hide all UI chrome when printing */
+@media print {
+  /* Hide sidebar, topbar, and layout chrome */
+  .app-layout {
+    display: block !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+
+  /* Force hide specific components */
+  .app-layout > *:not(.main-content) {
+    display: none !important;
+  }
+
+  /* Hide any navigation, headers, buttons, etc */
+  nav,
+  header,
+  .sidebar,
+  .topbar,
+  button,
+  .p-button {
+    display: none !important;
+  }
+}
 </style>
