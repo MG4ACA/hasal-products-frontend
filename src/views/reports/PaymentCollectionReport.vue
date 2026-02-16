@@ -553,6 +553,7 @@ onMounted(() => {
 
 .charts-grid :deep(.p-card-content) {
   min-height: 300px;
+  display: flex;
 }
 
 .report-tabs {

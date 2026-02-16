@@ -149,7 +149,7 @@
                 v-if="data.payment_method === 'check' && !data.clearance_date"
                 icon="pi pi-check"
                 size="small"
-                severity="success"
+                severity="info"
                 text
                 @click="clearCheck(data)"
               />

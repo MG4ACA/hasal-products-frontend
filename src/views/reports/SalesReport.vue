@@ -137,7 +137,7 @@
             class="report-table"
           >
             <Column field="outlet_name" header="Outlet" sortable />
-            <Column field="area" header="Area" sortable />
+            <Column field="address" header="Area" sortable />
             <Column field="invoices" header="Invoices" sortable />
             <Column field="total_sales" header="Total Sales" sortable>
               <template #body="{ data }">
@@ -168,10 +168,11 @@
             responsive-layout="scroll"
             class="report-table"
           >
-            <Column field="sku_code" header="SKU Code" sortable />
+            <Column field="sku_id" header="SKU Code" sortable />
             <Column field="sku_name" header="Product Name" sortable />
+            <Column field="size" header="Size" sortable />
             <Column field="quantity_sold" header="Qty Sold" sortable />
-            <Column field="unit_price" header="Unit Price" sortable>
+            <Column field="price" header="Unit Price" sortable>
               <template #body="{ data }">
                 {{ formatCurrency(data.unit_price) }}
               </template>
@@ -389,7 +390,7 @@ const handleExportCSV = () => {
   csvData.push('\n\nSales by Product\n');
   reportData.value.by_product.forEach(item => {
     csvData.push(
-      `${item.sku_code},${item.sku_name},${item.quantity_sold},${item.unit_price},${item.total_sales}`
+      `${item.sku_id},${item.sku_name},${item.size},${item.quantity_sold},${item.unit_price},${item.total_sales}`
     );
   });
 

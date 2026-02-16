@@ -50,6 +50,7 @@
         <!-- Product Profit Table -->
         <DataTable
           v-model:filters="filters"
+          v-model:expanded-rows="expandedRows"
           :value="profitData"
           :loading="loading"
           striped-rows
@@ -58,6 +59,7 @@
           :rows-per-page-options="[10, 25, 50]"
           filter-display="row"
           :global-filter-fields="['product_name', 'product_code']"
+          data-key="product_id"
         >
           <template #header>
             <div class="flex justify-content-between align-items-center">
@@ -79,15 +81,11 @@
 
           <Column field="product_name" header="Product Name" sortable />
 
-          <Column header="SKUs">
+          <Column :expander="true" style="width: 3rem" />
+
+          <Column header="SKUs" style="width: 6rem">
             <template #body="{ data }">
-              <Button
-                :label="`${data.skus.length} SKUs`"
-                text
-                icon="pi pi-angle-down"
-                :icon-pos="expandedRows[data.product_id] ? 'right' : 'right'"
-                @click="toggleSkuDetails(data)"
-              />
+              <span class="text-sm text-500">{{ data.skus.length }} SKUs</span>
             </template>
           </Column>
 
@@ -180,7 +178,7 @@ import { computed, onMounted, ref } from 'vue';
 const toast = useToastNotification();
 const loading = ref(false);
 const profitData = ref([]);
-const expandedRows = ref({});
+const expandedRows = ref([]);
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -208,10 +206,6 @@ const formatCurrency = value => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-};
-
-const toggleSkuDetails = data => {
-  expandedRows.value[data.product_id] = !expandedRows.value[data.product_id];
 };
 
 const loadProfitData = async () => {

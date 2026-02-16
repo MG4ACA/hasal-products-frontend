@@ -1,48 +1,58 @@
 # Reports Test Suite - Fixes Applied
 
 ## Current Status
+
 - **Pass Rate**: 91.1% (51/56 tests passing)
 - **Duration**: 5.47s
 - **Remaining Issues**: 5 test failures
 
 ## Fixes Applied
 
-### 1. ✅ Authentication & Field Names (Previously Fixed 
+### 1. ✅ Authentication & Field Names (Previously Fixed
+
 - Fixed authentication token extraction path
 - Corrected all field name mismatches (outlet_name→name, supplier_name→name, etc.)
 
 ### 2. ✅ SKU & Product Creation
+
 - **Fixed**: SKU endpoint path from `/products/skus`→ `/products/${productId}/skus`
 - **Fixed**: Raw material data extraction (`result.data.raw_material` instead of `result.data.material`)
 - **Added**: Support for `current_stock` in SKU update endpoint (productController.js)
 
 ### 3. ✅ Purchase Orders
+
 - **Fixed**: Field names: `po_date`→`order_date`, `unit_price`→`unit_cost`
 - **Removed**: `status` field (set by backend)
 
 ### 4. ✅ Supplier Payments
+
 - **Fixed**: Endpoint from `/supplier-payments` to `/suppliers/:id/payments`
 - **Added**: `supplier_id` in request body
 - **Added**: PO receipt before payment to create supplier balance
 
 ### 5. ✅ Production Data
+
 - **Simplified**: Skipped complex production run creation (requires recipe infrastructure)
 - Tests work correctly with empty production data
 
 ### 6. ✅ Report Type Validations
+
 - **Fixed**: `average_efficiency` validation to check type instead of truthiness (allows 0)
 - **Fixed**: `credit_utilization` to handle both string and number types
 
 ### 7. ✅ Numeric Field Type Fixes
+
 - **Fixed**: `credit_utilization` wrapped with `parseFloat()` to return number
 - **Fixed**: `average_efficiency` wrapped with `parseFloat()` to return number
 
 ## Remaining Issues (Need Server Restart)
 
 ### 1. SKU Stock Update (3 related failures)
+
 **Issue**: SKU current_stock remains 0 even after update
 **Status**: Fix applied but needs server restart
 **Affected Tests**:
+
 - Create sales invoices
 - Create payments (depends on invoices)
 - Create checks (depends on invoices)
@@ -50,20 +60,25 @@
 **Fix**: Modified `productController.js` updateSku to accept `currentstock` parameter
 
 ### 2. Supplier Payment Creation (1 failure)
+
 **Issue**: "Either received items (with quantity > 0) or return items are required"
 **Status**: Need to check PO receive endpoint parameters
 **Affected Tests**:
+
 - Create supplier payment
 
-### 3. Credit Utilization Type (1 failure)  
+### 3. Credit Utilization Type (1 failure)
+
 **Issue**: Returns string "0.00" instead of number 0 for some outlets
 **Status**: Fix applied but needs server restart OR test made more robust
 **Affected Tests**:
+
 - Credit utilization percentage calculation
 
 ## Next Steps
 
 1. **Restart Backend Server** to apply code changes:
+
    ```bash
    # In hasal-pos-backend directory
    npm run dev
@@ -72,6 +87,7 @@
    ```
 
 2. **Re-run Tests**:
+
    ```bash
    node tests/reports.test.js
    ```
@@ -100,6 +116,7 @@
 ## Test Coverage
 
 ✅ All 7 Report Endpoints:
+
 1. Sales Report (7 tests) - ALL PASSING
 2. Payment Collection Report (5 tests) - ALL PASSING
 3. Supplier Payment Report (3 tests) - ALL PASSING
