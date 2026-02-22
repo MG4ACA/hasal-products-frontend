@@ -1,10 +1,10 @@
 <script setup>
 import InvoiceList from '@/components/sales/InvoiceList.vue';
-import PrintableInvoice from '@/components/sales/PrintableInvoice.vue';
 import { useEmployeeStore } from '@/stores/employee';
 import { useOutletStore } from '@/stores/outlet';
 import { useRouteStore } from '@/stores/route';
 import { useSalesStore } from '@/stores/sales';
+import { printReceipt } from '@/utils/printReceipt';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
@@ -33,7 +33,6 @@ const filters = ref({
 });
 
 // Print invoice
-const printInvoice = ref(null);
 
 // Options
 const paymentStatusOptions = [
@@ -182,11 +181,7 @@ const handleCreate = () => {
 const handlePrint = async id => {
   try {
     await salesStore.fetchInvoiceById(id);
-    printInvoice.value = salesStore.currentInvoice;
-    setTimeout(() => {
-      window.print();
-      printInvoice.value = null;
-    }, 100);
+    printReceipt(salesStore.currentInvoice);
   } catch (error) {
     toast.add({
       severity: 'error',
@@ -377,11 +372,6 @@ onMounted(async () => {
         @page="handlePageChange"
       />
     </div>
-
-    <!-- Print-only invoice -->
-    <div v-if="printInvoice" class="print-only">
-      <PrintableInvoice :invoice="printInvoice" />
-    </div>
   </div>
 </template>
 
@@ -447,28 +437,5 @@ onMounted(async () => {
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* Print-specific styles */
-.print-only {
-  display: none;
-}
-
-@media print {
-  .sales-index {
-    padding: 0;
-  }
-
-  .page-header,
-  .filters-card,
-  .content-card,
-  button,
-  .p-paginator {
-    display: none !important;
-  }
-
-  .print-only {
-    display: block !important;
-  }
 }
 </style>

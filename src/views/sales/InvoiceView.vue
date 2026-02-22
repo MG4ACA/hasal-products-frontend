@@ -1,9 +1,9 @@
 <script setup>
-import PrintableInvoice from '@/components/sales/PrintableInvoice.vue';
 import { useSalesStore } from '@/stores/sales';
+import { printReceipt } from '@/utils/printReceipt';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -123,15 +123,10 @@ const handleBack = () => {
   router.push('/sales');
 };
 
-const printingInvoice = ref(false);
-
 const handlePrint = () => {
-  printingInvoice.value = true;
-  // Use nextTick to ensure DOM is updated before printing
-  setTimeout(() => {
-    window.print();
-    printingInvoice.value = false;
-  }, 100);
+  if (invoice.value) {
+    printReceipt(invoice.value);
+  }
 };
 
 onMounted(() => {
@@ -427,11 +422,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-
-    <!-- Printable Invoice (hidden on screen, shown when printing) -->
-    <div v-if="invoice" class="print-only">
-      <PrintableInvoice :invoice="invoice" />
-    </div>
   </div>
 </template>
 
@@ -582,36 +572,5 @@ onMounted(() => {
 .grand-total .total-label,
 .grand-total .total-value {
   color: #111827;
-}
-
-/* Print-specific styles */
-.print-only {
-  display: none;
-}
-
-@media print {
-  /* Hide everything except the printable invoice */
-  .invoice-view {
-    padding: 0;
-  }
-
-  .loading-state,
-  .page-header,
-  .info-card,
-  .totals-card,
-  button,
-  .header-actions {
-    display: none !important;
-  }
-
-  .print-only {
-    display: block !important;
-  }
-
-  /* Ensure the printable invoice fills the page */
-  .printable-invoice {
-    width: 100%;
-    max-width: 100%;
-  }
 }
 </style>

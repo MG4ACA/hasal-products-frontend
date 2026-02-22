@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <div class="sidebar-header">
-      <h2>Hasal POS</h2>
+      <img src="/logo.png" alt="Hasal Logo" class="sidebar-logo" />
     </div>
 
     <nav class="sidebar-menu">
@@ -252,11 +252,16 @@ const toggleSection = section => {
 .sidebar-header {
   padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.sidebar-header h2 {
-  font-size: 1.5rem;
-  margin: 0;
+.sidebar-logo {
+  max-width: 100%;
+  height: auto;
+  max-height: 60px;
+  object-fit: contain;
 }
 
 .sidebar-menu {

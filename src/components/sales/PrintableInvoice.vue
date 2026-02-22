@@ -478,16 +478,20 @@ const outstandingBalance = computed(() => {
 /* Print Styles */
 @media print {
   .printable-invoice {
-    padding: 10mm;
+    padding: 0;
     max-width: 100%;
   }
 
+  /* ── Epson LQ-310 page setup ────────────────────────────────
+     Paper : 9.5" × 11" continuous fanfold (standard, 3-ply NCR)
+     Printable width : ~8" — the LQ-310 leaves ~0.75" margin on each side.
+     Height is auto so the paper only feeds as far as the content needs.
+  ── */
   @page {
-    size: A4 portrait;
-    margin: 10mm;
+    size: 9.5in 11in;
+    margin: 6mm 14mm 8mm 14mm;
   }
 
-  /* Ensure proper page breaks */
   .items-table {
     page-break-inside: avoid;
   }
@@ -496,7 +500,6 @@ const outstandingBalance = computed(() => {
     page-break-inside: avoid;
   }
 
-  /* Hide any elements that shouldn't print */
   button,
   .no-print {
     display: none !important;
