@@ -318,7 +318,8 @@ nano src/api/client.js
 Update the base URL:
 
 ```javascript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://hasal-products.lumicore-labs.com/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://hasal-products.lumicore-labs.com/api';
 ```
 
 ### 6.3 Install Dependencies and Build
@@ -339,13 +340,15 @@ This creates a `dist` folder with optimized static files.
 # Create directory for frontend
 sudo mkdir -p /var/www/hasal_products/frontend
 
-# Copy built files
+# Copy built files (including public folder contents)
 sudo cp -r dist/* /var/www/hasal_products/frontend/
 
 # Set permissions
 sudo chown -R www-data:www-data /var/www/hasal_products/frontend
 sudo chmod -R 755 /var/www/hasal_products/frontend
 ```
+
+**Note:** Files in the `public/` folder are automatically included in the `dist/` build output by Vite, so they will be deployed to production.
 
 ---
 
@@ -443,6 +446,7 @@ sudo systemctl enable nginx
 ---
 
 ## 🔒 Step 8: Set Up SSL (Optional but Recommended)
+
 ### 8.1 Install Certbot
 
 ```bash
