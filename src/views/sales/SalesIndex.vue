@@ -192,6 +192,14 @@ const handlePrint = async id => {
   }
 };
 
+const handlePrintTestData = () => {
+  window.open(
+    '/test-receipt-50items.html',
+    'test_receipt',
+    'width=520,height=700,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes'
+  );
+};
+
 // Load data
 onMounted(async () => {
   await Promise.all([
@@ -219,6 +227,12 @@ onMounted(async () => {
           rounded
           severity="primary"
           @click="fetchInvoices"
+        />
+        <Button
+          label="Print Test Data"
+          icon="pi pi-print"
+          severity="warning"
+          @click="handlePrintTestData"
         />
         <Button label="Create Invoice" icon="pi pi-plus" @click="handleCreate" />
       </div>

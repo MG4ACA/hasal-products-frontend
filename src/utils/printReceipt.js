@@ -35,7 +35,7 @@ const buildReceiptHTML = invoice => {
     .map(
       item => `
     <tr>
-      <td>${item.sku?.product?.name ?? ''}<span class="item-size"> ${item.sku?.size ?? ''}</span></td>
+      <td><span class="product-name">${item.sku?.product?.name ?? ''}</span><span class="item-size"> ${item.sku?.size ?? ''}</span></td>
       <td class="tc">${item.quantity}</td>
       <td class="tr">${formatCurrency(item.unit_price)}</td>
       <td class="tc">${item.discount_percent}</td>
@@ -54,7 +54,7 @@ const buildReceiptHTML = invoice => {
           .map(
             item => `
     <tr class="return-item">
-      <td>${item.sku?.product?.name ?? ''}<span class="item-size"> ${item.sku?.size ?? ''}</span></td>
+      <td><span class="product-name">${item.sku?.product?.name ?? ''}</span><span class="item-size"> ${item.sku?.size ?? ''}</span></td>
       <td class="tc">${Math.abs(item.quantity)}</td>
       <td class="tr">${formatCurrency(item.unit_price)}</td>
       <td class="tc">-</td>
@@ -82,7 +82,7 @@ const buildReceiptHTML = invoice => {
 
   const outstandingRow =
     outstandingBalance > 0
-      ? `<div class="prow"><span>Outstanding Balance:</span><span>Rs.${formatCurrency(outstandingBalance)}</span></div>`
+      ? `<div class="prow outstanding-balance"><span>Outstanding Balance:</span><span>Rs.${formatCurrency(outstandingBalance)}</span></div>`
       : '';
 
   const salesRefRow = invoice.sales_ref
@@ -109,14 +109,14 @@ const buildReceiptHTML = invoice => {
    */
   @page {
     size: 9.5in 11in;
-    margin: 5mm 0 5mm 0;
+    margin: 0 0 0 0;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
-    width: 125mm;
-    max-width: 125mm;
+    width: 135mm;
+    max-width: 135mm;
     overflow: hidden;
     height: 100vh;
   }
@@ -139,14 +139,14 @@ const buildReceiptHTML = invoice => {
   .co-info{ width: 100%; padding-left: 5px;     text-align: start; }
   .logo { max-width: 100px; max-height: 100px; object-fit: contain; }
   .co-name { font-size: 22pt; font-family: emoji; font-weight: 600; margin: 2px 0; letter-spacing: 0; }
-  .co-sub { font-size: 8.5pt; margin: 1px 0; }
+  .co-sub { font-size: 14pt; margin: 1px 0; font-weight: 600;}
   .co-name-and-mobile{     display: flex; justify-content: space-between;}
 
   /* ── invoice meta ── */
-  .meta { display: flex; justify-content: space-between; font-size: 9pt; }
-  .meta-invoice{ margin-right: 10px }
+  .meta { display: flex; justify-content: space-between; font-size: 11pt; }
+  .meta-invoice{ margin-right: 5px }
   /* ── outlet ── */
-  .outlet { margin-bottom: 4px; font-size: 9pt; }
+  .outlet { margin-bottom: 4px; font-size: 14pt; display: flex; justify-content: space-between; }
 
   /* ── items table ──
      Column widths are fixed so nothing overflows:
@@ -165,16 +165,17 @@ const buildReceiptHTML = invoice => {
   .tc { text-align: center; }
   .tr { text-align: right; }
   .tl { text-align: left; }
-  .item-size { font-size: 7.5pt; }
+  .product-name { font-size: 14pt; font-weight: 500; }
+  .item-size { font-size: 14pt; }
   .returns-header td { border-top: 2px solid #000; border-bottom: 1px solid #000; border-right: none; font-weight: 600; padding: 2px; }
   .return-item td { border-right: none; }
   .ret { font-weight: 600; }
 
   /* ── totals ── */
   .bottom-section { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
-  .totals { margin-left: auto; width: 60%; border: 1px solid #000; padding: 3px; font-size: 9pt; }
+  .totals { margin-left: auto; width: 60%; border: 1px solid #000; padding: 3px; font-size: 14pt; }
   .row { display: flex; justify-content: space-between; padding: 1px 0; }
-  .grand { border-top: 2px solid #000; margin-top: 3px; padding-top: 3px; font-size: 10.5pt; font-weight: 600; }
+  .grand { border-top: 2px solid #000; margin-top: 3px; padding-top: 3px; font-size: 14.5pt; font-weight: 600; }
 
   /* ── stats ── */
   .stats { display: flex; gap: 12px; border: 1px solid #000; padding: 2px 3px; margin-bottom: 4px; font-size: 9pt; }
@@ -185,6 +186,7 @@ const buildReceiptHTML = invoice => {
   .payment { border: 1px solid #000; padding: 3px; margin-bottom: 4px; font-size: 9pt; }
   .prow { display: flex; gap: 5px; margin-bottom: 2px; }
   .prow span:first-child { font-weight: 600; min-width: 95px; }
+  .outstanding-balance { font-size: 14pt; font-weight: 600; }
 
   /* ── footer ── */
   .footer { text-align: center; font-size: 8pt; font-style: italic; border-top: 1px dashed #000; padding-top: 4px; margin-bottom: 6px; }
@@ -203,23 +205,23 @@ const buildReceiptHTML = invoice => {
   <div class="co-info">
   <div class="co-name">HASAL PRODUCTS</div>
   <div class="co-name-and-mobile">
-  <div class="co-sub">Thelikada, Ginmallagaha, Galle</div>
-  <div class="co-sub">Tel: 077765994</div>
+  <div class="co-sub">Thelikada, Ginimallagaha, Galle</div>
+  <div class="co-sub">Tel: 0777659946</div>
   </div>
-  <div class="co-sub">Reg No: 1/9/180/2017-08-02/04</div>
+  <div class="co-sub">Reg No: 1781004</div>
   </div>
 </div>
 
 <div class="meta">
   <div>
     <strong class="meta-invoice">INVOICE</strong>
-    No. ${invoice.invoice_number}
+     <strong>: ${invoice.invoice_number}</strong>
   </div>
-  <div>${formatDate(invoice.invoice_date)}</div>
+  <div><strong>${formatDate(invoice.invoice_date)}</strong></div>
 </div>
 
 <div class="outlet">
-  <strong>${invoice.outlet?.name ?? ''}</strong>${invoice.outlet?.address ? ', ' + invoice.outlet.address : ''}
+  ${invoice.outlet?.name ?? ''}${invoice.outlet?.address ? '  ' + invoice.outlet.address : ''}
 </div>
 
 <table>
@@ -278,7 +280,7 @@ const buildReceiptHTML = invoice => {
     // Close after the print dialog is dismissed.
     window.addEventListener('afterprint', function () { window.close(); });
   };
-<\/script>
+</script>
 </body>
 </html>`;
 };
