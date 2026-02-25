@@ -557,7 +557,7 @@ git pull origin main
 echo "🔨 Deploying backend..."
 cd backend-project
 npm install --production
-pm2 restart hasal_products-backend
+pm2 restart hasal-products-backend
 
 # Frontend deployment
 echo "🎨 Deploying frontend..."

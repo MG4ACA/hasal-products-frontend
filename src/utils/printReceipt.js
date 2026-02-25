@@ -108,17 +108,17 @@ const buildReceiptHTML = invoice => {
    * the paper; the printer driver controls the left edge.
    */
   @page {
-    size: 9.5in 11in;
-    margin: 0 0 0 0;
+    size: 14.2cm 28cm;
+    margin: 0;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
-    width: 135mm;
-    max-width: 135mm;
+    width: 11.6cm;
+    max-width: 11.6cm;
     overflow: hidden;
-    height: 100vh;
+    height: 28cm;
   }
 
   body {
