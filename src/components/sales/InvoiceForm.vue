@@ -770,6 +770,11 @@ onMounted(async () => {
     }
   }
 
+  // Initialize invoice discount if editing an existing invoice
+  if (formData.value.invoice_discount_percent) {
+    invoiceDiscountPercent.value = parseFloat(formData.value.invoice_discount_percent) || 0;
+  }
+
   await Promise.all([
     (async () => {
       employeeStore.setFilters({ type: 'sales_ref', status: 'active' });

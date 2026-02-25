@@ -30,6 +30,7 @@ const invoiceData = ref({
   check_clearance_date: null,
   notes: '',
   items: [],
+  invoice_discount_percent: 0,
 });
 
 const loadInvoice = async () => {
@@ -63,6 +64,7 @@ const loadInvoice = async () => {
         ? new Date(invoice.check_clearance_date)
         : null,
       notes: invoice.notes || '',
+      invoice_discount_percent: parseFloat(invoice.discount_percent) || 0,
       items: (invoice.items || []).map(item => ({
         sku_id: item.sku_id,
         product_name: item.sku?.product?.name || 'Unknown Product',
@@ -90,10 +92,23 @@ const handleSubmit = async data => {
   try {
     const id = route.params.id;
 
-    // Note: updateInvoice only allows updating notes and payment_status
     const updateData = {
+      items: (data.items || []).map(item => ({
+        sku_id: item.sku_id,
+        quantity: Math.abs(item.quantity),
+        unit_price: item.unit_price,
+        discount_percent: item.discount_percent || 0,
+        is_return: item.is_return || false,
+        return_reason: item.return_reason || null,
+        return_to_stock: item.return_to_stock || false,
+        original_invoice_id: item.original_invoice_id || null,
+        original_invoice_item_id: item.original_invoice_item_id || null,
+        return_policy_override: item.return_policy_override || false,
+        return_policy_override_reason: item.return_policy_override_reason || null,
+        return_policy_override_by: item.return_policy_override_by || null,
+      })),
+      invoice_discount_percent: data.invoice_discount_percent || 0,
       notes: data.notes,
-      payment_status: data.payment_status,
     };
 
     await salesStore.updateInvoice(id, updateData);
@@ -132,7 +147,7 @@ onMounted(() => {
     <div class="page-header">
       <div>
         <h1 class="page-title">Edit Sales Invoice</h1>
-        <p class="page-subtitle">Update invoice notes and payment status</p>
+        <p class="page-subtitle">Update invoice items, prices, discounts and notes</p>
       </div>
     </div>
 
