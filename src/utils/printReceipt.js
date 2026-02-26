@@ -108,7 +108,7 @@ const buildReceiptHTML = invoice => {
    * the paper; the printer driver controls the left edge.
    */
   @page {
-    size: 14.2cm auto;
+    size: 14.2cm 27.9cm;
     margin: 10mm 0 4mm 0;
   }
 
@@ -133,6 +133,10 @@ const buildReceiptHTML = invoice => {
     padding: 0 0 0 5mm;
     letter-spacing: 0;
     font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    /* 27.9cm page − 10mm top margin − 4mm bottom margin = 26.5cm printable */
+    min-height: 26.5cm;
   }
 
   /* ── header ── */
@@ -193,6 +197,9 @@ const buildReceiptHTML = invoice => {
   .footer { text-align: center; font-size: 8pt; font-style: italic; border-top: 1px dashed #000; padding-top: 4px; margin-bottom: 6px; }
   .footer p { white-space: normal; word-break: break-word; }
 
+  /* ── flex spacer — pushes bottom-section to page bottom on short receipts ── */
+  .flex-spacer { flex: 1; min-height: 0; }
+
   /* ── signatures ── */
   .sigs { display: flex; justify-content: space-between; margin-top: 12px; }
   .sig { width: 45%; }
@@ -243,6 +250,8 @@ const buildReceiptHTML = invoice => {
     ${returnRows}
   </tbody>
 </table>
+
+<div class="flex-spacer"></div>
 
 <div class="bottom-section">
 <div class="totals">
