@@ -108,8 +108,12 @@ const buildReceiptHTML = invoice => {
    * the paper; the printer driver controls the left edge.
    */
   @page {
-    size: 14.2cm 28cm;
-    margin: 0;
+    size: 14.2cm auto;
+    margin: 10mm 0 4mm 0;
+  }
+
+  @page :first {
+    margin-top: 0;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -117,8 +121,7 @@ const buildReceiptHTML = invoice => {
   html, body {
     width: 11.6cm;
     max-width: 11.6cm;
-    overflow: hidden;
-    height: 28cm;
+    overflow: visible;
   }
 
   body {
@@ -130,8 +133,6 @@ const buildReceiptHTML = invoice => {
     padding: 0 0 0 5mm;
     letter-spacing: 0;
     font-weight: 400;
-    display: flex;
-    flex-direction: column;
   }
 
   /* ── header ── */
@@ -159,7 +160,7 @@ const buildReceiptHTML = invoice => {
   col.c-disc { width: 9%; }
   col.c-amt  { width: 21%; }
   thead { border-top: 2px solid #000; border-bottom: 2px solid #000; }
-  th, td { padding: 0px 2px; border-right: 1px solid #aaa; overflow: hidden; }
+  th, td { padding: 0px 2px; border-right: 1px solid #aaa; overflow: hidden; line-height: 1.1; }
   th:last-child, td:last-child { border-right: none; }
   th { font-weight: 600; }
   .tc { text-align: center; }
@@ -172,7 +173,7 @@ const buildReceiptHTML = invoice => {
   .ret { font-weight: 600; }
 
   /* ── totals ── */
-  .bottom-section { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
+  .bottom-section { margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
   .totals { margin-left: auto; width: 60%; border: 1px solid #000; padding: 3px; font-size: 14pt; }
   .row { display: flex; justify-content: space-between; padding: 1px 0; }
   .grand { border-top: 2px solid #000; margin-top: 3px; padding-top: 3px; font-size: 14.5pt; font-weight: 600; }
@@ -205,10 +206,10 @@ const buildReceiptHTML = invoice => {
   <div class="co-info">
   <div class="co-name">HASAL PRODUCTS</div>
   <div class="co-name-and-mobile">
-  <div class="co-sub">Thelikada, Ginimallagaha, Galle</div>
+  <div class="co-sub">Reg No: 1781004</div>
   <div class="co-sub">Tel: 0777659946</div>
   </div>
-  <div class="co-sub">Reg No: 1781004</div>
+  <div class="co-sub">Puwakwaththa, Thelikada, Ginimallagaha, Galle</div>
   </div>
 </div>
 
@@ -234,7 +235,7 @@ const buildReceiptHTML = invoice => {
       <th class="tc">Qty</th>
       <th class="tr">Rate</th>
       <th class="tc">Dis%</th>
-      <th class="tr">Amount</th>
+      <th class="tr">Amount (Rs)</th>
     </tr>
   </thead>
   <tbody>
@@ -274,10 +275,35 @@ const buildReceiptHTML = invoice => {
 </div>
 
 <script>
-  // Auto-print as soon as the popup has loaded, then close it.
+  function insertEarlyPageBreak(extraRows) {
+    var rows = Array.from(document.querySelectorAll('tbody tr'));
+    if (rows.length <= extraRows + 1) return;
+
+    // 11-inch fanfold paper (279 mm) at 96 dpi ~ 1054 px
+    var PAGE_H_PX = (279 * 96) / 25.4;
+
+    var bodyTop = document.body.getBoundingClientRect().top;
+    var naturalBreakIdx = -1;
+
+    for (var i = 0; i < rows.length; i++) {
+      var rowBottom = rows[i].getBoundingClientRect().bottom - bodyTop;
+      if (rowBottom > PAGE_H_PX) {
+        naturalBreakIdx = i;
+        break;
+      }
+    }
+
+    if (naturalBreakIdx < 0) return;
+
+    var breakIdx = Math.max(0, naturalBreakIdx - extraRows);
+    var targetRow = rows[breakIdx];
+    targetRow.style.pageBreakBefore = 'always';
+    targetRow.style.breakBefore = 'page';
+  }
+
   window.onload = function () {
+    insertEarlyPageBreak(2);
     window.print();
-    // Close after the print dialog is dismissed.
     window.addEventListener('afterprint', function () { window.close(); });
   };
 </script>
