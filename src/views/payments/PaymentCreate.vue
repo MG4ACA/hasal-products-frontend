@@ -95,6 +95,7 @@
                 mode="currency"
                 currency="LKR"
                 locale="en-LK"
+                :max="totalOutstanding || undefined"
                 :disabled="!paymentData.outlet_id"
               />
             </div>
@@ -160,7 +161,7 @@
             </div>
             <div class="summary-item">
               <span>Total Allocated:</span>
-              <strong :class="{ 'text-danger': totalAllocated !== totalPaymentAmount }">
+              <strong :class="{ 'text-danger': totalAllocated > totalPaymentAmount }">
                 Rs. {{ totalAllocated.toFixed(2) }}
               </strong>
             </div>
@@ -168,8 +169,19 @@
               <span>Payment Amount:</span>
               <strong>Rs. {{ totalPaymentAmount.toFixed(2) }}</strong>
             </div>
-            <div v-if="totalAllocated !== totalPaymentAmount" class="validation-message">
-              <Message severity="warn"> Total allocated must equal payment amount </Message>
+            <div v-if="totalPaymentAmount > totalAllocated" class="summary-item">
+              <span>Unallocated:</span>
+              <strong class="text-warning"
+                >Rs. {{ (totalPaymentAmount - totalAllocated).toFixed(2) }}</strong
+              >
+            </div>
+            <div v-if="totalPaymentAmount > totalOutstanding" class="validation-message">
+              <Message severity="error">
+                Payment amount exceeds total outstanding (Rs. {{ totalOutstanding.toFixed(2) }})
+              </Message>
+            </div>
+            <div v-if="totalAllocated > totalPaymentAmount" class="validation-message">
+              <Message severity="error"> Allocated amount exceeds payment amount </Message>
             </div>
           </div>
         </div>
@@ -256,7 +268,11 @@ const isFormValid = computed(() => {
     return false;
   }
 
-  if (Math.abs(totalAllocated.value - totalPaymentAmount.value) > 0.01) {
+  if (totalPaymentAmount.value > totalOutstanding.value + 0.01) {
+    return false;
+  }
+
+  if (totalAllocated.value > totalPaymentAmount.value + 0.01) {
     return false;
   }
 
@@ -427,6 +443,10 @@ onMounted(async () => {
 
 .text-danger {
   color: #dc3545;
+}
+
+.text-warning {
+  color: #fd7e14;
 }
 
 .validation-message {

@@ -144,14 +144,14 @@ const buildReceiptHTML = invoice => {
   .co-info{ width: 100%; padding-left: 5px;     text-align: start; }
   .logo { max-width: 100px; max-height: 100px; object-fit: contain; }
   .co-name { font-size: 22pt; font-family: emoji; font-weight: 600; margin: 2px 0; letter-spacing: 0; }
-  .co-sub { font-size: 14pt; margin: 1px 0; font-weight: 600;}
+  .co-sub { font-size: 12pt; margin: 1px 0; font-weight: 600;}
   .co-name-and-mobile{     display: flex; justify-content: space-between;}
 
   /* ── invoice meta ── */
   .meta { display: flex; justify-content: space-between; font-size: 11pt; }
   .meta-invoice{ margin-right: 5px }
   /* ── outlet ── */
-  .outlet { margin-bottom: 4px; font-size: 14pt; display: flex; justify-content: space-between; }
+  .outlet { margin-bottom: 4px; font-size: 12pt; display: flex; justify-content: space-between; }
 
   /* ── items table ──
      Column widths are fixed so nothing overflows:
@@ -164,32 +164,33 @@ const buildReceiptHTML = invoice => {
   col.c-disc { width: 9%; }
   col.c-amt  { width: 21%; }
   thead { border-top: 2px solid #000; border-bottom: 2px solid #000; }
-  th, td { padding: 0px 2px; border-right: 1px solid #aaa; overflow: hidden; line-height: 1.1; }
+  .amount-class{font-size: 12pt;}
+  th, td { padding: 0px 2px; border-right: 1px solid #aaa; overflow: hidden; line-height: 1; }
   th:last-child, td:last-child { border-right: none; }
-  th { font-weight: 600; }
+  th { font-weight: 600; margin-bottom: 2px; line-height: 1.3;}
   .tc { text-align: center; }
   .tr { text-align: right; }
   .tl { text-align: left; }
-  .product-name { font-size: 14pt; font-weight: 500; }
-  .item-size { font-size: 14pt; }
+  .product-name { font-size: 13pt; font-weight: 500; }
+  .item-size { font-size: 13pt; }
   .returns-header td { border-top: 2px solid #000; border-bottom: 1px solid #000; border-right: none; font-weight: 600; padding: 2px; }
   .return-item td { border-right: none; }
   .ret { font-weight: 600; }
 
   /* ── totals ── */
-  .bottom-section { margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
+  .bottom-section { display: flex; flex-direction: column; gap: 4px; }
   .totals { margin-left: auto; width: 60%; border: 1px solid #000; padding: 3px; font-size: 14pt; }
-  .row { display: flex; justify-content: space-between; padding: 1px 0; }
-  .grand { border-top: 2px solid #000; margin-top: 3px; padding-top: 3px; font-size: 14.5pt; font-weight: 600; }
+  .row { display: flex; justify-content: space-between; }
+  .grand { border-top: 2px solid #000; padding-top: 3px; font-size: 14.5pt; font-weight: 600; }
 
   /* ── stats ── */
-  .stats { display: flex; gap: 12px; border: 1px solid #000; padding: 2px 3px; margin-bottom: 4px; font-size: 9pt; }
+  .stats { display: flex; gap: 12px; border: 1px solid #000; padding: 2px 3px; font-size: 9pt; }
   .stat { display: flex; gap: 4px; }
   .slbl { font-weight: 600; }
 
   /* ── payment ── */
-  .payment { border: 1px solid #000; padding: 3px; margin-bottom: 4px; font-size: 9pt; }
-  .prow { display: flex; gap: 5px; margin-bottom: 2px; }
+  .payment { border: 1px solid #000; padding: 3px; font-size: 9pt; }
+  .prow { display: flex; gap: 5px; }
   .prow span:first-child { font-weight: 600; min-width: 95px; }
   .outstanding-balance { font-size: 14pt; font-weight: 600; }
 
@@ -229,7 +230,12 @@ const buildReceiptHTML = invoice => {
 </div>
 
 <div class="outlet">
-  ${invoice.outlet?.name ?? ''}${invoice.outlet?.address ? '  ' + invoice.outlet.address : ''}
+<div class="outlet">
+${invoice.outlet?.name ?? ''}
+</div>
+<div class="outlet">
+${invoice.route?.name ?? ''}
+</div>
 </div>
 
 <table>
@@ -242,7 +248,7 @@ const buildReceiptHTML = invoice => {
       <th class="tc">Qty</th>
       <th class="tr">Rate</th>
       <th class="tc">Dis%</th>
-      <th class="tr">Amount (Rs)</th>
+      <th class="tr amount-class">Amount (Rs)</th>
     </tr>
   </thead>
   <tbody>

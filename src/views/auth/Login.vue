@@ -2,6 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
+        <img src="/logo.png" alt="Hasal POS Logo" class="logo-image" />
         <h1>Hasal POS</h1>
         <p>Inventory Management System</p>
       </div>
@@ -88,6 +89,15 @@ const handleLogin = async () => {
 .login-header {
   text-align: center;
   margin-bottom: 2rem;
+}
+
+.logo-image {
+  width: 100px;
+  height: auto;
+  margin-bottom: 1rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .login-header h1 {
