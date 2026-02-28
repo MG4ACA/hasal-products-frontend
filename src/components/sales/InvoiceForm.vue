@@ -72,6 +72,8 @@ const originalInvoiceId = ref(null); // Stores numeric ID for backend
 const originalInvoiceNumber = ref(null); // Stores invoice number for display
 const originalInvoiceDate = ref(null); // Stores invoice date for policy calculation
 const daysSincePurchase = ref(null); // Stores days since purchase
+const originalInvoiceUnitPrice = ref(0); // Billed unit price from original invoice
+const originalInvoiceDiscountPercent = ref(0); // Item discount from original invoice
 
 // Legacy Returns support (for pre-system purchases)
 const returnPolicyOverrideReason = ref(''); // Used only for legacy return explanation
@@ -138,7 +140,8 @@ const totalDiscount = computed(() => {
 const returnsTotal = computed(() => {
   return (formData.value.items || []).reduce((sum, item) => {
     if (!item.is_return) return sum;
-    return sum + Math.abs(item.quantity) * item.unit_price;
+    const effectiveUnitPrice = item.unit_price * (1 - (item.discount_percent || 0) / 100);
+    return sum + Math.abs(item.quantity) * effectiveUnitPrice;
   }, 0);
 });
 
@@ -511,8 +514,8 @@ const addReturnItem = async () => {
     product_name: product.name,
     sku_label: `${sku.size}${sku.unit}`,
     quantity: returnQuantity.value,
-    unit_price: sku.price,
-    discount_percent: 0,
+    unit_price: originalInvoiceUnitPrice.value,
+    discount_percent: originalInvoiceDiscountPercent.value,
     is_return: true,
     return_reason: returnReason.value,
     return_to_stock: returnToStock.value,
@@ -530,6 +533,8 @@ const addReturnItem = async () => {
   originalInvoiceNumber.value = null;
   originalInvoiceDate.value = null;
   daysSincePurchase.value = null;
+  originalInvoiceUnitPrice.value = 0;
+  originalInvoiceDiscountPercent.value = 0;
   purchaseHistory.value = null;
 };
 
@@ -627,6 +632,8 @@ const selectOriginalInvoice = invoice => {
   originalInvoiceNumber.value = invoice.invoice_number;
   originalInvoiceDate.value = invoice.invoice_date;
   daysSincePurchase.value = invoice.days_since_purchase;
+  originalInvoiceUnitPrice.value = parseFloat(invoice.unit_price || 0);
+  originalInvoiceDiscountPercent.value = parseFloat(invoice.discount_percent || 0);
   showPurchaseHistoryDialog.value = false;
 
   // Check if return is within policy limits
@@ -1465,6 +1472,12 @@ onMounted(async () => {
             </template>
           </Column>
 
+          <Column field="discount_percent" header="Discount" style="width: 90px">
+            <template #body="slotProps">
+              {{ parseFloat(slotProps.data.discount_percent || 0).toFixed(1) }}%
+            </template>
+          </Column>
+
           <Column field="return_reason" header="Reason" style="width: 150px">
             <template #body="slotProps">
               {{ returnReasonOptions.find(r => r.value === slotProps.data.return_reason)?.label }}
@@ -1481,7 +1494,13 @@ onMounted(async () => {
           <Column header="Total" style="width: 140px">
             <template #body="slotProps">
               <div class="font-semibold text-red-500">
-                -{{ formatCurrency(slotProps.data.quantity * slotProps.data.unit_price) }}
+                -{{
+                  formatCurrency(
+                    Math.abs(slotProps.data.quantity) *
+                      slotProps.data.unit_price *
+                      (1 - (slotProps.data.discount_percent || 0) / 100)
+                  )
+                }}
               </div>
             </template>
           </Column>
@@ -1723,8 +1742,26 @@ onMounted(async () => {
               </Tag>
             </template>
           </Column>
-          <Column field="unit_price" header="Price" style="width: 120px">
+          <Column field="unit_price" header="Unit Price" style="width: 120px">
             <template #body="{ data }"> Rs. {{ parseFloat(data.unit_price).toFixed(2) }} </template>
+          </Column>
+          <Column field="discount_percent" header="Discount" style="width: 90px">
+            <template #body="{ data }">
+              {{ parseFloat(data.discount_percent || 0).toFixed(1) }}%
+            </template>
+          </Column>
+          <Column header="Effective Price" style="width: 130px">
+            <template #body="{ data }">
+              <span class="font-semibold">
+                Rs.
+                {{
+                  (
+                    parseFloat(data.unit_price) *
+                    (1 - parseFloat(data.discount_percent || 0) / 100)
+                  ).toFixed(2)
+                }}
+              </span>
+            </template>
           </Column>
           <Column header="Status" style="width: 140px">
             <template #body="{ data }">
