@@ -463,7 +463,7 @@ const onProductSelect = async event => {
 };
 
 const loadRawMaterials = async () => {
-  await rawMaterialStore.fetchRawMaterials();
+  await rawMaterialStore.fetchRawMaterials({ limit: 1000 });
   rawMaterialOptions.value = rawMaterialStore.rawMaterials.map(rm => ({
     label: `${rm.code} - ${rm.name}`,
     value: rm.id,
