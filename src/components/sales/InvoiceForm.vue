@@ -788,7 +788,10 @@ onMounted(async () => {
       await employeeStore.fetchEmployees();
     })(),
     routeStore.fetchRoutes({ status: 'active' }),
-    productStore.fetchProducts({ status: 'active' }),
+    (async () => {
+      const allProducts = await productStore.fetchAllProducts();
+      productStore.products = allProducts;
+    })(),
   ]);
 });
 </script>
