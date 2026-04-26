@@ -36,7 +36,7 @@
                 <div class="text-sm text-500">Expected Output</div>
                 <div class="font-semibold text-primary text-lg">
                   {{ formatNumber(productionRun.expected_quantity || productionRun.quantity) }}
-                  {{ productionRun.unit }}
+                  {{ productionRun.recipe?.yield_unit }}
                 </div>
               </div>
             </div>
@@ -65,7 +65,12 @@
       <!-- Unit (Read-only) -->
       <div class="col-12 md:col-6">
         <label for="unit" class="block mb-2">Unit</label>
-        <InputText id="unit" v-model="productionRun.unit" class="w-full" disabled />
+        <InputText
+          id="unit"
+          :model-value="productionRun.recipe?.yield_unit"
+          class="w-full"
+          disabled
+        />
       </div>
 
       <!-- Waste Quantity -->
@@ -140,7 +145,7 @@
               <div class="col-3">
                 <div class="text-sm text-500">Total Output</div>
                 <div class="text-lg font-semibold">
-                  {{ totalOutput.toFixed(2) }} {{ productionRun.unit }}
+                  {{ totalOutput.toFixed(2) }} {{ productionRun.recipe?.yield_unit }}
                 </div>
               </div>
               <div class="col-3">
@@ -150,7 +155,7 @@
                   :class="varianceAmount >= 0 ? 'text-green-600' : 'text-red-600'"
                 >
                   {{ varianceAmount >= 0 ? '+' : '' }}{{ varianceAmount.toFixed(2) }}
-                  {{ productionRun.unit }}
+                  {{ productionRun.recipe?.yield_unit }}
                 </div>
               </div>
               <div class="col-3">

@@ -218,6 +218,7 @@
 
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
+import { recipeService } from '@/services/recipeService';
 import { useAuthStore } from '@/stores/auth';
 import { useRecipeStore } from '@/stores/recipe';
 import { formatNumber } from '@/utils/formatters';
@@ -297,10 +298,9 @@ onMounted(async () => {
 });
 
 const loadRecipes = async () => {
-  await recipeStore.fetchRecipes();
-  // Filter only active recipes
-  const activeRecipes = recipeStore.recipes.filter(r => r.is_active);
-  recipeOptions.value = activeRecipes.map(r => ({
+  const response = await recipeService.getAll({ limit: 1000, is_active: true });
+  const recipes = Array.isArray(response) ? response : response?.data || [];
+  recipeOptions.value = recipes.map(r => ({
     label: `${r.name} (v${r.version}) - ${r.product?.name}`,
     value: r.id,
   }));
