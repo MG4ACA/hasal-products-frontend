@@ -172,7 +172,7 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import { productService } from '@/services/productService';
-import { FilterMatchMode } from 'primevue/core';
+import { FilterMatchMode } from 'primevue/api';
 import { computed, onMounted, ref } from 'vue';
 
 const toast = useToastNotification();
