@@ -63,7 +63,13 @@ const totalCost = computed(() => {
   const recipe = recipeStore.currentRecipe;
   if (!recipe?.items) return 0;
   return recipe.items.reduce((sum, item) => {
-    const cost = parseFloat(item.material?.average_cost || 0) * parseFloat(item.quantity || 0);
+    let unitCost = 0;
+    if (item.material_type === 'finished_product') {
+      unitCost = parseFloat(item.unit_cost || 0);
+    } else {
+      unitCost = parseFloat(item.material?.average_cost || 0);
+    }
+    const cost = unitCost * parseFloat(item.quantity || 0);
     return sum + cost;
   }, 0);
 });
@@ -76,7 +82,13 @@ const costPerUnit = computed(() => {
 });
 
 const calculateItemCost = item => {
-  const cost = parseFloat(item.material?.average_cost || 0) * parseFloat(item.quantity || 0);
+  let unitCost = 0;
+  if (item.material_type === 'finished_product') {
+    unitCost = parseFloat(item.unit_cost || 0);
+  } else {
+    unitCost = parseFloat(item.material?.average_cost || 0);
+  }
+  const cost = unitCost * parseFloat(item.quantity || 0);
   return formatNumber(cost);
 };
 </script>
@@ -217,14 +229,25 @@ const calculateItemCost = item => {
               </div>
             </template>
 
-            <Column header="Raw Material" style="min-width: 200px">
+            <Column header="Material / Product" style="min-width: 200px">
               <template #body="{ data }">
                 <div class="material-cell">
-                  <div class="font-semibold">
-                    {{ data.material?.code }}
+                  <div v-if="data.material_type === 'raw_material'">
+                    <div class="font-semibold">
+                      {{ data.material?.code }}
+                    </div>
+                    <div class="text-sm text-600">
+                      {{ data.material?.name }}
+                    </div>
                   </div>
-                  <div class="text-sm text-600">
-                    {{ data.material?.name }}
+                  <div v-else-if="data.material_type === 'finished_product'">
+                    <div class="font-semibold text-primary">
+                      <i class="pi pi-box mr-2" style="font-size: 0.875rem" />
+                      {{ data.productSku?.product?.name || 'Product' }}
+                    </div>
+                    <div class="text-sm text-600">
+                      {{ data.productSku?.size }} {{ data.productSku?.unit }}
+                    </div>
                   </div>
                 </div>
               </template>
@@ -238,7 +261,12 @@ const calculateItemCost = item => {
 
             <Column header="Unit Cost" style="min-width: 120px">
               <template #body="{ data }">
-                Rs. {{ formatNumber(data.material?.average_cost || 0) }}
+                <span v-if="data.material_type === 'raw_material'">
+                  Rs. {{ formatNumber(data.material?.average_cost || 0) }}
+                </span>
+                <span v-else-if="data.material_type === 'finished_product'">
+                  Rs. {{ formatNumber(data.unit_cost || 0) }}
+                </span>
               </template>
             </Column>
 

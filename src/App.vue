@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="app">
-    <component :is="'RouterView'" v-if="!isAuthenticated" />
+    <RouterView v-if="!isAuthenticated" />
     <AppLayout v-else />
     <Toast />
     <ConfirmDialog />
@@ -11,6 +11,7 @@
 import AppLayout from '@/components/layout/AppLayout.vue';
 import { useAuthStore } from '@/stores/auth';
 import { computed } from 'vue';
+import { RouterView } from 'vue-router';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);

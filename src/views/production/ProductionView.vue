@@ -37,7 +37,7 @@ onMounted(async () => {
       breadcrumbItems.value = [
         { label: 'Dashboard', to: '/' },
         { label: 'Production', to: '/production-runs' },
-        { label: productionStore.currentProductionRun.run_number },
+        { label: productionStore.currentProductionRun.batch_number },
       ];
     }
   } catch (error) {
@@ -80,9 +80,10 @@ const totalMaterialCost = computed(() => {
 
 const efficiency = computed(() => {
   const run = productionStore.currentProductionRun;
-  if (!run || !run.quantity || run.quantity === 0) return 0;
-  const totalOutput = parseFloat(run.actual_output || 0) + parseFloat(run.waste_quantity || 0);
-  return ((parseFloat(run.actual_output || 0) / parseFloat(run.quantity)) * 100).toFixed(2);
+  if (!run || !run.expected_quantity || parseFloat(run.expected_quantity) === 0) return 0;
+  return ((parseFloat(run.actual_quantity || 0) / parseFloat(run.expected_quantity)) * 100).toFixed(
+    2
+  );
 });
 </script>
 
@@ -111,7 +112,7 @@ const efficiency = computed(() => {
       <div class="page-header">
         <div class="header-content">
           <div class="header-text">
-            <h1>Production Run {{ productionStore.currentProductionRun?.run_number }}</h1>
+            <h1>Production Run {{ productionStore.currentProductionRun?.batch_number }}</h1>
             <p>Production Run Details & Output Tracking</p>
             <div class="production-meta">
               <span class="recipe-name">
@@ -249,14 +250,14 @@ const efficiency = computed(() => {
               <span class="label">Expected Quantity:</span>
               <span class="value"
                 >{{ formatNumber(productionStore.currentProductionRun.expected_quantity) }}
-                {{ productionStore.currentProductionRun.unit }}</span
+                {{ productionStore.currentProductionRun.recipe?.yield_unit }}</span
               >
             </div>
             <div v-if="productionStore.currentProductionRun?.actual_quantity" class="info-row">
               <span class="label">Actual Quantity:</span>
               <span class="value font-semibold"
                 >{{ formatNumber(productionStore.currentProductionRun.actual_quantity) }}
-                {{ productionStore.currentProductionRun.unit }}</span
+                {{ productionStore.currentProductionRun.recipe?.yield_unit }}</span
               >
             </div>
             <div v-if="productionStore.currentProductionRun?.waste_quantity" class="info-row">
@@ -268,7 +269,7 @@ const efficiency = computed(() => {
                     : 'value'
                 "
                 >{{ formatNumber(productionStore.currentProductionRun.waste_quantity) }}
-                {{ productionStore.currentProductionRun.unit }}</span
+                {{ productionStore.currentProductionRun.recipe?.yield_unit }}</span
               >
             </div>
             <div v-if="productionStore.currentProductionRun?.yield_efficiency" class="info-row">
@@ -336,8 +337,8 @@ const efficiency = computed(() => {
             <div class="output-item">
               <div class="output-label">Actual Output</div>
               <div class="output-value primary">
-                {{ formatNumber(productionStore.currentProductionRun?.actual_output || 0) }}
-                {{ productionStore.currentProductionRun?.unit }}
+                {{ formatNumber(productionStore.currentProductionRun?.actual_quantity || 0) }}
+                {{ productionStore.currentProductionRun?.recipe?.yield_unit }}
               </div>
             </div>
             <div
@@ -355,7 +356,7 @@ const efficiency = computed(() => {
                 }"
               >
                 {{ formatNumber(productionStore.currentProductionRun?.waste_quantity || 0) }}
-                {{ productionStore.currentProductionRun?.unit }}
+                {{ productionStore.currentProductionRun?.recipe?.yield_unit }}
               </div>
             </div>
             <div class="output-item">
@@ -391,14 +392,25 @@ const efficiency = computed(() => {
               </div>
             </template>
 
-            <Column header="Raw Material" style="min-width: 200px">
+            <Column header="Material / Product" style="min-width: 200px">
               <template #body="{ data }">
                 <div class="material-cell">
-                  <div class="font-semibold">
-                    {{ data.batch?.material?.code }}
+                  <div v-if="data.material_type === 'raw_material'">
+                    <div class="font-semibold">
+                      {{ data.batch?.material?.code }}
+                    </div>
+                    <div class="text-sm text-600">
+                      {{ data.batch?.material?.name }}
+                    </div>
                   </div>
-                  <div class="text-sm text-600">
-                    {{ data.batch?.material?.name }}
+                  <div v-else-if="data.material_type === 'finished_product'">
+                    <div class="font-semibold text-primary">
+                      <i class="pi pi-box mr-2" style="font-size: 0.875rem" />
+                      {{ data.productSku?.product?.name || 'Product' }}
+                    </div>
+                    <div class="text-sm text-600">
+                      {{ data.productSku?.size }} {{ data.productSku?.unit }}
+                    </div>
                   </div>
                 </div>
               </template>
@@ -406,12 +418,20 @@ const efficiency = computed(() => {
 
             <Column header="Quantity Used" style="min-width: 120px">
               <template #body="{ data }">
-                {{ formatNumber(data.quantity_used) }} {{ data.unit }}
+                {{ formatNumber(data.quantity_used) }}
+                {{ data.productSku?.unit || data.batch?.material?.unit || data.unit }}
               </template>
             </Column>
 
             <Column header="Unit Cost" style="min-width: 120px">
-              <template #body="{ data }"> Rs. {{ formatNumber(data.average_cost || 0) }} </template>
+              <template #body="{ data }">
+                <span v-if="data.material_type === 'raw_material'">
+                  Rs. {{ formatNumber(data.batch?.unit_cost || 0) }}
+                </span>
+                <span v-else>
+                  Rs. {{ formatNumber(data.unit_cost || data.productSku?.price || 0) }}
+                </span>
+              </template>
             </Column>
 
             <Column header="Total Cost" style="min-width: 120px">
@@ -443,15 +463,15 @@ const efficiency = computed(() => {
         <template #content>
           <div class="completion-info">
             <div class="info-item">
-              <span class="label">Completed At:</span>
+              <span class="label">Production Date:</span>
               <span class="value">{{
-                formatDate(productionStore.currentProductionRun?.completed_at)
+                formatDate(productionStore.currentProductionRun?.production_date)
               }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Completed By:</span>
+              <span class="label">Produced By:</span>
               <span class="value">{{
-                productionStore.currentProductionRun?.completed_by_name || 'N/A'
+                productionStore.currentProductionRun?.producedBy?.username || 'N/A'
               }}</span>
             </div>
           </div>
@@ -470,22 +490,6 @@ const efficiency = computed(() => {
           <p>{{ productionStore.currentProductionRun?.notes }}</p>
         </template>
       </Card>
-
-      <!-- Timestamps -->
-      <div class="timestamps">
-        <div class="timestamp-item">
-          <span class="label">Created:</span>
-          <span class="value">{{
-            formatDate(productionStore.currentProductionRun?.created_at)
-          }}</span>
-        </div>
-        <div class="timestamp-item">
-          <span class="label">Updated:</span>
-          <span class="value">{{
-            formatDate(productionStore.currentProductionRun?.updated_at)
-          }}</span>
-        </div>
-      </div>
     </template>
   </div>
 </template>

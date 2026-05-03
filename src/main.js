@@ -1,10 +1,8 @@
+import Aura from '@primeuix/themes/aura';
 import { createPinia } from 'pinia';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 import PrimeVue from 'primevue/config';
-import 'primevue/resources/primevue.css';
-import 'primevue/resources/themes/aura-light-green/theme.css';
-import 'primevue/resources/themes/lara-light-blue/theme.css';
 import { createApp } from 'vue';
 
 // Import custom styles
@@ -42,6 +40,7 @@ import Paginator from 'primevue/paginator';
 import Password from 'primevue/password';
 import ProgressBar from 'primevue/progressbar';
 import ProgressSpinner from 'primevue/progressspinner';
+import Select from 'primevue/select';
 import SelectButton from 'primevue/selectbutton';
 import Steps from 'primevue/steps';
 import TabPanel from 'primevue/tabpanel';
@@ -57,7 +56,16 @@ const app = createApp(App);
 // Use plugins
 app.use(createPinia());
 app.use(router);
-app.use(PrimeVue);
+app.use(PrimeVue, {
+  theme: {
+    preset: Aura,
+    options: {
+      prefix: 'p',
+      darkModeSelector: '.dark',
+      cssLayer: false,
+    },
+  },
+});
 
 app.use(ToastService);
 app.use(ConfirmationService);
@@ -98,6 +106,7 @@ app.component('InputIcon', InputIcon);
 app.component('TabPanel', TabPanel);
 app.component('Checkbox', Checkbox);
 app.component('SelectButton', SelectButton);
+app.component('Select', Select);
 app.component('Password', Password);
 
 app.directive('badge', BadgeDirective);

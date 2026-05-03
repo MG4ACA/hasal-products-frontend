@@ -19,19 +19,19 @@
               <label for="product" class="block mb-2">
                 Product <span class="text-red-500">*</span>
               </label>
-              <AutoComplete
+              <Select
                 id="product"
-                v-model="selectedProduct"
-                :suggestions="filteredProducts"
-                field="label"
+                v-model="formData.product_id"
+                :options="productOptions"
                 option-label="label"
+                option-value="value"
                 placeholder="Search and select product"
+                filter
                 class="w-full"
                 :class="{ 'p-invalid': errors.product_id }"
                 :disabled="isEditMode"
                 required
-                @complete="onSearchProducts"
-                @item-select="onProductSelect"
+                @change="onProductChange"
               />
               <small v-if="errors.product_id" class="p-error">{{ errors.product_id }}</small>
             </div>
@@ -39,7 +39,7 @@
             <!-- SKU Selection -->
             <div class="col-12 md:col-6">
               <label for="sku" class="block mb-2"> SKU <span class="text-red-500">*</span> </label>
-              <Dropdown
+              <Select
                 id="sku"
                 v-model="formData.product_sku_id"
                 :options="skuOptions"
@@ -94,7 +94,7 @@
               <label for="yield_unit" class="block mb-2">
                 Unit <span class="text-red-500">*</span>
               </label>
-              <Dropdown
+              <Select
                 id="yield_unit"
                 v-model="formData.yield_unit"
                 :options="unitOptions"
@@ -107,12 +107,13 @@
             <!-- Status -->
             <div class="col-12 md:col-6">
               <label for="status" class="block mb-2">Status</label>
-              <Dropdown
+              <Select
                 id="status"
                 v-model="formData.status"
                 :options="statusOptions"
                 option-label="label"
                 option-value="value"
+                placeholder="Select Status"
                 class="w-full"
               />
             </div>
@@ -149,9 +150,15 @@
                 <div class="text-center p-4">No materials added yet</div>
               </template>
 
-              <Column header="Raw Material">
-                <template #body="{ data, index }">
-                  {{ getRawMaterialName(data.raw_material_id) }}
+              <Column header="Ingredient">
+                <template #body="{ data }">
+                  <Tag
+                    v-if="data.material_type === 'finished_product'"
+                    value="Product"
+                    severity="info"
+                    class="mr-2"
+                  />
+                  {{ getIngredientName(data) }}
                 </template>
               </Column>
 
@@ -162,9 +169,7 @@
               </Column>
 
               <Column header="Est. Cost">
-                <template #body="{ data }">
-                  Rs. {{ calculateItemCost(data.raw_material_id, data.quantity) }}
-                </template>
+                <template #body="{ data }"> Rs. {{ calculateItemCost(data) }} </template>
               </Column>
 
               <Column header="Actions">
@@ -236,29 +241,86 @@
     <!-- BOM Item Dialog -->
     <Dialog
       v-model:visible="showBomDialog"
-      :style="{ width: '500px' }"
-      :header="bomEditIndex !== null ? 'Edit Material' : 'Add Material'"
+      :style="{ width: '520px' }"
+      :header="bomEditIndex !== null ? 'Edit Ingredient' : 'Add Ingredient'"
       :modal="true"
     >
-      <div class="grid justify-content-between">
-        <div class="col-12">
-          <label for="raw_material" class="block mb-2">
-            Raw Material <span class="text-red-500">*</span>
-          </label>
-          <Dropdown
-            id="raw_material"
-            v-model="bomFormData.raw_material_id"
-            :options="rawMaterialOptions"
+      <div class="grid gap-3">
+        <!-- Material Type Toggle -->
+        <div class="col-12 mb-2">
+          <label class="block mb-2">Ingredient Type</label>
+          <SelectButton
+            v-model="bomFormData.material_type"
+            :options="materialTypeOptions"
             option-label="label"
             option-value="value"
-            placeholder="Select Raw Material"
             class="w-full"
-            filter
-            required
           />
         </div>
 
-        <div class="col-12 md:col-4">
+        <!-- Raw Material fields -->
+        <template v-if="bomFormData.material_type === 'raw_material'">
+          <div class="col-12">
+            <label for="raw_material" class="block mb-2">
+              Raw Material <span class="text-red-500">*</span>
+            </label>
+            <Select
+              id="raw_material"
+              v-model="bomFormData.raw_material_id"
+              :options="rawMaterialOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Select Raw Material"
+              filter
+              class="w-full"
+              required
+            />
+          </div>
+        </template>
+
+        <!-- Finished Product fields -->
+        <template v-else>
+          <div class="col-12">
+            <label class="block mb-2">Product <span class="text-red-500">*</span></label>
+            <Select
+              v-model="bomFormData.product_id"
+              :options="productOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Search product"
+              filter
+              class="w-full"
+              @change="onBomProductChange"
+            />
+          </div>
+          <div class="col-12">
+            <label class="block mb-2">SKU <span class="text-red-500">*</span></label>
+            <Select
+              v-model="bomFormData.product_sku_id"
+              :options="bomSkuOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Select SKU"
+              class="w-full"
+              @change="onBomSkuSelect"
+            />
+          </div>
+          <div class="col-12 md:col-6">
+            <label class="block mb-2">Unit Cost (Rs.) <span class="text-red-500">*</span></label>
+            <InputNumber
+              v-model="bomFormData.unit_cost"
+              class="w-full"
+              mode="decimal"
+              :min-fraction-digits="2"
+              :max-fraction-digits="2"
+              :min="0"
+            />
+            <small class="text-500">Pre-filled from SKU price; edit if needed</small>
+          </div>
+        </template>
+
+        <!-- Quantity and Unit (common) -->
+        <div class="col-12 md:col-6">
           <label for="quantity" class="block mb-2">
             Quantity <span class="text-red-500">*</span>
           </label>
@@ -278,7 +340,7 @@
           <label for="bom_unit" class="block mb-2">
             Unit <span class="text-red-500">*</span>
           </label>
-          <Dropdown
+          <Select
             id="bom_unit"
             v-model="bomFormData.unit"
             :options="unitOptions"
@@ -288,7 +350,7 @@
           />
         </div>
 
-        <div v-if="bomFormData.raw_material_id" class="col-12">
+        <div v-if="bomItemCost !== '0.00'" class="col-12">
           <div class="p-3 surface-100 border-round">
             <div class="text-sm text-500 mb-1">Estimated Cost</div>
             <div class="text-lg font-bold">Rs. {{ bomItemCost }}</div>
@@ -342,10 +404,16 @@ const errors = ref({});
 const showBomDialog = ref(false);
 const bomEditIndex = ref(null);
 const productOptions = ref([]);
-const filteredProducts = ref([]);
-const selectedProduct = ref(null);
 const skuOptions = ref([]);
 const rawMaterialOptions = ref([]);
+
+// Finished product ingredient selector state
+const bomSkuOptions = ref([]);
+
+const materialTypeOptions = [
+  { label: 'Raw Material', value: 'raw_material' },
+  { label: 'Finished Product', value: 'finished_product' },
+];
 
 const formData = ref({
   product_id: null,
@@ -359,7 +427,11 @@ const formData = ref({
 });
 
 const bomFormData = ref({
+  material_type: 'raw_material',
   raw_material_id: null,
+  product_id: null,
+  product_sku_id: null,
+  unit_cost: null,
   quantity: 0,
   unit: 'kg',
 });
@@ -375,9 +447,11 @@ const isEditMode = computed(() => !!props.recipeId);
 
 const totalCost = computed(() => {
   return formData.value.items.reduce((sum, item) => {
+    if (item.material_type === 'finished_product') {
+      return sum + parseFloat(item.unit_cost || 0) * parseFloat(item.quantity || 0);
+    }
     const material = rawMaterialStore.rawMaterials.find(rm => rm.id === item.raw_material_id);
-    const cost = parseFloat(material?.average_cost || 0) * parseFloat(item.quantity || 0);
-    return sum + cost;
+    return sum + parseFloat(material?.average_cost || 0) * parseFloat(item.quantity || 0);
   }, 0);
 });
 
@@ -390,15 +464,18 @@ const costPerUnit = computed(() => {
 
 // Computed property for BOM dialog - shows estimated cost reactively
 const bomItemCost = computed(() => {
-  if (!bomFormData.value.raw_material_id || !bomFormData.value.quantity) {
-    return '0.00';
+  const qty = parseFloat(bomFormData.value.quantity || 0);
+  if (!qty) return '0.00';
+  if (bomFormData.value.material_type === 'finished_product') {
+    const unitCost = parseFloat(bomFormData.value.unit_cost || 0);
+    return (unitCost * qty).toFixed(2);
   }
+  if (!bomFormData.value.raw_material_id) return '0.00';
   const material = rawMaterialStore.rawMaterials.find(
     rm => rm.id === bomFormData.value.raw_material_id
   );
   if (!material) return '0.00';
-  const cost = parseFloat(material.average_cost || 0) * parseFloat(bomFormData.value.quantity || 0);
-  return cost.toFixed(2);
+  return (parseFloat(material.average_cost || 0) * qty).toFixed(2);
 });
 
 onMounted(async () => {
@@ -407,7 +484,6 @@ onMounted(async () => {
 
   if (isEditMode.value) {
     await loadRecipe(props.recipeId);
-    initializeSelectedProduct();
   } else if (props.duplicateData) {
     // Pre-fill form with duplicate data
     formData.value = {
@@ -420,7 +496,9 @@ onMounted(async () => {
       status: props.duplicateData.status || 'active',
       items: props.duplicateData.items || [],
     };
-    initializeSelectedProduct();
+    if (formData.value.product_id) {
+      await onProductChange();
+    }
   }
 });
 
@@ -430,36 +508,12 @@ const loadProducts = async () => {
     label: `${p.code} - ${p.name}`,
     value: p.id,
   }));
-  filteredProducts.value = productOptions.value;
 };
 
 const initializeSelectedProduct = () => {
   if (formData.value.product_id) {
-    const product = productOptions.value.find(p => p.value === formData.value.product_id);
-    if (product) {
-      selectedProduct.value = product;
-    }
+    onProductChange();
   }
-};
-
-const onSearchProducts = event => {
-  const query = event.query.toLowerCase();
-  if (!query) {
-    filteredProducts.value = productOptions.value;
-  } else {
-    filteredProducts.value = productOptions.value.filter(product =>
-      product.label.toLowerCase().includes(query)
-    );
-  }
-};
-
-const onProductSelect = async event => {
-  // event.value contains the selected product object
-  if (event.value) {
-    selectedProduct.value = event.value;
-    formData.value.product_id = event.value.value;
-  }
-  await onProductChange();
 };
 
 const loadRawMaterials = async () => {
@@ -483,11 +537,32 @@ const loadRecipe = async id => {
       yield_unit: recipe.yield_unit,
       status: 'active', // New version is always active
       items:
-        recipe.items?.map(item => ({
-          raw_material_id: item.material_id,
-          quantity: parseFloat(item.quantity) || 0,
-          unit: item.unit,
-        })) || [],
+        recipe.items?.map(item => {
+          if (item.material_type === 'finished_product') {
+            const sku = item.productSku;
+            return {
+              material_type: 'finished_product',
+              raw_material_id: null,
+              product_id: item.product_id || sku?.product_id || sku?.product?.id || null,
+              product_sku_id: item.product_sku_id,
+              unit_cost: parseFloat(item.unit_cost || sku?.price || 0),
+              quantity: parseFloat(item.quantity) || 0,
+              unit: item.unit,
+              // For display only
+              _productName: sku?.product
+                ? `${sku.product.name} ${sku.size || ''} ${sku.unit || ''}`.trim()
+                : `SKU #${item.product_sku_id}`,
+            };
+          }
+          return {
+            material_type: 'raw_material',
+            raw_material_id: item.material_id,
+            product_sku_id: null,
+            unit_cost: null,
+            quantity: parseFloat(item.quantity) || 0,
+            unit: item.unit,
+          };
+        }) || [],
     };
     await onProductChange();
   } catch (error) {
@@ -511,25 +586,78 @@ const onProductChange = async () => {
     })) || [];
 };
 
-const getRawMaterialName = id => {
-  const material = rawMaterialStore.rawMaterials.find(rm => rm.id === id);
+const getIngredientName = item => {
+  if (item.material_type === 'finished_product') {
+    return item._productName || `SKU #${item.product_sku_id}`;
+  }
+  const material = rawMaterialStore.rawMaterials.find(rm => rm.id === item.raw_material_id);
   return material ? `${material.code} - ${material.name}` : 'Unknown';
 };
 
-const calculateItemCost = (materialId, quantity) => {
-  const material = rawMaterialStore.rawMaterials.find(rm => rm.id === materialId);
-  if (!material || !quantity) return '0.00';
-  const cost = parseFloat(material.average_cost || 0) * parseFloat(quantity || 0);
-  return cost.toFixed(2);
+const calculateItemCost = item => {
+  const qty = parseFloat(item.quantity || 0);
+  if (!qty) return '0.00';
+  if (item.material_type === 'finished_product') {
+    return (parseFloat(item.unit_cost || 0) * qty).toFixed(2);
+  }
+  const material = rawMaterialStore.rawMaterials.find(rm => rm.id === item.raw_material_id);
+  return (parseFloat(material?.average_cost || 0) * qty).toFixed(2);
 };
-const editBomItem = index => {
+
+// BOM dialog: product selection for finished product ingredient
+const onBomProductChange = async () => {
+  if (!bomFormData.value.product_id) {
+    bomSkuOptions.value = [];
+    bomFormData.value.product_sku_id = null;
+    bomFormData.value.unit_cost = null;
+    return;
+  }
+
+  const product = await productStore.fetchProductById(bomFormData.value.product_id);
+  bomSkuOptions.value =
+    product.skus?.map(sku => ({
+      label: `${sku.size} ${sku.unit} - Rs.${sku.price} (Stock: ${sku.current_stock || 0})`,
+      value: sku.id,
+      price: parseFloat(sku.price || 0),
+      unit: sku.unit,
+      current_stock: sku.current_stock || 0,
+    })) || [];
+  bomFormData.value.product_sku_id = null;
+  bomFormData.value.unit_cost = null;
+};
+
+const onBomSkuSelect = event => {
+  const selected = bomSkuOptions.value.find(s => s.value === bomFormData.value.product_sku_id);
+  if (selected) {
+    bomFormData.value.unit_cost = selected.price;
+    if (!bomFormData.value.unit || bomFormData.value.unit === 'kg') {
+      bomFormData.value.unit = selected.unit || 'pcs';
+    }
+  }
+};
+const editBomItem = async index => {
   bomEditIndex.value = index;
   const item = formData.value.items[index];
   bomFormData.value = {
-    raw_material_id: item.raw_material_id,
+    material_type: item.material_type || 'raw_material',
+    raw_material_id: item.raw_material_id || null,
+    product_id: item.product_id || null,
+    product_sku_id: item.product_sku_id || null,
+    unit_cost: item.unit_cost || null,
     quantity: item.quantity,
     unit: item.unit,
   };
+  if (item.material_type === 'finished_product' && item.product_id) {
+    const product = await productStore.fetchProductById(item.product_id);
+    bomSkuOptions.value =
+      product.skus?.map(sku => ({
+        label: `${sku.size} ${sku.unit} - Rs.${sku.price} (Stock: ${sku.current_stock || 0})`,
+        value: sku.id,
+        price: parseFloat(sku.price || 0),
+        unit: sku.unit,
+        current_stock: sku.current_stock || 0,
+      })) || [];
+  }
   showBomDialog.value = true;
 };
 
@@ -540,23 +668,59 @@ const deleteBomItem = index => {
 const closeBomDialog = () => {
   showBomDialog.value = false;
   bomEditIndex.value = null;
+  bomSkuOptions.value = [];
   bomFormData.value = {
+    material_type: 'raw_material',
     raw_material_id: null,
+    product_id: null,
+    product_sku_id: null,
+    unit_cost: null,
     quantity: 0,
     unit: 'kg',
   };
 };
 
 const saveBomItem = () => {
-  if (!bomFormData.value.raw_material_id || !bomFormData.value.quantity) {
-    showError('Please fill all required fields');
-    return;
-  }
-
-  if (bomEditIndex.value !== null) {
-    formData.value.items[bomEditIndex.value] = { ...bomFormData.value };
+  if (bomFormData.value.material_type === 'finished_product') {
+    if (!bomFormData.value.product_sku_id || !bomFormData.value.quantity) {
+      showError('Please select a product SKU and enter a quantity');
+      return;
+    }
+    const selected = bomSkuOptions.value.find(s => s.value === bomFormData.value.product_sku_id);
+    const productLabel = selected?.label || `SKU #${bomFormData.value.product_sku_id}`;
+    const newItem = {
+      material_type: 'finished_product',
+      raw_material_id: null,
+      product_id: bomFormData.value.product_id,
+      product_sku_id: bomFormData.value.product_sku_id,
+      unit_cost: bomFormData.value.unit_cost || (selected?.price ?? 0),
+      quantity: bomFormData.value.quantity,
+      unit: bomFormData.value.unit,
+      _productName: productLabel,
+    };
+    if (bomEditIndex.value !== null) {
+      formData.value.items[bomEditIndex.value] = newItem;
+    } else {
+      formData.value.items.push(newItem);
+    }
   } else {
-    formData.value.items.push({ ...bomFormData.value });
+    if (!bomFormData.value.raw_material_id || !bomFormData.value.quantity) {
+      showError('Please fill all required fields');
+      return;
+    }
+    const newItem = {
+      material_type: 'raw_material',
+      raw_material_id: bomFormData.value.raw_material_id,
+      product_sku_id: null,
+      unit_cost: null,
+      quantity: bomFormData.value.quantity,
+      unit: bomFormData.value.unit,
+    };
+    if (bomEditIndex.value !== null) {
+      formData.value.items[bomEditIndex.value] = newItem;
+    } else {
+      formData.value.items.push(newItem);
+    }
   }
 
   closeBomDialog();
@@ -586,14 +750,25 @@ const handleSubmit = () => {
   }
 
   // Emit submit event with transformed data to parent
-  // Transform items to use material_id instead of raw_material_id
   const submitData = {
     ...formData.value,
-    items: formData.value.items.map(item => ({
-      material_id: item.raw_material_id, // Map raw_material_id to material_id
-      quantity: item.quantity,
-      unit: item.unit,
-    })),
+    items: formData.value.items.map(item => {
+      if (item.material_type === 'finished_product') {
+        return {
+          material_type: 'finished_product',
+          product_sku_id: item.product_sku_id,
+          unit_cost: item.unit_cost,
+          quantity: item.quantity,
+          unit: item.unit,
+        };
+      }
+      return {
+        material_type: 'raw_material',
+        material_id: item.raw_material_id,
+        quantity: item.quantity,
+        unit: item.unit,
+      };
+    }),
   };
 
   emit('submit', submitData);

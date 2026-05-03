@@ -175,9 +175,24 @@
                 <span v-else class="text-500">(per batch)</span>
               </h4>
               <DataTable :value="requiredMaterials" class="p-datatable-sm">
-                <Column field="name" header="Raw Material">
+                <Column field="name" header="Ingredient">
                   <template #body="{ data }">
-                    {{ data.material?.name }}
+                    <Tag
+                      v-if="data.material_type === 'finished_product'"
+                      value="Product"
+                      severity="info"
+                      class="mr-2"
+                    />
+                    <span v-if="data.material_type === 'finished_product'">
+                      {{
+                        data.productSku?.product?.name
+                          ? `${data.productSku.product.name} ${data.productSku.size || ''} ${data.productSku.unit || ''}`.trim()
+                          : `SKU #${data.product_sku_id}`
+                      }}
+                    </span>
+                    <span v-else>
+                      {{ data.material?.name || 'Unknown' }}
+                    </span>
                   </template>
                 </Column>
                 <Column field="quantity" header="Required Quantity">
