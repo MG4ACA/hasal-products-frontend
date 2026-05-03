@@ -172,8 +172,11 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import { productService } from '@/services/productService';
-import { FilterMatchMode } from 'primevue/api';
 import { computed, onMounted, ref } from 'vue';
+
+const FilterMatchMode = {
+  CONTAINS: 'contains',
+};
 
 const toast = useToastNotification();
 const loading = ref(false);
