@@ -1,0 +1,94 @@
+section,task,sevierty,status,
+Wastage Tracking,fully test ths ,high,pending ,
+Title bar,Need to remove duplicate titile showing in every area,low,pending,
+breadcrumb ,Not consist every where,low,pending,
+Toast message,toast have a style isse ,low,pending,
+check ,"- User management (create, edit, deactivate users)",normal,pending,
+,- Track which sales ref collected each order,normal,pending,
+,- Performance tracking (future: commission calculation),normal,pending,
+,- Role-based access control,normal,pending,
+,#### 3.2.3 Supplier Payments & Returns,normal,pending,
+- Finished goodsCurrent stock levels by SKU - ,we can use grouped table to expande skus seperatly,improv,pending,
+#### 3.3.3 Production/Manufacturing,Test all the section,normal,pending,
+Sales reffs ,sles refs user interface to see thier details,improv,pending,
+- **Cash payments:**,- Update daily cash register,normal,pending,
+#### 3.5.5 Product Returns from Outlets,,high,pending,high
+"makring flow with tab - AutoFocus/ Focus Trap
+ coponent","Create Purchase Order-> add items ui must focus on raw materials, 
+not next button",improv,pending,
+grouped table ,"SupplierView -> Recent Purchase Orders should be able to see batches 
+in gruped ",improv,pending,
+Suplier payemtn - reports,"""Show all payments cleared between Jan 1 - Jan 15""",normal,pending,
+Suplier payemtn - reports,"""Payment aging report: pending for 15 days, 30 days, 60 days""",normal,pending,
+#### 3.6.1 Credit Sales Tracking,- Aging analysis (30/60/90 days),normal,pending,
+#### 3.6.2 Payment Collection,- Track clearance status,normal,pending,
+#### 3.6.3 Credit Limit Management,,normal,pending,
+## 6. User Workflows,,normal,pending,
+### Test 2.3: View Outlet Balance,after outlet sales payemtn check outlet table balance show correctly,normal,pending,
+Botton consistancy. ,need to update button styles and  colors across the system,improv,pending,high
+product form skus,"product form skus are added by product edit flow, seperate sku api, make that addeble in product creation flow",improv,pending,high
+Product skus ,product skus reorder level(edit product form) is not at  be side,high,pending,high
+Error Handler,error hadler is not properly working,improv,pending,
+Production run ssue ,"whenw e run a production, stocks are reducing from the batch details. so then we cannot track initial batch qty",high,pending,high
+Audit Information,track audit info throught out the uis,improv,pending,high
+ProductionView,Output Details shows wrong values,normal,pending,high
+Create Sales Invoice,"in that form, items table duplicate same products, should be able to edit that table rows",normal,pending,high
+InvoiceView,Total Discount: is not calculating properly,normal,pending,high
+Create Sales Invoice,"submit invoice, button disablity check ",normal,pending,high
+error.response?.data?.message,this error check is false throughout the system. update it ,improv,pending,high
+Production creation- return discount ,"production creation return, shows full total amount without the discount",improv,pending,high
+sales deletion issue. ,"in sales page sales deletion, we see 2 confirmation messages/ also sales should not be able to delete, if delete ok need to update the stocks",improv,pending,high
+Sales Invoices edit,"we have disabled sales invoice edit feature, uncomment it cheking edit and delete features",normal,pending,
+InvoiceCreate - returns,"prducts we ruturn during, invoice creation must be added and tracked through wastage tracking",normal,pending,
+Profit Analysis,"test the prices, prices are not set properly",high,pending ,high
+,,,,
+,,,,
+**Step 3: Delivery**,check that do we keep delevery details,normal,done,
+Territories,torritories list table sales representative field is not sortable,normal,done,
+product category update ,need to add repacking and hasal products instead of spices and packaging ,normal,done,
+### 3.4 Customer (Outlet) Management,"its good to add this to outlet sales bill- Default discount percentage (e.g., 20%), - Custom discount override option",high,done,
+Nav bar ,Sort the nav bar accordingly ,high,done,
+"- Assign vehicle to route (dynamic, can change)",Note: Vehicle assignment to routes is managed separately through the assignment feature.,high,done,
+**Step 2: Order Entry (Cashier)**,check discount should be recepir base not propduct base- Apply default discount (20%) or custom discount,high,done,
+Suppler return from implementation,,improv,done,
+RawMaterialView,RawMaterialView -  no expiory raw materials diplay ui,improv,done,
+Category api ,we need implement a feature to manage categories,improv,done,
+Create recipe,"create recipe add material dialog,  try adding material that current_stock = 0 and test. coz estimated cost is 0 then",high,done,
+Create Sales Invoice,"when user select an outlet, route and sales ref must be auto select.",improv,done,
+Create Sales Invoice,"discount adding is product wise for now, need to change it to whole invoice wise, and another custom one",improv,done,
+Login issue ,when we refresh it  redirects to login page,high,done,
+Relationships,suppliers and purchase order relationship,high,done,
+purchase order,get all purchase details does not return items,high,done,
+filtered values reset button,need to add a reset button to fileted dropdown values reset in every table,improv,done,
+receive purchase order ,"Payment(optional), here must be show that po remaining balance ",improv,done,
+create purchase order,if Expected Delivery Date is not selected keep the current date by default,improv,done,
+ProductionView,"in ProductionView material used show not names, api does not have name",high,done,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,"POST http://localhost:5000/api/sales-invoices 400 (Bad Request)
+dispatchXhrRequest @ axios.js?v=81c09f3b:1696
+xhr @ axios.js?v=81c09f3b:1573
+dispatchRequest @ axios.js?v=81c09f3b:2107
+Promise.then
+_request @ axios.js?v=81c09f3b:2310
+request @ axios.js?v=81c09f3b:2219
+httpMethod @ axios.js?v=81c09f3b:2356
+wrap @ axios.js?v=81c09f3b:8
+createInvoice @ salesService.js:28
+createInvoice @ sales.js:80
+wrappedAction @ pinia.js?v=81c09f3b:1107
+store.<computed> @ pinia.js?v=81c09f3b:785
+handleSubmit @ InvoiceCreate.vue:66
+callWithErrorHandling @ chunk-W2TXKPSE.js?v=81c09f3b:2342
+callWithAsyncErrorHandling @ chunk-W2TXKPSE.js?v=81c09f3b:2349
+emit @ chunk-W2TXKPSE.js?v=81c09f3b:6534
+(anonymous) @ chunk-W2TXKPSE.js?v=81c09f3b:10390
+handleSubmit @ InvoiceForm.vue?t=1769469357789:419
+callWithErrorHandling @ chunk-W2TXKPSE.js?v=81c09f3b:2342
+callWithAsyncErrorHandling @ chunk-W2TXKPSE.js?v=81c09f3b:2349
+invoker @ chunk-W2TXKPSE.js?v=81c09f3b:11425
+installHook.js:1 [API Error 400]: Returns must reference an original purchase invoice",,,
