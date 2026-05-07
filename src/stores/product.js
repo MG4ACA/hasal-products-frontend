@@ -194,6 +194,28 @@ export const useProductStore = defineStore('product', () => {
     }
   };
 
+  const createLooseSku = async (productId, unit) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await productService.createLooseSku(productId, unit);
+
+      if (response && response.error) {
+        error.value = response.message;
+        throw new Error(response.message);
+      }
+
+      await fetchProductById(productId);
+      return response;
+    } catch (err) {
+      error.value = err.message || 'Failed to create loose SKU';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const updateSku = async (productId, skuId, skuData) => {
     loading.value = true;
     error.value = null;
@@ -316,6 +338,7 @@ export const useProductStore = defineStore('product', () => {
     updateProduct,
     deleteProduct,
     addSku,
+    createLooseSku,
     updateSku,
     deleteSku,
     getProductStock,

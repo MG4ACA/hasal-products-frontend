@@ -239,11 +239,19 @@ const handleProductFilter = () => {
 
 const handleRefresh = () => {
   filters.page = 1;
+  recipeStore.pagination.page = 1;
   fetchData();
 };
 
 const onPageChange = event => {
-  filters.page = event.page + 1;
+  const newPage = event.page + 1;
+  filters.page = newPage;
+  recipeStore.pagination.page = newPage;
+  if (event.rows && event.rows !== recipeStore.pagination.limit) {
+    recipeStore.pagination.limit = event.rows;
+    recipeStore.pagination.page = 1;
+    filters.page = 1;
+  }
   fetchData();
 };
 

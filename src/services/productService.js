@@ -64,6 +64,16 @@ export const productService = {
     }
   },
 
+  // Create a Loose/Bulk SKU for a product
+  async createLooseSku(productId, unit) {
+    try {
+      const response = await api.post(`${PRODUCT_BASE_URL}/${productId}/loose-sku`, { unit });
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   // Update SKU
   async updateSku(productId, skuId, skuData) {
     try {

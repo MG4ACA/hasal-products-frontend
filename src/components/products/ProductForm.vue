@@ -81,17 +81,34 @@
             <Divider />
             <div class="flex justify-content-between align-items-center mb-3 pt-3">
               <h3>Product SKUs</h3>
-              <Button
-                label="Add SKU"
-                icon="pi pi-plus"
-                class="p-button-success"
-                size="small"
-                @click="showSkuDialog = true"
-              />
+              <div class="flex gap-2">
+                <Button
+                  v-if="!hasLooseSku"
+                  label="Add Loose SKU"
+                  icon="pi pi-box"
+                  class="p-button-secondary"
+                  size="small"
+                  @click="showLooseSkuDialog = true"
+                />
+                <Button
+                  label="Add SKU"
+                  icon="pi pi-plus"
+                  class="p-button-success"
+                  size="small"
+                  @click="showSkuDialog = true"
+                />
+              </div>
             </div>
 
             <DataTable :value="productData.skus || []" striped-rows class="p-datatable-sm">
-              <Column field="size" header="Size" />
+              <Column field="size" header="Size">
+                <template #body="{ data }">
+                  <span v-if="data.is_loose">
+                    <Tag value="Loose" severity="info" />
+                  </span>
+                  <span v-else>{{ data.size }}</span>
+                </template>
+              </Column>
               <Column field="unit" header="Unit" />
               <Column field="barcode" header="Barcode">
                 <template #body="{ data }">
@@ -254,6 +271,51 @@
       </template>
     </Dialog>
 
+    <!-- Loose SKU Dialog -->
+    <Dialog
+      v-model:visible="showLooseSkuDialog"
+      :style="{ width: '400px' }"
+      header="Add Loose / Bulk SKU"
+      :modal="true"
+    >
+      <div class="grid">
+        <div class="col-12">
+          <p class="text-sm text-color-secondary mb-3">
+            A loose SKU has no fixed size — useful for bulk or variable-weight products (e.g., loose
+            spices sold by weight).
+          </p>
+        </div>
+        <div class="col-12">
+          <label for="loose_unit" class="block mb-2">
+            Unit <span class="text-red-500">*</span>
+          </label>
+          <InputText
+            id="loose_unit"
+            v-model="looseSkuUnit"
+            class="w-full"
+            placeholder="e.g., kg, g, L"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          @click="
+            showLooseSkuDialog = false;
+            looseSkuUnit = '';
+          "
+        />
+        <Button
+          label="Create Loose SKU"
+          icon="pi pi-check"
+          :loading="loading"
+          @click="saveLooseSku"
+        />
+      </template>
+    </Dialog>
+
     <!-- Delete SKU Dialog -->
     <Dialog
       v-model:visible="deleteSkuDialog"
@@ -303,6 +365,8 @@ const showSkuDialog = ref(false);
 const skuToEdit = ref(null);
 const deleteSkuDialog = ref(false);
 const skuToDelete = ref(null);
+const showLooseSkuDialog = ref(false);
+const looseSkuUnit = ref('');
 
 const formData = ref({
   code: '',
@@ -324,6 +388,7 @@ const statusOptions = STATUS_OPTIONS;
 const categoryOptions = CATEGORY_OPTIONS;
 
 const isEditMode = computed(() => !!props.productId);
+const hasLooseSku = computed(() => productData.value?.skus?.some(s => s.is_loose) ?? false);
 
 const loadProduct = async id => {
   loading.value = true;
@@ -427,6 +492,25 @@ const deleteSku = async () => {
     await loadProduct(props.productId);
   } catch (error) {
     showError(error.response?.data?.message || 'Failed to delete SKU');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const saveLooseSku = async () => {
+  if (!looseSkuUnit.value.trim()) {
+    showError('Unit is required for a loose SKU');
+    return;
+  }
+  loading.value = true;
+  try {
+    await productStore.createLooseSku(props.productId, looseSkuUnit.value.trim());
+    showSuccess('Loose SKU created successfully');
+    showLooseSkuDialog.value = false;
+    looseSkuUnit.value = '';
+    await loadProduct(props.productId);
+  } catch (error) {
+    showError(error.message || 'Failed to create loose SKU');
   } finally {
     loading.value = false;
   }

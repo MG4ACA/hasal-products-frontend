@@ -38,7 +38,7 @@
 
             <!-- SKU Selection -->
             <div class="col-12 md:col-6">
-              <label for="sku" class="block mb-2"> SKU <span class="text-red-500">*</span> </label>
+              <label for="sku" class="block mb-2"> SKU (Optional) </label>
               <Select
                 id="sku"
                 v-model="formData.product_sku_id"
@@ -294,7 +294,7 @@
             />
           </div>
           <div class="col-12">
-            <label class="block mb-2">SKU <span class="text-red-500">*</span></label>
+            <label class="block mb-2">SKU <span class="text-500">(Optional)</span></label>
             <Select
               v-model="bomFormData.product_sku_id"
               :options="bomSkuOptions"
@@ -399,6 +399,18 @@ const productStore = useProductStore();
 const rawMaterialStore = useRawMaterialStore();
 const { showError, showSuccess } = useToastNotification();
 
+// Unit conversion to base units (kg / L / pcs)
+const UNIT_TO_BASE = {
+  kg: 1,
+  g: 0.001,
+  mg: 0.000001,
+  L: 1,
+  mL: 0.001,
+  pcs: 1,
+  box: 1,
+};
+const toBaseUnit = (qty, unit) => qty * (UNIT_TO_BASE[unit] ?? 1);
+
 const loading = ref(false);
 const errors = ref({});
 const showBomDialog = ref(false);
@@ -451,7 +463,11 @@ const totalCost = computed(() => {
       return sum + parseFloat(item.unit_cost || 0) * parseFloat(item.quantity || 0);
     }
     const material = rawMaterialStore.rawMaterials.find(rm => rm.id === item.raw_material_id);
-    return sum + parseFloat(material?.average_cost || 0) * parseFloat(item.quantity || 0);
+    return (
+      sum +
+      parseFloat(material?.average_cost || 0) *
+        toBaseUnit(parseFloat(item.quantity || 0), item.unit)
+    );
   }, 0);
 });
 
@@ -475,7 +491,9 @@ const bomItemCost = computed(() => {
     rm => rm.id === bomFormData.value.raw_material_id
   );
   if (!material) return '0.00';
-  return (parseFloat(material.average_cost || 0) * qty).toFixed(2);
+  return (parseFloat(material.average_cost || 0) * toBaseUnit(qty, bomFormData.value.unit)).toFixed(
+    2
+  );
 });
 
 onMounted(async () => {
@@ -601,7 +619,7 @@ const calculateItemCost = item => {
     return (parseFloat(item.unit_cost || 0) * qty).toFixed(2);
   }
   const material = rawMaterialStore.rawMaterials.find(rm => rm.id === item.raw_material_id);
-  return (parseFloat(material?.average_cost || 0) * qty).toFixed(2);
+  return (parseFloat(material?.average_cost || 0) * toBaseUnit(qty, item.unit)).toFixed(2);
 };
 
 // BOM dialog: product selection for finished product ingredient
@@ -682,12 +700,12 @@ const closeBomDialog = () => {
 
 const saveBomItem = () => {
   if (bomFormData.value.material_type === 'finished_product') {
-    if (!bomFormData.value.product_sku_id || !bomFormData.value.quantity) {
-      showError('Please select a product SKU and enter a quantity');
+    if (!bomFormData.value.quantity) {
+      showError('Please enter a quantity');
       return;
     }
     const selected = bomSkuOptions.value.find(s => s.value === bomFormData.value.product_sku_id);
-    const productLabel = selected?.label || `SKU #${bomFormData.value.product_sku_id}`;
+    const productLabel = selected?.label || (bomFormData.value.product_sku_id ? `SKU #${bomFormData.value.product_sku_id}` : (productOptions.value.find(p => p.value === bomFormData.value.product_id)?.label || 'Finished Product'));
     const newItem = {
       material_type: 'finished_product',
       raw_material_id: null,
@@ -701,7 +719,17 @@ const saveBomItem = () => {
     if (bomEditIndex.value !== null) {
       formData.value.items[bomEditIndex.value] = newItem;
     } else {
-      formData.value.items.push(newItem);
+      // Merge if same finished product SKU already in list
+      const dupIdx = formData.value.items.findIndex(
+        ex =>
+          ex.material_type === 'finished_product' && ex.product_sku_id === newItem.product_sku_id
+      );
+      if (dupIdx !== -1) {
+        formData.value.items[dupIdx].quantity =
+          parseFloat(formData.value.items[dupIdx].quantity) + parseFloat(newItem.quantity);
+      } else {
+        formData.value.items.push(newItem);
+      }
     }
   } else {
     if (!bomFormData.value.raw_material_id || !bomFormData.value.quantity) {
@@ -719,7 +747,19 @@ const saveBomItem = () => {
     if (bomEditIndex.value !== null) {
       formData.value.items[bomEditIndex.value] = newItem;
     } else {
-      formData.value.items.push(newItem);
+      // Merge if same raw material with same unit already in list
+      const dupIdx = formData.value.items.findIndex(
+        ex =>
+          ex.material_type === 'raw_material' &&
+          ex.raw_material_id === newItem.raw_material_id &&
+          ex.unit === newItem.unit
+      );
+      if (dupIdx !== -1) {
+        formData.value.items[dupIdx].quantity =
+          parseFloat(formData.value.items[dupIdx].quantity) + parseFloat(newItem.quantity);
+      } else {
+        formData.value.items.push(newItem);
+      }
     }
   }
 
@@ -731,11 +771,6 @@ const handleSubmit = () => {
 
   if (!formData.value.product_id) {
     errors.value.product_id = 'Product is required';
-    return;
-  }
-
-  if (!formData.value.product_sku_id) {
-    errors.value.product_sku_id = 'SKU is required';
     return;
   }
 

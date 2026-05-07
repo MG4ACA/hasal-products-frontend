@@ -27,9 +27,17 @@
               <div class="col-12 md:col-6">
                 <div class="text-sm text-500">Target SKU</div>
                 <div class="font-semibold">
-                  {{ productionRun.recipe?.product?.name }} -
-                  {{ productionRun.recipe?.productSku?.size }}
-                  {{ productionRun.recipe?.productSku?.unit }}
+                  {{ productionRun.recipe?.product?.name }}
+                  <span v-if="productionRun.recipe?.productSku">
+                    -
+                    {{
+                      productionRun.recipe.productSku.is_loose
+                        ? 'Loose'
+                        : productionRun.recipe.productSku.size
+                    }}
+                    {{ productionRun.recipe.productSku.unit }}
+                  </span>
+                  <span v-else class="text-500 font-normal"> (no default SKU)</span>
                 </div>
               </div>
               <div class="col-12 md:col-6">
@@ -44,51 +52,86 @@
         </Card>
       </div>
 
-      <!-- Actual Output -->
+      <!-- Output Allocations -->
+      <div class="col-12">
+        <div class="flex justify-content-between align-items-center mb-2">
+          <label class="font-semibold">
+            Output Allocations <span class="text-red-500">*</span>
+          </label>
+          <Button
+            label="Add Output Row"
+            icon="pi pi-plus"
+            size="small"
+            text
+            :disabled="loading || !productSkus.length"
+            @click="addOutput"
+          />
+        </div>
+        <DataTable :value="outputs" class="p-datatable-sm">
+          <Column header="SKU" style="min-width: 220px">
+            <template #body="{ index }">
+              <Dropdown
+                v-model="outputs[index].sku_id"
+                :options="productSkus"
+                option-label="label"
+                option-value="id"
+                placeholder="Select SKU"
+                class="w-full"
+                :disabled="loading"
+              />
+            </template>
+          </Column>
+          <Column header="Quantity" style="width: 200px">
+            <template #body="{ index }">
+              <InputNumber
+                v-model="outputs[index].quantity"
+                mode="decimal"
+                :min-fraction-digits="2"
+                :max-fraction-digits="2"
+                :min="0"
+                class="w-full"
+                :disabled="loading"
+              />
+            </template>
+          </Column>
+          <Column style="width: 60px">
+            <template #body="{ index }">
+              <Button
+                icon="pi pi-trash"
+                text
+                severity="danger"
+                size="small"
+                :disabled="loading || outputs.length <= 1"
+                @click="removeOutput(index)"
+              />
+            </template>
+          </Column>
+          <template #empty>
+            <div class="text-center text-500 py-3">
+              No output rows. Click "Add Output Row" to add one.
+            </div>
+          </template>
+        </DataTable>
+        <small class="text-500 block mt-1">
+          Total allocated: <strong>{{ totalOutputQuantity.toFixed(2) }}</strong>
+          {{ productionRun.recipe?.yield_unit }}
+        </small>
+      </div>
+
+      <!-- Waste (auto-calculated, read-only) -->
       <div class="col-12 md:col-6">
-        <label for="quantity_produced" class="block mb-2">
-          Actual Output <span class="text-red-500">*</span>
+        <label class="block mb-2">
+          Waste / Loss <span class="text-500">(auto-calculated)</span>
         </label>
         <InputNumber
-          id="quantity_produced"
-          v-model="formData.quantity_produced"
+          :model-value="autoWaste"
           class="w-full"
           mode="decimal"
           :min-fraction-digits="2"
           :max-fraction-digits="2"
-          :min="0"
-          required
-          :disabled="loading"
-        />
-      </div>
-
-      <!-- Unit (Read-only) -->
-      <div class="col-12 md:col-6">
-        <label for="unit" class="block mb-2">Unit</label>
-        <InputText
-          id="unit"
-          :model-value="productionRun.recipe?.yield_unit"
-          class="w-full"
           disabled
         />
-      </div>
-
-      <!-- Waste Quantity -->
-      <div class="col-12 md:col-6">
-        <label for="waste_quantity" class="block mb-2">
-          Waste Quantity <span class="text-500">(optional)</span>
-        </label>
-        <InputNumber
-          id="waste_quantity"
-          v-model="formData.waste_quantity"
-          class="w-full"
-          mode="decimal"
-          :min-fraction-digits="2"
-          :max-fraction-digits="2"
-          :min="0"
-          :disabled="loading"
-        />
-        <small class="text-500">Enter quantity of wasted/lost output</small>
+        <small class="text-500">= Expected Output − Total Allocated</small>
       </div>
 
       <!-- Waste Reason -->
@@ -102,7 +145,7 @@
           :options="wasteReasonOptions"
           placeholder="Select reason"
           class="w-full"
-          :disabled="loading || !formData.waste_quantity || formData.waste_quantity === 0"
+          :disabled="loading || autoWaste <= 0"
           show-clear
         />
       </div>
@@ -134,7 +177,7 @@
       </div>
 
       <!-- Yield Efficiency Indicator -->
-      <div v-if="formData.quantity_produced > 0" class="col-12">
+      <div v-if="totalOutputQuantity > 0" class="col-12">
         <Card :class="yieldEfficiencyClass">
           <template #content>
             <div class="grid">
@@ -195,7 +238,7 @@
         label="Complete Production"
         icon="pi pi-check"
         :loading="loading"
-        :disabled="!formData.quantity_produced || formData.quantity_produced <= 0"
+        :disabled="totalOutputQuantity <= 0 || !outputs.every(o => o.sku_id && o.quantity > 0)"
         @click="handleComplete"
       />
     </template>
@@ -205,14 +248,16 @@
 <script setup>
 import { useToastNotification } from '@/composables/useToastNotification';
 import productionService from '@/services/productionService';
+import productService from '@/services/productService';
 import { formatNumber } from '@/utils/formatters';
 import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Card from 'primevue/card';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import Textarea from 'primevue/textarea';
 import { computed, ref, watch } from 'vue';
@@ -232,6 +277,8 @@ const emit = defineEmits(['update:visible', 'completed']);
 
 const { showSuccess, showError } = useToastNotification();
 const loading = ref(false);
+const productSkus = ref([]);
+const outputs = ref([{ sku_id: null, quantity: 0 }]);
 
 const dialogVisible = computed({
   get: () => props.visible,
@@ -249,42 +296,43 @@ const wasteReasonOptions = [
 ];
 
 const formData = ref({
-  quantity_produced: 0,
-  waste_quantity: 0,
   waste_reason: '',
   production_date: new Date(),
   notes: '',
 });
 
-const totalOutput = computed(() => {
-  return (
-    parseFloat(formData.value.quantity_produced || 0) +
-    parseFloat(formData.value.waste_quantity || 0)
+const totalOutputQuantity = computed(() =>
+  outputs.value.reduce((sum, o) => sum + parseFloat(o.quantity || 0), 0)
+);
+
+const autoWaste = computed(() => {
+  const expected = parseFloat(
+    props.productionRun?.expected_quantity || props.productionRun?.quantity || 0
   );
+  return Math.max(0, expected - totalOutputQuantity.value);
 });
+
+const totalOutput = computed(() => totalOutputQuantity.value + autoWaste.value);
 
 const yieldEfficiency = computed(() => {
   const expected = parseFloat(
     props.productionRun?.expected_quantity || props.productionRun?.quantity || 0
   );
-  const actual = parseFloat(formData.value.quantity_produced || 0);
   if (expected === 0) return 0;
-  return (actual / expected) * 100;
+  return (totalOutputQuantity.value / expected) * 100;
 });
 
 const varianceAmount = computed(() => {
   const expected = parseFloat(
     props.productionRun?.expected_quantity || props.productionRun?.quantity || 0
   );
-  const actual = parseFloat(formData.value.quantity_produced || 0);
-  return actual - expected;
+  return totalOutputQuantity.value - expected;
 });
 
 const wastePercentage = computed(() => {
   const total = totalOutput.value;
-  const waste = parseFloat(formData.value.waste_quantity || 0);
   if (total === 0) return 0;
-  return (waste / total) * 100;
+  return (autoWaste.value / total) * 100;
 });
 
 const yieldEfficiencyClass = computed(() => {
@@ -318,47 +366,87 @@ const getVarianceClass = () => {
   return 'text-500';
 };
 
+const fetchSkus = async productId => {
+  try {
+    const product = await productService.getById(productId);
+    if (product && product.skus) {
+      productSkus.value = product.skus
+        .filter(s => s.status === 'active')
+        .map(s => ({
+          id: s.id,
+          label: s.is_loose ? `Loose / Bulk (${s.unit})` : `${s.size} ${s.unit}`,
+        }));
+    }
+  } catch {
+    productSkus.value = [];
+  }
+};
+
+const initOutputs = run => {
+  if (run?.recipe?.product_sku_id) {
+    outputs.value = [
+      {
+        sku_id: run.recipe.product_sku_id,
+        quantity: parseFloat(run.expected_quantity || run.quantity || 0),
+      },
+    ];
+  } else {
+    outputs.value = [{ sku_id: null, quantity: 0 }];
+  }
+};
+
 watch(
   () => props.productionRun,
   newVal => {
     if (newVal) {
       formData.value = {
-        quantity_produced: parseFloat(newVal.quantity || 0),
-        waste_quantity: 0,
         waste_reason: '',
         production_date: newVal.production_date ? new Date(newVal.production_date) : new Date(),
         notes: '',
       };
+      initOutputs(newVal);
+      if (newVal.recipe?.product?.id) {
+        fetchSkus(newVal.recipe.product.id);
+      }
     }
   },
   { immediate: true }
 );
 
+const addOutput = () => {
+  outputs.value.push({ sku_id: null, quantity: 0 });
+};
+
+const removeOutput = index => {
+  outputs.value.splice(index, 1);
+};
+
 const handleComplete = async () => {
-  if (!formData.value.quantity_produced || formData.value.quantity_produced <= 0) {
-    showError('Please enter actual output quantity');
+  if (totalOutputQuantity.value <= 0) {
+    showError('Please enter actual output quantity in at least one output row');
     return;
   }
 
-  if (formData.value.waste_quantity > 0 && !formData.value.waste_reason) {
-    showError('Please provide waste reason when waste quantity > 0');
+  const invalidRow = outputs.value.find(o => !o.sku_id || !(o.quantity > 0));
+  if (invalidRow) {
+    showError('All output rows must have a SKU selected and quantity > 0');
+    return;
+  }
+
+  if (autoWaste.value > 0 && !formData.value.waste_reason) {
+    showError('Please provide a waste reason — there is unaccounted output');
     return;
   }
 
   loading.value = true;
   try {
     const completionData = {
-      quantity_produced: formData.value.quantity_produced,
-      waste_quantity: formData.value.waste_quantity || 0,
+      quantity_produced: totalOutputQuantity.value,
+      waste_quantity: autoWaste.value,
       waste_reason: formData.value.waste_reason || '',
       production_date: formData.value.production_date.toISOString().split('T')[0],
       notes: formData.value.notes || '',
-      outputs: [
-        {
-          sku_id: props.productionRun.recipe?.product_sku_id,
-          quantity: formData.value.quantity_produced,
-        },
-      ],
+      outputs: outputs.value.map(o => ({ sku_id: o.sku_id, quantity: o.quantity })),
     };
 
     await productionService.complete(props.productionRun.id, completionData);

@@ -62,7 +62,7 @@ export const rawMaterialService = {
     }
   },
 
-  // Delete raw material (soft delete)
+  // Delete raw material (hard delete)
   async deleteRawMaterial(id) {
     try {
       const response = await api.delete(`/raw-materials/${id}`);

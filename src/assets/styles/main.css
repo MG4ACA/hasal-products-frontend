@@ -61,7 +61,8 @@
   height: 2.4rem;
 }
 .p-button-success {
-  background: var(--success-color);
+  background: var(--p-button-primary-background) !important;
+  border: 1px solid var(--p-button-primary-border-color) !important;
 }
 .p-button-text {
   color: var(--primary-dark);
@@ -88,10 +89,6 @@
 
 .audit-card .p-card-body {
   padding: 0.5rem;
-}
-
-.p-button-icon.pi {
-  margin-left: 1rem;
 }
 
 .p-dropdown-clear-icon {
@@ -202,4 +199,12 @@
 
 .fade-in {
   animation: fadeIn 0.3s ease-in-out;
+}
+
+.p-overlay-badge,
+.p-overlay-badge .p-avatar-icon,
+.p-overlay-badge .p-badge-info {
+  color: var(--p-button-primary-color) !important;
+  background: var(--p-button-primary-background) !important;
+  border: 1px solid var(--p-button-primary-border-color) !important;
 }
