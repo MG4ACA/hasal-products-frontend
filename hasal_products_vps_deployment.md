@@ -1,8 +1,8 @@
 # 🚀 Hostinger VPS Deployment Guide
 
-## Pharmacy POS System (MEVN Stack)
+## Hasal POS System (Vue.js + Express.js + MySQL)
 
-This guide will walk you through deploying your Pharmacy POS application (Vue.js frontend + Express.js backend) on a Hostinger VPS with the MEVN stack template.
+This guide will walk you through deploying the Hasal POS & Inventory Management application (Vue.js frontend + Express.js backend + MySQL) on a Hostinger VPS.
 
 ---
 
@@ -30,7 +30,7 @@ This guide will walk you through deploying your Pharmacy POS application (Vue.js
 │  │  Vue.js Frontend    │  │  Backend │ │
 │  │  (Static Files)     │  │  API     │ │
 │  │                     │  │  Port    │ │
-│  │                     │  │  3000    │ │
+│  │                     │  │  5000    │ │
 │  └─────────────────────┘  └────┬─────┘ │
 │                                 │       │
 │                          ┌──────▼─────┐ │
@@ -122,7 +122,7 @@ sudo mysql -u root -p
 CREATE DATABASE hasal_products;
 
 -- Create user (replace 'your_password' with a strong password)
-CREATE USER 'hasal_products'@'localhost' IDENTIFIED BY 'Velou@123';  pw - Velou@123
+CREATE USER 'hasal_products'@'localhost' IDENTIFIED BY '++++++++';  pw - ++++++++
 
 -- Grant privileges
 GRANT ALL PRIVILEGES ON hasal_products.* TO 'hasal_products'@'localhost';
@@ -149,11 +149,14 @@ cd /var/www/hasal_products
 ### 4.2 Clone Your Repository
 
 ```bash
-# If your code is on GitHub
+# Backend repo
 sudo git clone https://github.com/MG4ACA/hasal-products-backend.git
 
+# Frontend repo (in a separate directory)
+sudo git clone https://github.com/MG4ACA/hasal-pos-frontend.git
+
 # Or upload your code using SCP from your local machine:
-# scp -r /path/to/pharmacy-standalone-pos root@your_vps_ip:/var/www/hasal_products
+# scp -r /path/to/spices-pos root@your_vps_ip:/var/www/hasal_products
 ```
 
 ### 4.3 Set Correct Permissions
@@ -168,22 +171,23 @@ sudo chmod -R 755 /var/www/hasal_products
 
 ---
 
-cd hasal-products-backend
+### 4.4 Switch to the Correct Branch
+
+```bash
+cd hasal-pos-backend
 
 git fetch --all
 git branch
-git checkout 'your_branch'
-git pull origin dev
+git checkout main   # or 'dev' if deploying the dev branch
+git pull origin main
+```
 
-if errors occur try below
-git reset --hard
-
-## 🔨 Step 5: Set Up Backend
+---
 
 ### 5.1 Navigate to Backend Directory
 
 ```bash
-cd /var/www/hasal_products/hasal-products-backend
+cd /var/www/hasal_products/hasal-pos-backend
 ```
 
 ### 5.2 Install Dependencies
@@ -207,7 +211,7 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=hasal_products
 DB_USER=hasal_products
-DB_PASSWORD=Velou@123
+DB_PASSWORD=++++++++
 
 # Application
 NODE_ENV=production
@@ -233,11 +237,11 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ### 5.4 Initialize Database
 
 ```bash
-# Create database tables and seed
-npm run db:init
+# Run all pending migrations (safe for live data — only adds/alters columns)
+npm run db:migrate
 
-
-# If you have product CSV data
+# First-time setup only: seed initial data (admin user, outlets, etc.)
+# Skip this if the database already has data
 npm run db:seed
 ```
 
@@ -257,7 +261,7 @@ If successful, you should see a response. Press `Ctrl+C` to stop.
 
 ```bash
 # Start backend with PM2
-pm2 start server.js --name hasal-products-backend
+pm2 start server.js --name hasal-pos-backend
 
 # Save PM2 configuration
 pm2 save
@@ -273,13 +277,13 @@ pm2 status
 
 ```bash
 # View logs
-pm2 logs hasal-products-backend
+pm2 logs hasal-pos-backend
 
 # Restart app
-pm2 restart hasal-products-backend
+pm2 restart hasal-pos-backend
 
 # Stop app
-pm2 stop hasal-products-backend
+pm2 stop hasal-pos-backend
 
 # Monitor
 pm2 monit
@@ -291,10 +295,8 @@ pm2 monit
 
 ### 6.1 Navigate to Frontend Directory
 
-## clone frotend repo then
-
 ```bash
-cd /var/www/hasal_products/hasal_products-frontend
+cd /var/www/hasal_products/hasal-pos-frontend
 ```
 
 ### 6.2 Configure API Endpoint
@@ -365,7 +367,7 @@ Add this configuration:
 ```nginx
 # Upstream backend
 upstream hasal_products_backend {
-    server localhost:4000;
+    server localhost:5000;
     keepalive 64;
 }
 
@@ -485,7 +487,7 @@ nano /var/www/hasal_products/src/api/client.js
 Change to:
 
 ```javascript
-const API_BASE_URL = 'https://lumicore.trustyou-go.com/api';
+const API_BASE_URL = 'https://hasal-products.lumicore-labs.com/api';
 ```
 
 Rebuild and redeploy:
@@ -507,10 +509,10 @@ sudo cp -r dist/* /var/www/hasal_products/frontend/
 pm2 status
 
 # Check backend logs
-pm2 logs hasal_products-backend
+pm2 logs hasal-pos-backend
 
 # Test API directly
-curl http://localhost:3000/api/health
+curl http://localhost:5000/api/health
 ```
 
 ### 9.2 Check Nginx
@@ -529,7 +531,7 @@ Open your browser and visit:
 
 - `http://your_vps_ip` (or `https://yourdomain.com`)
 
-You should see your Pharmacy POS login page!
+You should see the Hasal POS login page!
 
 ---
 
@@ -544,24 +546,25 @@ nano /var/www/hasal_products/deploy.sh
 ```bash
 #!/bin/bash
 
-echo "🚀 Starting deployment..."
+echo "🚀 Starting Hasal POS deployment..."
 
-# Navigate to project directory
-cd /var/www/hasal_products
-
-# Pull latest changes (if using Git)
-echo "📥 Pulling latest changes..."
+# ── Backend ─────────────────────────────────────────────────────
+echo "📥 Pulling backend changes..."
+cd /var/www/hasal_products/hasal-pos-backend
 git pull origin main
-
-# Backend deployment
-echo "🔨 Deploying backend..."
-cd backend-project
 npm install --production
-pm2 restart hasal-products-backend
 
-# Frontend deployment
-echo "🎨 Deploying frontend..."
-cd ..
+# Run any pending DB migrations (safe — tracked via SequelizeMeta)
+echo "🗄️  Running migrations..."
+npx sequelize-cli db:migrate
+
+# Restart backend
+pm2 restart hasal-pos-backend
+
+# ── Frontend ─────────────────────────────────────────────────────
+echo "🎨 Building frontend..."
+cd /var/www/hasal_products/hasal-pos-frontend
+git pull origin main
 npm install
 npm run build
 sudo cp -r dist/* /var/www/hasal_products/frontend/
@@ -584,6 +587,36 @@ Run deployment:
 ```bash
 ./deploy.sh
 ```
+
+### Safe Production Deployment Checklist
+
+Before running the deploy script on a live server, always follow this order:
+
+```bash
+# 1. Take a database backup first
+mysqldump -u hasal_products -p'++++++++' hasal_products \
+  --single-transaction --routines --triggers \
+  > ~/backups/hasal_products_$(date +%Y%m%d_%H%M%S).sql
+
+# 2. Run any pending migrations (tracked via SequelizeMeta — safe to re-run)
+NODE_ENV=production npx sequelize-cli db:migrate
+
+# 3. Restart the backend
+pm2 restart all
+```
+
+> **Note:** On a Windows dev machine, use PowerShell syntax for step 2:
+>
+> ```powershell
+> # On production server — take backup first
+> .\scripts\backup-db.ps1
+>
+> # Then run migrations
+> $env:NODE_ENV="production"; npx sequelize-cli db:migrate
+>
+> # Then restart server
+> pm2 restart all
+> ```
 
 ---
 
@@ -626,8 +659,9 @@ sudo tail -f /var/log/mysql/error.log
 # Create backup directory
 mkdir -p ~/backups
 
-# Backup database
-mysqldump -u ape_news_user -p ape_news > ~/backups/ape_news_$(date +%Y%m%d_%H%M%S).sql
+# Manual backup
+mysqldump -u hasal_products -p hasal_products --single-transaction --routines --triggers \
+  > ~/backups/hasal_products_$(date +%Y%m%d_%H%M%S).sql
 
 # Create automated backup script
 nano ~/backup-db.sh
@@ -637,10 +671,12 @@ nano ~/backup-db.sh
 #!/bin/bash
 BACKUP_DIR=~/backups
 mkdir -p $BACKUP_DIR
-mysqldump -u ape_news_user -p'your_password' ape_news > $BACKUP_DIR/ape_news_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u hasal_products -p'++++++++' hasal_products \
+  --single-transaction --routines --triggers \
+  > $BACKUP_DIR/hasal_products_$(date +%Y%m%d_%H%M%S).sql
 
 # Keep only last 7 days of backups
-find $BACKUP_DIR -name "ape_news_*.sql" -mtime +7 -delete
+find $BACKUP_DIR -name "hasal_products_*.sql" -mtime +7 -delete
 ```
 
 ```bash
@@ -659,16 +695,16 @@ crontab -e
 
 ```bash
 # Check logs
-pm2 logs hasal-products-backend
+pm2 logs hasal-pos-backend
 
 # Common issues:
-# 1. Port 3000 already in use
-sudo lsof -i :3000
+# 1. Port 5000 already in use
+sudo lsof -i :5000
 sudo kill -9 <PID>
 
 # 2. Database connection failed
 # Check .env file and MySQL credentials
-mysql -u ape_news_user -p ape_news
+mysql -u hasal_products -p hasal_products
 ```
 
 ### Frontend Not Loading
@@ -692,17 +728,17 @@ sudo systemctl restart nginx
 ```bash
 # Backend is not running
 pm2 status
-pm2 restart hasal_products-backend
+pm2 restart hasal-pos-backend
 
-# Check backend is listening on port 3000
-sudo netstat -tlnp | grep 3000
+# Check backend is listening on port 5000
+sudo netstat -tlnp | grep 5000
 ```
 
 ### Database Connection Issues
 
 ```bash
 # Test MySQL connection
-mysql -u ape_news_user -p ape_news
+mysql -u hasal_products -p hasal_products
 
 # Check MySQL is running
 sudo systemctl status mysql
@@ -711,7 +747,7 @@ sudo systemctl status mysql
 sudo systemctl restart mysql
 
 # Check backend .env file
-cat backend-project/.env
+cat /var/www/hasal_products/hasal-pos-backend/.env
 ```
 
 ---
@@ -764,7 +800,7 @@ gzip_types text/plain text/css text/xml text/javascript application/json applica
 In PM2 configuration:
 
 ```bash
-pm2 start src/index.js --name hasal_products-backend -i max --node-args="--max-old-space-size=1024"
+pm2 start server.js --name hasal-pos-backend -i max --node-args="--max-old-space-size=1024"
 ```
 
 ---
@@ -792,17 +828,17 @@ If you encounter issues:
 
 ## 🎉 Congratulations!
 
-Your Pharmacy POS System is now live on Hostinger VPS!
+Your Hasal POS System is now live on Hostinger VPS!
 
 **Access your application at:**
 
-- 🌐 Frontend: `http://your_vps_ip` or `https://yourdomain.com`
-- 🔌 Backend API: `http://your_vps_ip/api` or `https://yourdomain.com/api`
+- 🌐 Frontend: `https://hasal-products.lumicore-labs.com`
+- 🔌 Backend API: `https://hasal-products.lumicore-labs.com/api`
 
-**Default Login (if using seed data):**
+**Default Login:**
 
 - Username: `admin`
-- Password: Check your seed file
+- Password: `admin123`
 
 ---
 
@@ -821,5 +857,5 @@ Your Pharmacy POS System is now live on Hostinger VPS!
 
 ---
 
-**Last Updated:** December 2024  
-**Version:** 1.0.0
+**Last Updated:** May 2026  
+**Version:** 2.0.0
