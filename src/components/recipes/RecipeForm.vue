@@ -634,7 +634,7 @@ const onBomProductChange = async () => {
   const product = await productStore.fetchProductById(bomFormData.value.product_id);
   bomSkuOptions.value =
     product.skus?.map(sku => ({
-      label: `${sku.size} ${sku.unit} - Rs.${sku.price} (Stock: ${sku.current_stock || 0})`,
+      label: `${sku.is_loose ? 'Loose / Bulk' : sku.size} ${sku.unit} - Rs.${sku.price} (Stock: ${sku.current_stock || 0})`,
       value: sku.id,
       price: parseFloat(sku.price || 0),
       unit: sku.unit,
@@ -700,12 +700,21 @@ const closeBomDialog = () => {
 
 const saveBomItem = () => {
   if (bomFormData.value.material_type === 'finished_product') {
+    if (!bomFormData.value.product_sku_id) {
+      showError('Please select a product SKU');
+      return;
+    }
     if (!bomFormData.value.quantity) {
       showError('Please enter a quantity');
       return;
     }
     const selected = bomSkuOptions.value.find(s => s.value === bomFormData.value.product_sku_id);
-    const productLabel = selected?.label || (bomFormData.value.product_sku_id ? `SKU #${bomFormData.value.product_sku_id}` : (productOptions.value.find(p => p.value === bomFormData.value.product_id)?.label || 'Finished Product'));
+    const productLabel =
+      selected?.label ||
+      (bomFormData.value.product_sku_id
+        ? `SKU #${bomFormData.value.product_sku_id}`
+        : productOptions.value.find(p => p.value === bomFormData.value.product_id)?.label ||
+          'Finished Product');
     const newItem = {
       material_type: 'finished_product',
       raw_material_id: null,

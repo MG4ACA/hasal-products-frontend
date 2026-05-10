@@ -517,6 +517,44 @@ Authorization: Bearer <token>
 
 ---
 
+#### TC-LS07 — "Add Loose SKU" button absent in product CREATE mode
+
+**Priority:** Medium  
+**Source:** `ProductForm.vue` — SKU section uses `v-if="isEditMode && productData"`, so the entire SKU block (including the "Add Loose SKU" button) is hidden when creating a new product.
+
+**Steps:**
+
+1. Navigate to **Products → New Product**
+2. Inspect the product form
+
+**Expected result:**
+
+- No "Add Loose SKU" button is visible
+- No SKU management section is rendered at all (SKUs are added after the product is saved)
+
+---
+
+#### TC-LS08 — Loose SKU appears in BOM ingredient dropdown with correct label
+
+**Priority:** High  
+**Source:** `RecipeForm.vue` `onBomProductChange()` — builds `bomSkuOptions` from all product SKUs including loose ones. For a loose SKU `size = null`, the label falls back to `"null kg"` which is misleading.
+
+**Steps:**
+
+1. Open **Recipes → New Recipe**
+2. Add a BOM item with type **Finished Product**
+3. Select a product that has a loose SKU
+4. Open the SKU dropdown
+
+**Expected result:**
+
+- Loose SKU appears in the dropdown
+- Label should NOT show "null kg" — it should show something like **"Loose / Bulk kg"** or **"(Loose) kg"**
+
+**Note:** This is a known rendering bug — `sku.size` is `null` for loose SKUs and the label template `\`${sku.size} ${sku.unit}\``produces`"null kg"`. A fix should update the label to check `sku.is_loose` and substitute a readable string.
+
+---
+
 ### SECTION G — Recipe Optional SKU
 
 ---
@@ -664,6 +702,45 @@ SELECT id, name, product_id, product_sku_id FROM recipes WHERE id = <new recipe 
 **Expected result:**
 
 - Only one row, quantity = 5
+
+---
+
+#### TC-BOM06 — Edit BOM row (raw material): merge is skipped
+
+**Priority:** High  
+**Source:** `RecipeForm.vue` `saveBomItem()` — when `bomEditIndex !== null` the item is replaced directly; the merge `findIndex` block is inside the `else` branch only.
+
+**Steps:**
+
+1. Add: Black Pepper, qty=2, unit=kg → Save → BOM table has one row (qty=2)
+2. Add a second row: Salt, qty=3, unit=kg → Save → BOM table has two rows
+3. Click **Edit** on the Black Pepper row
+4. Change quantity to **5**, click **Save BOM Item**
+
+**Expected result:**
+
+- Black Pepper row quantity updates to **5** (not 7)
+- Salt row is unchanged
+- Still exactly **two rows** — no row was merged or duplicated
+
+---
+
+#### TC-BOM07 — Edit BOM row (finished product): merge is skipped
+
+**Priority:** High
+
+**Steps:**
+
+1. Add finished product BOM: Chili Powder SKU id=2, qty=3 → Save
+2. Add second finished product BOM: Turmeric Powder SKU id=25, qty=4 → Save
+3. Click **Edit** on the Chili Powder row
+4. Change quantity to **7**, click **Save BOM Item**
+
+**Expected result:**
+
+- Chili Powder row quantity is now **7** (not 10)
+- Turmeric Powder row unchanged
+- Still exactly **two rows** — no merge occurred
 
 ---
 
@@ -1002,6 +1079,31 @@ Where the run has been started with mixed BOM.
 
 ---
 
+#### TC-API-06 — GET /api/products/:id response includes is_loose field
+
+```
+GET /api/products/<product_id_with_loose_sku>
+Authorization: Bearer <token>
+```
+
+**Expected response `skus` array includes for the loose SKU row:**
+
+```json
+{
+  "id": <loose_sku_id>,
+  "size": null,
+  "unit": "kg",
+  "is_loose": true,
+  "price": 0,
+  "current_stock": 0,
+  "status": "active"
+}
+```
+
+**Also verify for regular SKU rows:** `is_loose: false`
+
+---
+
 ### SECTION D — Database Verification
 
 These queries should be run directly against the MySQL database after each major test.
@@ -1226,6 +1328,8 @@ Run tests in this order to ensure proper data dependencies:
 [ ] TC-LS04    Loose SKU visible in CompleteProductionDialog
 [ ] TC-LS05    Use Loose SKU as production output
 [ ] TC-LS06    POST /api/products/:id/loose-sku API test
+[ ] TC-LS07    Add Loose SKU button absent in CREATE mode
+[ ] TC-LS08    Loose SKU label in BOM dropdown
 
 --- Optional Recipe SKU ---
 [ ] TC-RS01    Create recipe without default output SKU
@@ -1235,9 +1339,11 @@ Run tests in this order to ensure proper data dependencies:
 --- BOM Cost & Duplicate Merge ---
 [ ] TC-BOM01   Cost calculation with sub-unit (g)
 [ ] TC-BOM02   Cost calculation with mL ingredient
-[ ] TC-BOM03   No merge for same material different unit
-[ ] TC-BOM04   Duplicate BOM row merging: raw material
+[ ] TC-BOM03   Duplicate BOM row merging: raw material
+[ ] TC-BOM04   No merge for same material different unit
 [ ] TC-BOM05   Duplicate BOM row merging: finished product
+[ ] TC-BOM06   Edit BOM row (raw material): merge skipped
+[ ] TC-BOM07   Edit BOM row (finished product): merge skipped
 
 --- Multi-Output Production ---
 [ ] TC-MO01    Complete production: split output two SKUs
@@ -1250,66 +1356,72 @@ Run tests in this order to ensure proper data dependencies:
 [ ] TC-MO08    Complete via API: invalid sku_id
 [ ] TC-MO09    Complete via API: missing sku_id in row
 [ ] TC-MO10    Weighted average cost after multi-output
+[ ] TC-API-06  GET product: is_loose in SKU response
 ```
 
 ---
 
 ## 5. Pass/Fail Summary Sheet
 
-| Test Case | Description                            | Pass / Fail | Notes |
-| --------- | -------------------------------------- | ----------- | ----- |
-| TC-DB-01  | Migration schema correct               |             |       |
-| TC-R01    | Raw material recipe (regression)       |             |       |
-| TC-R02    | Recipe with finished product           |             |       |
-| TC-R03    | Mixed BOM recipe                       |             |       |
-| TC-R04    | Edit finished product item             |             |       |
-| TC-R05    | BOM validation: no SKU                 |             |       |
-| TC-R06    | BOM validation: no product             |             |       |
-| TC-API-01 | POST recipe                            |             |       |
-| TC-API-02 | GET recipe includes                    |             |       |
-| TC-DB-02  | recipe_items DB verify                 |             |       |
-| TC-P01    | Create production run                  |             |       |
-| TC-P02    | Start run — happy path                 |             |       |
-| TC-DB-03  | FIFO deduction order                   |             |       |
-| TC-DB-04  | current_stock deducted                 |             |       |
-| TC-DB-05  | production_materials record            |             |       |
-| TC-API-03 | POST start run                         |             |       |
-| TC-API-05 | GET run includes                       |             |       |
-| TC-P03    | Start run — insufficient stock         |             |       |
-| TC-DB-06  | Rollback verified                      |             |       |
-| TC-API-04 | API error on insufficient stock        |             |       |
-| TC-P04    | Complete production: single output     |             |       |
-| TC-P05    | Complete: no outputs, no fallback SKU  |             |       |
-| TC-E01    | Exact stock consumption                |             |       |
-| TC-E02    | FIFO spans two batches                 |             |       |
-| TC-E03    | No production_output rows              |             |       |
-| TC-E04    | unit_cost = 0                          |             |       |
-| TC-E05    | unit_cost = null                       |             |       |
-| TC-E06    | Version history mixed BOM              |             |       |
-| TC-LS01   | Add Loose SKU via UI                   |             |       |
-| TC-LS02   | Loose SKU: unit required               |             |       |
-| TC-LS03   | Prevent duplicate loose SKU            |             |       |
-| TC-LS04   | Loose SKU in dialog dropdown           |             |       |
-| TC-LS05   | Use Loose SKU as output                |             |       |
-| TC-LS06   | POST /api/products/:id/loose-sku       |             |       |
-| TC-RS01   | Recipe without SKU                     |             |       |
-| TC-RS02   | Complete run with no-SKU recipe        |             |       |
-| TC-RS03   | Edit recipe: clear default SKU         |             |       |
-| TC-BOM01  | BOM cost: g → kg conversion            |             |       |
-| TC-BOM02  | BOM cost: mL → L conversion            |             |       |
-| TC-BOM03  | No merge: same material different unit |             |       |
-| TC-BOM04  | Duplicate merge: raw material          |             |       |
-| TC-BOM05  | Duplicate merge: finished product      |             |       |
-| TC-MO01   | Multi-output: two SKUs                 |             |       |
-| TC-MO02   | Multi-output: regular + loose SKU      |             |       |
-| TC-MO03   | Validation: row missing SKU            |             |       |
-| TC-MO04   | Validation: row qty = 0                |             |       |
-| TC-MO05   | Waste auto-calculation                 |             |       |
-| TC-MO06   | Waste reason required                  |             |       |
-| TC-MO07   | API multi-output complete              |             |       |
-| TC-MO08   | API: invalid sku_id                    |             |       |
-| TC-MO09   | API: missing sku_id in row             |             |       |
-| TC-MO10   | Weighted avg cost after multi-output   |             |       |
+| Test Case | Description                               | Pass / Fail | Notes |
+| --------- | ----------------------------------------- | ----------- | ----- |
+| TC-DB-01  | Migration schema correct                  | ✅ PASS |       |
+| TC-R01    | Raw material recipe (regression)          |             |       |
+| TC-R02    | Recipe with finished product              |             |       |
+| TC-R03    | Mixed BOM recipe                          |             |       |
+| TC-R04    | Edit finished product item                |             |       |
+| TC-R05    | BOM validation: no SKU                    |             |       |
+| TC-R06    | BOM validation: no product                |             |       |
+| TC-API-01 | POST recipe                               | ✅ PASS |       |
+| TC-API-02 | GET recipe includes                       | ✅ PASS |       |
+| TC-DB-02  | recipe_items DB verify                    | ✅ PASS |       |
+| TC-P01    | Create production run                     |             |       |
+| TC-P02    | Start run — happy path                    | ✅ PASS |       |
+| TC-DB-03  | FIFO deduction order                      | ✅ PASS |       |
+| TC-DB-04  | current_stock deducted                    | ✅ PASS |       |
+| TC-DB-05  | production_materials record               | ✅ PASS |       |
+| TC-API-03 | POST start run                            | ✅ PASS |       |
+| TC-API-05 | GET run includes                          | ✅ PASS |       |
+| TC-P03    | Start run — insufficient stock            | ✅ PASS |       |
+| TC-DB-06  | Rollback verified                         | ✅ PASS |       |
+| TC-API-04 | API error on insufficient stock           | ✅ PASS |       |
+| TC-P04    | Complete production: single output        | ✅ PASS |       |
+| TC-P05    | Complete: no outputs, no fallback SKU     | ✅ PASS |       |
+| TC-E01    | Exact stock consumption                   | ✅ PASS |       |
+| TC-E02    | FIFO spans two batches                    | ✅ PASS |       |
+| TC-E03    | No production_output rows                 | ✅ PASS |       |
+| TC-E04    | unit_cost = 0                             | ✅ PASS |       |
+| TC-E05    | unit_cost = null                          | ✅ PASS |       |
+| TC-E06    | Version history mixed BOM                 | ✅ PASS |       |
+| TC-LS01   | Add Loose SKU via UI                      |             |       |
+| TC-LS02   | Loose SKU: unit required                  |             |       |
+| TC-LS03   | Prevent duplicate loose SKU               | ✅ PASS |       |
+| TC-LS04   | Loose SKU in dialog dropdown              |             |       |
+| TC-LS05   | Use Loose SKU as output                   | ✅ PASS |       |
+| TC-LS06   | POST /api/products/:id/loose-sku          | ✅ PASS |       |
+| TC-LS07   | Loose SKU button absent in CREATE mode    |             |       |
+| TC-LS08   | Loose SKU label in BOM dropdown           |             |       |
+| TC-RS01   | Recipe without SKU                        | ✅ PASS |       |
+| TC-RS02   | Complete run with no-SKU recipe           | ✅ PASS |       |
+| TC-RS03   | Edit recipe: clear default SKU            | ✅ PASS |       |
+| TC-BOM01  | BOM cost: g → kg conversion               |             |       |
+| TC-BOM02  | BOM cost: mL → L conversion               |             |       |
+| TC-BOM03  | Duplicate merge: raw material             |             |       |
+| TC-BOM04  | No merge: same material different unit    |             |       |
+| TC-BOM05  | Duplicate merge: finished product         |             |       |
+| TC-BOM06  | Edit BOM row (raw material): no merge     |             |       |
+| TC-BOM07  | Edit BOM row (finished product): no merge |             |       |
+| TC-MO01   | Multi-output: two SKUs                    |             |       |
+| TC-MO02   | Multi-output: regular + loose SKU         |             |       |
+| TC-MO03   | Validation: row missing SKU               |             |       |
+| TC-MO04   | Validation: row qty = 0                   |             |       |
+| TC-MO05   | Waste auto-calculation                    |             |       |
+| TC-MO06   | Waste reason required                     |             |       |
+| TC-MO07   | API multi-output complete                 | ✅ PASS |       |
+| TC-MO08   | API: invalid sku_id                       | ✅ PASS |       |
+| TC-MO09   | API: missing sku_id in row                | ✅ PASS |       |
+| TC-MO10   | Weighted avg cost after multi-output      | ✅ PASS |       |
+| TC-API-06 | GET product: is_loose in SKU response     | ✅ PASS |       |
 
 ---
 
