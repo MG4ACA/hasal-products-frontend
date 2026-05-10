@@ -174,7 +174,7 @@ sudo chmod -R 755 /var/www/hasal_products
 ### 4.4 Switch to the Correct Branch
 
 ```bash
-cd hasal-pos-backend
+cd hasal-products-backend
 
 git fetch --all
 git branch
@@ -187,7 +187,7 @@ git pull origin main
 ### 5.1 Navigate to Backend Directory
 
 ```bash
-cd /var/www/hasal_products/hasal-pos-backend
+cd /var/www/hasal_products/hasal-products-backend
 ```
 
 ### 5.2 Install Dependencies
@@ -261,7 +261,7 @@ If successful, you should see a response. Press `Ctrl+C` to stop.
 
 ```bash
 # Start backend with PM2
-pm2 start server.js --name hasal-pos-backend
+pm2 start server.js --name hasal-products-backend
 
 # Save PM2 configuration
 pm2 save
@@ -277,13 +277,13 @@ pm2 status
 
 ```bash
 # View logs
-pm2 logs hasal-pos-backend
+pm2 logs hasal-products-backend
 
 # Restart app
-pm2 restart hasal-pos-backend
+pm2 restart hasal-products-backend
 
 # Stop app
-pm2 stop hasal-pos-backend
+pm2 stop hasal-products-backend
 
 # Monitor
 pm2 monit
@@ -509,7 +509,7 @@ sudo cp -r dist/* /var/www/hasal_products/frontend/
 pm2 status
 
 # Check backend logs
-pm2 logs hasal-pos-backend
+pm2 logs hasal-products-backend
 
 # Test API directly
 curl http://localhost:5000/api/health
@@ -550,7 +550,7 @@ echo "🚀 Starting Hasal POS deployment..."
 
 # ── Backend ─────────────────────────────────────────────────────
 echo "📥 Pulling backend changes..."
-cd /var/www/hasal_products/hasal-pos-backend
+cd /var/www/hasal_products/hasal-products-backend
 git pull origin main
 npm install --production
 
@@ -559,7 +559,7 @@ echo "🗄️  Running migrations..."
 npx sequelize-cli db:migrate
 
 # Restart backend
-pm2 restart hasal-pos-backend
+pm2 restart hasal-products-backend
 
 # ── Frontend ─────────────────────────────────────────────────────
 echo "🎨 Building frontend..."
@@ -695,7 +695,7 @@ crontab -e
 
 ```bash
 # Check logs
-pm2 logs hasal-pos-backend
+pm2 logs hasal-products-backend
 
 # Common issues:
 # 1. Port 5000 already in use
@@ -728,7 +728,7 @@ sudo systemctl restart nginx
 ```bash
 # Backend is not running
 pm2 status
-pm2 restart hasal-pos-backend
+pm2 restart hasal-products-backend
 
 # Check backend is listening on port 5000
 sudo netstat -tlnp | grep 5000
@@ -747,7 +747,7 @@ sudo systemctl status mysql
 sudo systemctl restart mysql
 
 # Check backend .env file
-cat /var/www/hasal_products/hasal-pos-backend/.env
+cat /var/www/hasal_products/hasal-products-backend/.env
 ```
 
 ---
@@ -800,7 +800,7 @@ gzip_types text/plain text/css text/xml text/javascript application/json applica
 In PM2 configuration:
 
 ```bash
-pm2 start server.js --name hasal-pos-backend -i max --node-args="--max-old-space-size=1024"
+pm2 start server.js --name hasal-products-backend -i max --node-args="--max-old-space-size=1024"
 ```
 
 ---
