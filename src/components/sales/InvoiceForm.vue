@@ -830,7 +830,7 @@ onMounted(async () => {
 
           <div class="field">
             <label for="sales_ref">Sales Reference <span class="required">*</span></label>
-            <Dropdown
+            <Select
               id="sales_ref"
               v-model="formData.sales_ref_id"
               :options="employeeOptions"
@@ -853,12 +853,12 @@ onMounted(async () => {
                   <span class="text-sm text-gray-500">({{ slotProps.option.code }})</span>
                 </div>
               </template>
-            </Dropdown>
+            </Select>
           </div>
 
           <div class="field">
             <label for="route">Territory</label>
-            <Dropdown
+            <Select
               id="route"
               v-model="formData.route_id"
               :options="routeStore.routes"
@@ -878,7 +878,7 @@ onMounted(async () => {
                   </div>
                 </div>
               </template>
-            </Dropdown>
+            </Select>
           </div>
 
           <div class="field">
@@ -894,7 +894,7 @@ onMounted(async () => {
 
           <div class="field">
             <label for="payment_method">Payment Method *</label>
-            <Dropdown
+            <Select
               id="payment_method"
               v-model="formData.payment_method"
               :options="paymentMethodOptions"
@@ -951,21 +951,21 @@ onMounted(async () => {
             <div class="form-row">
               <div class="field flex-1">
                 <label for="product">Product</label>
-                <Dropdown
+                <Select
                   id="product"
                   v-model="selectedProduct"
                   :options="productOptions"
                   option-label="name"
                   option-value="id"
                   placeholder="Select Product"
-                  :filter="true"
+                  editable
                   class="w-full"
                 />
               </div>
 
               <div class="field">
                 <label for="sku">SKU</label>
-                <Dropdown
+                <Select
                   id="sku"
                   v-model="selectedSku"
                   :options="skuOptions"
@@ -996,7 +996,7 @@ onMounted(async () => {
                       </div>
                     </div>
                   </template>
-                </Dropdown>
+                </Select>
               </div>
 
               <div class="field">
@@ -1288,7 +1288,7 @@ onMounted(async () => {
             <div class="form-row mb-3">
               <div class="field flex-1">
                 <label for="return_product">Product *</label>
-                <Dropdown
+                <Select
                   id="return_product"
                   v-model="returnProduct"
                   :options="productOptions"
@@ -1302,7 +1302,7 @@ onMounted(async () => {
 
               <div class="field flex-1">
                 <label for="return_sku">SKU *</label>
-                <Dropdown
+                <Select
                   id="return_sku"
                   v-model="returnSku"
                   :options="returnSkuOptions"
@@ -1321,7 +1321,7 @@ onMounted(async () => {
                   <template #option="slotProps">
                     <div>{{ slotProps.option.size }}{{ slotProps.option.unit }}</div>
                   </template>
-                </Dropdown>
+                </Select>
               </div>
             </div>
 
@@ -1392,7 +1392,7 @@ onMounted(async () => {
 
               <div class="field flex-1">
                 <label for="return_reason">Reason *</label>
-                <Dropdown
+                <Select
                   id="return_reason"
                   v-model="returnReason"
                   :options="returnReasonOptions"
