@@ -136,8 +136,6 @@ onMounted(() => {
 
 <template>
   <div class="invoice-view">
-    <ConfirmDialog />
-
     <Breadcrumb :home="breadcrumbHome" :model="breadcrumbItems" class="mb-4" />
 
     <div v-if="salesStore.loading" class="loading-state">

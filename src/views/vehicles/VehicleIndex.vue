@@ -135,7 +135,6 @@ onMounted(() => {
 
 <template>
   <div class="vehicle-index">
-    <ConfirmDialog />
     <VehicleAssignment
       v-model:visible="showAssignmentDialog"
       :vehicle-id="selectedVehicleId"

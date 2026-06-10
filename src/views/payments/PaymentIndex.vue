@@ -173,8 +173,6 @@
       />
     </div>
 
-    <!-- Dialogs -->
-    <ConfirmDialog />
     <Dialog v-model:visible="showClearDialog" header="Clear Check" :style="{ width: '500px' }">
       <div class="p-fluid">
         <div class="field">
