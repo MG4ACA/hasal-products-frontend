@@ -2,6 +2,23 @@ import salesService from '@/services/salesService';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
+const DRAFT_STORAGE_KEY = 'hasal_invoice_draft';
+
+// Helper: load draft from localStorage
+const loadDraftFromStorage = () => {
+  try {
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Restore Date objects
+    if (parsed.invoice_date) parsed.invoice_date = new Date(parsed.invoice_date);
+    if (parsed.check_date) parsed.check_date = new Date(parsed.check_date);
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
 export const useSalesStore = defineStore('sales', () => {
   // State
   const invoices = ref([]);
@@ -9,6 +26,9 @@ export const useSalesStore = defineStore('sales', () => {
   const totalInvoices = ref(0);
   const loading = ref(false);
   const error = ref(null);
+
+  // Draft invoice state (persisted in localStorage)
+  const draftInvoice = ref(loadDraftFromStorage());
 
   // Getters
   const getInvoiceById = computed(() => id => {
@@ -157,6 +177,22 @@ export const useSalesStore = defineStore('sales', () => {
     currentInvoice.value = null;
   };
 
+  // Save invoice draft to localStorage
+  const saveDraft = (data) => {
+    try {
+      draftInvoice.value = data;
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
+  // Clear invoice draft from localStorage
+  const clearDraft = () => {
+    draftInvoice.value = null;
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  };
+
   return {
     // State
     invoices,
@@ -164,6 +200,7 @@ export const useSalesStore = defineStore('sales', () => {
     totalInvoices,
     loading,
     error,
+    draftInvoice,
     // Getters
     getInvoiceById,
     paidInvoices,
@@ -177,5 +214,7 @@ export const useSalesStore = defineStore('sales', () => {
     deleteInvoice,
     clearError,
     clearCurrentInvoice,
+    saveDraft,
+    clearDraft,
   };
 });

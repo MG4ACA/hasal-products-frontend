@@ -97,6 +97,10 @@
               </div>
 
               <div class="form-field">
+                <!-- Last purchase price hint -->
+                <small v-if="lastPriceInfo" class="last-price-hint">
+                  Last purchase: <strong>{{ formatCurrency(lastPriceInfo.last_unit_cost) }}</strong>
+                </small>
                 <label for="unitCost">Unit Cost (LKR) <span class="required">*</span></label>
                 <InputNumber
                   id="unitCost"
@@ -353,6 +357,9 @@ const currentItem = reactive({
   unit_cost: 0,
 });
 
+// Tracks last-price info for the currently selected material
+const lastPriceInfo = ref(null);
+
 const supplierOptions = computed(() => supplierStore.suppliers);
 const rawMaterialOptions = computed(() => rawMaterialStore.rawMaterials);
 
@@ -364,15 +371,30 @@ const totalAmount = computed(() => {
   return formData.items.reduce((sum, item) => sum + item.total_cost, 0);
 });
 
+
+
 const onMaterialSelect = () => {
   if (!rawMaterialOptions.value || !Array.isArray(rawMaterialOptions.value)) {
     return;
   }
   const material = rawMaterialOptions.value.find(m => m.id === currentItem.raw_material_id);
   if (material) {
-    currentItem.material_code = material.material_code;
+    currentItem.material_code = material.code || material.material_code;
     currentItem.material_name = material.name;
     currentItem.unit = material.unit;
+
+    // Pre-fill unit cost with last purchase price if available
+    if (material.last_unit_cost != null && material.last_unit_cost > 0) {
+      currentItem.unit_cost = material.last_unit_cost;
+      lastPriceInfo.value = {
+        last_unit_cost: material.last_unit_cost,
+        last_purchase_date: material.last_purchase_date,
+        average_cost: material.average_cost,
+      };
+    } else {
+      currentItem.unit_cost = 0;
+      lastPriceInfo.value = null;
+    }
   }
 };
 
@@ -418,6 +440,7 @@ const addItem = () => {
   currentItem.quantity = 0;
   currentItem.unit = '';
   currentItem.unit_cost = 0;
+  lastPriceInfo.value = null;
 };
 
 const removeItem = index => {
@@ -744,5 +767,17 @@ onMounted(async () => {
 :deep(.p-calendar),
 :deep(.p-dropdown) {
   width: 100%;
+}
+
+/* ── Last purchase price hint ── */
+.last-price-hint {
+  display: block;
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.last-price-hint strong {
+  color: #1e40af;
 }
 </style>

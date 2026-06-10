@@ -1,13 +1,16 @@
 <script setup>
 import InvoiceForm from '@/components/sales/InvoiceForm.vue';
 import { useSalesStore } from '@/stores/sales';
+import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref, watch } from 'vue';
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const salesStore = useSalesStore();
 const toast = useToast();
+const confirm = useConfirm();
 
 const breadcrumbItems = [
   { label: 'Dashboard', to: '/' },
@@ -17,7 +20,7 @@ const breadcrumbItems = [
 
 const breadcrumbHome = { icon: 'pi pi-home', to: '/' };
 
-const invoiceData = ref({
+const defaultInvoice = () => ({
   outlet_id: null,
   sales_ref_id: null,
   route_id: null,
@@ -29,6 +32,63 @@ const invoiceData = ref({
   check_clearance_date: null,
   notes: '',
   items: [],
+});
+
+const invoiceData = ref(defaultInvoice());
+const draftRestored = ref(false);
+// Prevents the leave-guard from firing when we navigate programmatically after confirm
+const bypassGuard = ref(false);
+
+// On mount: only restore draft when navigated here via ?resume=true (from the Sales list page)
+onMounted(() => {
+  if (route.query.resume === 'true') {
+    const draft = salesStore.draftInvoice;
+    if (draft && (draft.outlet_id || (draft.items && draft.items.length > 0))) {
+      invoiceData.value = draft;
+      draftRestored.value = true;
+    }
+  }
+});
+
+// Auto-save draft on every change (debounced slightly)
+let draftTimer = null;
+watch(
+  invoiceData,
+  newVal => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => {
+      // Only save if there is something meaningful
+      if (newVal.outlet_id || (newVal.items && newVal.items.length > 0)) {
+        salesStore.saveDraft(JSON.parse(JSON.stringify(newVal)));
+      }
+    }, 500);
+  },
+  { deep: true }
+);
+
+// Navigate-away confirmation — only fires when there is meaningful data to lose
+onBeforeRouteLeave(to => {
+  if (bypassGuard.value) return true;
+  const hasMeaningfulData =
+    invoiceData.value.outlet_id ||
+    (invoiceData.value.items && invoiceData.value.items.length > 0);
+  if (hasMeaningfulData) {
+    confirm.require({
+      message: 'Your draft is automatically saved. You can resume it from the Sales Invoice list whenever you\'re ready.',
+      header: 'Leave Invoice Page?',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Stay',
+      acceptLabel: 'Leave',
+      rejectClass: 'p-button-success',
+      acceptClass: 'p-button-secondary p-button-outlined',
+      accept: () => {
+        bypassGuard.value = true;
+        router.push(to.fullPath);
+      },
+    });
+    return false;
+  }
+  return true;
 });
 
 const handleSubmit = async data => {
@@ -69,6 +129,11 @@ const handleSubmit = async data => {
 
     await salesStore.createInvoice(formattedData);
 
+    // Clear draft on successful submit
+    salesStore.clearDraft();
+    draftRestored.value = false;
+    bypassGuard.value = true; // No need to show leave dialog after successful submit
+
     toast.add({
       severity: 'success',
       summary: 'Success',
@@ -88,6 +153,10 @@ const handleSubmit = async data => {
 };
 
 const handleCancel = () => {
+  // Explicit cancel — clear draft and navigate without triggering the leave guard
+  bypassGuard.value = true;
+  salesStore.clearDraft();
+  draftRestored.value = false;
   router.push('/sales');
 };
 
@@ -112,6 +181,12 @@ const formatDate = date => {
       </div>
     </div>
 
+    <!-- Subtle resume notice (only shown when user navigated with ?resume=true) -->
+    <div v-if="draftRestored" class="draft-resume-notice mb-3">
+      <i class="pi pi-history mr-2" />
+      <span>Draft restored — continuing from where you left off.</span>
+    </div>
+
     <InvoiceForm v-model="invoiceData" @submit="handleSubmit" @cancel="handleCancel" />
   </div>
 </template>
@@ -122,6 +197,9 @@ const formatDate = date => {
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
 }
 
@@ -135,5 +213,16 @@ const formatDate = date => {
 .page-subtitle {
   color: #6b7280;
   margin: 0;
+}
+
+.draft-resume-notice {
+  display: flex;
+  align-items: center;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  color: #166534;
+  font-size: 0.875rem;
 }
 </style>

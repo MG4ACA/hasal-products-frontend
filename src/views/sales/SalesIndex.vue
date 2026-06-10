@@ -178,6 +178,36 @@ const handleCreate = () => {
   router.push('/sales/create');
 };
 
+// Draft management
+const hasDraft = computed(() => {
+  const d = salesStore.draftInvoice;
+  return d && (d.outlet_id || (d.items && d.items.length > 0));
+});
+
+const resumeDraft = () => {
+  router.push('/sales/create?resume=true');
+};
+
+const discardDraftFromList = () => {
+  confirm.require({
+    message: 'Are you sure you want to discard the saved invoice draft? This cannot be undone.',
+    header: 'Discard Draft?',
+    icon: 'pi pi-exclamation-triangle',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    acceptLabel: 'Discard',
+    accept: () => {
+      salesStore.clearDraft();
+      toast.add({
+        severity: 'info',
+        summary: 'Draft Discarded',
+        detail: 'The invoice draft has been cleared.',
+        life: 3000,
+      });
+    },
+  });
+};
+
 const handlePrint = async id => {
   try {
     await salesStore.fetchInvoiceById(id);
@@ -205,14 +235,29 @@ onMounted(async () => {
 
 <template>
   <div class="sales-index">
-    <ConfirmDialog />
-
     <div class="page-header">
       <div>
         <h1 class="page-title">Sales Invoices</h1>
         <p class="page-subtitle">Manage sales invoices and returns</p>
       </div>
       <div class="header-actions">
+        <!-- Draft buttons: only shown when a draft exists -->
+        <template v-if="hasDraft">
+          <Button
+            label="Resume Draft"
+            icon="pi pi-history"
+            severity="success"
+            outlined
+            @click="resumeDraft"
+          />
+          <Button
+            label="Discard Draft"
+            icon="pi pi-trash"
+            severity="warning"
+            outlined
+            @click="discardDraftFromList"
+          />
+        </template>
         <Button
           v-tooltip="'Refresh'"
           icon="pi pi-refresh"

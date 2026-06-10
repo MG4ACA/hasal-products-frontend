@@ -27,7 +27,7 @@
               <div class="col-12 md:col-6">
                 <div class="text-sm text-500">Target SKU</div>
                 <div class="font-semibold">
-                  {{ productionRun.recipe?.product?.name }}
+                  {{ productionRun.recipe?.product?.name || productionRun.recipe?.productSku?.product?.name }}
                   <span v-if="productionRun.recipe?.productSku">
                     -
                     {{
@@ -70,7 +70,7 @@
         <DataTable :value="outputs" class="p-datatable-sm">
           <Column header="SKU" style="min-width: 220px">
             <template #body="{ index }">
-              <Dropdown
+              <Select
                 v-model="outputs[index].sku_id"
                 :options="productSkus"
                 option-label="label"
@@ -250,16 +250,6 @@ import { useToastNotification } from '@/composables/useToastNotification';
 import productionService from '@/services/productionService';
 import productService from '@/services/productService';
 import { formatNumber } from '@/utils/formatters';
-import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import Message from 'primevue/message';
-import Textarea from 'primevue/textarea';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -405,7 +395,11 @@ watch(
         notes: '',
       };
       initOutputs(newVal);
-      if (newVal.recipe?.product?.id) {
+      
+      if (newVal.recipe?.productSku?.product?.id) {
+        fetchSkus(newVal.recipe.productSku.product.id);
+      } else if (newVal.recipe?.product?.id) {
+        // Fallback just in case some other controller includes product directly
         fetchSkus(newVal.recipe.product.id);
       }
     }
