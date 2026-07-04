@@ -29,11 +29,11 @@
         <div class="filter-grid">
           <div class="field">
             <label>Date From</label>
-            <Calendar v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
+            <DatePicker v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
           </div>
           <div class="field">
             <label>Date To</label>
-            <Calendar v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
+            <DatePicker v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
           </div>
           <div class="field">
             <label>Outlet</label>
@@ -277,6 +277,14 @@ const filters = ref({
   route_id: null,
 });
 
+// Helper function to format date to string without timezone conversion
+const formatDateString = date => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Load Report
 const loadReport = async () => {
   try {
@@ -284,10 +292,10 @@ const loadReport = async () => {
     const params = {};
 
     if (filters.value.date_from) {
-      params.date_from = filters.value.date_from.toISOString().split('T')[0];
+      params.date_from = formatDateString(filters.value.date_from);
     }
     if (filters.value.date_to) {
-      params.date_to = filters.value.date_to.toISOString().split('T')[0];
+      params.date_to = formatDateString(filters.value.date_to);
     }
     if (filters.value.outlet_id) {
       params.outlet_id = filters.value.outlet_id;
@@ -373,8 +381,8 @@ const handleExportCSV = () => {
   // Add summary
   csvData.push(
     createCSVHeader('Sales Report', {
-      date_from: filters.value.date_from?.toISOString().split('T')[0],
-      date_to: filters.value.date_to?.toISOString().split('T')[0],
+      date_from: filters.value.date_from ? formatDateString(filters.value.date_from) : '',
+      date_to: filters.value.date_to ? formatDateString(filters.value.date_to) : '',
     })
   );
 

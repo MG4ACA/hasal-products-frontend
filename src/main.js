@@ -26,6 +26,7 @@ import Column from 'primevue/column';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
+import DatePicker from 'primevue/datepicker';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
 import Dropdown from 'primevue/dropdown';
@@ -50,6 +51,7 @@ import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+
 
 const app = createApp(App);
 
@@ -108,7 +110,7 @@ app.component('Checkbox', Checkbox);
 app.component('SelectButton', SelectButton);
 app.component('Select', Select);
 app.component('Password', Password);
-
+app.component('DatePicker', DatePicker);
 app.directive('badge', BadgeDirective);
 
 app.mount('#app');
