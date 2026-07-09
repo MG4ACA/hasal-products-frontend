@@ -37,24 +37,28 @@
           </div>
           <div class="field">
             <label>Outlet</label>
-            <Dropdown
+            <Select
               v-model="filters.outlet_id"
               :options="outlets"
               option-label="name"
               option-value="id"
               placeholder="All Outlets"
               show-clear
+              filter
+              resetFilterOnHide
             />
           </div>
           <div class="field">
             <label>Route</label>
-            <Dropdown
+            <Select
               v-model="filters.route_id"
               :options="routes"
               option-label="name"
               option-value="id"
               placeholder="All Routes"
               show-clear
+              filter
+              resetFilterOnHide
             />
           </div>
           <div class="field align-end">
@@ -327,8 +331,8 @@ const loadReport = async () => {
 const loadReferenceData = async () => {
   try {
     const [outletsData, routesData] = await Promise.all([
-      outletService.getAll(),
-      routeService.getAll(),
+      outletService.getAll({ page: 1, limit: 9999, status: 'active' }),
+      routeService.getAll({ page: 1, limit: 9999, status: 'active' }),
     ]);
     // Extract arrays from paginated responses
     outlets.value = outletsData.outlets || outletsData;

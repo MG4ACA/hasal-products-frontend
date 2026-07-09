@@ -29,13 +29,15 @@
         <div class="filter-grid">
           <div class="field">
             <label>Outlet</label>
-            <Dropdown
+            <Select
               v-model="filters.outlet_id"
               :options="outlets"
               option-label="name"
               option-value="id"
               placeholder="All Outlets"
               show-clear
+              filter
+              resetFilterOnHide
             />
           </div>
           <div class="field align-end">
@@ -252,7 +254,7 @@ const loadReport = async () => {
 
 const loadOutlets = async () => {
   try {
-    const outletsData = await outletService.getAll();
+    const outletsData = await outletService.getAll({ page: 1, limit: 9999, status: 'active' });
     // Extract array from paginated response
     outlets.value = outletsData.outlets || outletsData;
   } catch (error) {

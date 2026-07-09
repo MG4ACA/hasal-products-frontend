@@ -29,26 +29,28 @@
         <div class="filter-grid">
           <div class="field">
             <label>Date From</label>
-            <Calendar v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
+            <DatePicker v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
           </div>
           <div class="field">
             <label>Date To</label>
-            <Calendar v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
+            <DatePicker v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
           </div>
           <div class="field">
             <label>Outlet</label>
-            <Dropdown
+            <Select
               v-model="filters.outlet_id"
               :options="outlets"
               option-label="name"
               option-value="id"
               placeholder="All Outlets"
               show-clear
+              filter
+              resetFilterOnHide
             />
           </div>
           <div class="field">
             <label>Payment Method</label>
-            <Dropdown
+            <Select
               v-model="filters.payment_method"
               :options="paymentMethods"
               placeholder="All Methods"
@@ -306,7 +308,7 @@ const loadReport = async () => {
 // Load outlets
 const loadOutlets = async () => {
   try {
-    const outletsData = await outletService.getAll();
+    const outletsData = await outletService.getAll({ page: 1, limit: 9999, status: 'active' });
     // Extract array from paginated response
     outlets.value = outletsData.outlets || outletsData;
   } catch (error) {

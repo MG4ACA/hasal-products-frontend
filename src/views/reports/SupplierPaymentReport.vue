@@ -29,21 +29,23 @@
         <div class="filter-grid">
           <div class="field">
             <label>Date From</label>
-            <Calendar v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
+            <DatePicker v-model="filters.date_from" date-format="yy-mm-dd" show-icon />
           </div>
           <div class="field">
             <label>Date To</label>
-            <Calendar v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
+            <DatePicker v-model="filters.date_to" date-format="yy-mm-dd" show-icon />
           </div>
           <div class="field">
             <label>Supplier</label>
-            <Dropdown
+            <Select
               v-model="filters.supplier_id"
               :options="suppliers"
               option-label="name"
               option-value="id"
               placeholder="All Suppliers"
               show-clear
+              filter
+              resetFilterOnHide
             />
           </div>
           <div class="field align-end">
@@ -238,7 +240,7 @@ const loadReport = async () => {
 
 const loadSuppliers = async () => {
   try {
-    const suppliersData = await supplierService.getAllSuppliers();
+    const suppliersData = await supplierService.getAllSuppliers({ page: 1, limit: 9999, status: 'active' });
     // Extract array from paginated response
     suppliers.value = suppliersData.suppliers || suppliersData;
   } catch (error) {

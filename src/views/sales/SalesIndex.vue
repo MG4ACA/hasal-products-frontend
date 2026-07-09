@@ -49,8 +49,11 @@ const paymentMethodOptions = [
   { label: 'Check', value: 'check' },
 ];
 
+// Options lists
+const outletsList = ref([]);
+
 // Computed
-const outletOptions = computed(() => [{ name: 'All Outlets', id: null }, ...outletStore.outlets]);
+const outletOptions = computed(() => [{ name: 'All Outlets', id: null }, ...outletsList.value]);
 
 const salesRefOptions = computed(() => [
   { name: 'All Sales Reps', id: null },
@@ -224,9 +227,14 @@ const handlePrint = async id => {
 
 // Load data
 onMounted(async () => {
+  try {
+    outletsList.value = await outletStore.fetchAllOutlets();
+  } catch (error) {
+    console.error('Failed to fetch outlets:', error);
+  }
+
   await Promise.all([
     fetchInvoices(),
-    outletStore.fetchOutlets({ status: 'active' }),
     employeeStore.fetchEmployees({ type: 'sales_ref', status: 'active' }),
     routeStore.fetchRoutes({ status: 'active' }),
   ]);
@@ -285,7 +293,7 @@ onMounted(async () => {
 
         <div class="field">
           <label for="outlet">Outlet</label>
-          <Dropdown
+          <Select
             id="outlet"
             v-model="filters.outlet_id"
             :options="outletOptions"
@@ -293,12 +301,14 @@ onMounted(async () => {
             option-value="id"
             placeholder="Select Outlet"
             class="w-full"
+            filter
+            resetFilterOnHide
           />
         </div>
 
         <div class="field">
           <label for="sales_ref">Sales Rep</label>
-          <Dropdown
+          <Select
             id="sales_ref"
             v-model="filters.sales_ref_id"
             :options="salesRefOptions"
@@ -319,12 +329,12 @@ onMounted(async () => {
                 >({{ slotProps.option.code }})</span
               >
             </template>
-          </Dropdown>
+          </Select>
         </div>
 
         <div class="field">
           <label for="route">Route</label>
-          <Dropdown
+          <Select
             id="route"
             v-model="filters.route_id"
             :options="routeOptions"
@@ -337,7 +347,7 @@ onMounted(async () => {
 
         <div class="field">
           <label for="payment_status">Status</label>
-          <Dropdown
+          <Select
             id="payment_status"
             v-model="filters.payment_status"
             :options="paymentStatusOptions"
@@ -351,7 +361,7 @@ onMounted(async () => {
         <!-- Row 2 -->
         <div class="field">
           <label for="payment_method">Method</label>
-          <Dropdown
+          <Select
             id="payment_method"
             v-model="filters.payment_method"
             :options="paymentMethodOptions"
@@ -364,7 +374,7 @@ onMounted(async () => {
 
         <div class="field">
           <label for="start_date">Start Date</label>
-          <Calendar
+          <DatePicker
             id="start_date"
             v-model="filters.start_date"
             date-format="yy-mm-dd"
@@ -376,7 +386,7 @@ onMounted(async () => {
 
         <div class="field">
           <label for="end_date">End Date</label>
-          <Calendar
+          <DatePicker
             id="end_date"
             v-model="filters.end_date"
             date-format="yy-mm-dd"

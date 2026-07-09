@@ -958,7 +958,8 @@ onMounted(async () => {
                   option-label="name"
                   option-value="id"
                   placeholder="Select Product"
-                  editable
+                  filter
+                  resetFilterOnHide
                   class="w-full"
                 />
               </div>
