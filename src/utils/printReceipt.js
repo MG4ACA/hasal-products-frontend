@@ -151,7 +151,9 @@ const buildReceiptHTML = invoice => {
   .meta { display: flex; justify-content: space-between; font-size: 11pt; }
   .meta-invoice{ margin-right: 5px }
   /* ── outlet ── */
-  .outlet { margin-bottom: 4px; font-size: 12pt; display: flex; justify-content: space-between; }
+  .outlet { margin-bottom: 4px; font-size: 12pt; display: flex; justify-content: space-between; align-items: flex-end; }
+  .outlet-name { font-size: 14pt; font-weight: bold; max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .route-name { font-size: 11pt; max-width: 32%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
 
   /* ── items table ──
      Column widths are fixed so nothing overflows:
@@ -230,10 +232,10 @@ const buildReceiptHTML = invoice => {
 </div>
 
 <div class="outlet">
-<div class="outlet">
+<div class="outlet-name">
 ${invoice.outlet?.name ?? ''}
 </div>
-<div class="outlet">
+<div class="route-name">
 ${invoice.route?.name ?? ''}
 </div>
 </div>

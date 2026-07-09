@@ -557,12 +557,19 @@ const itemsToReceiveCount = computed(() => {
   return formData.value.received_items.filter(item => item.receive).length;
 });
 
+// Calculate total amount already paid for this PO
+const totalPaid = computed(() => {
+  const payments = purchaseOrder.value?.payments || [];
+  return payments.reduce((sum, payment) => sum + parseFloat(payment.amount || 0), 0);
+});
+
 // Calculate remaining balance for this specific PO
 const remainingBalance = computed(() => {
   if (!purchaseOrder.value) return 0;
 
-  // Balance = PO total amount (what still needs to be paid)
-  return parseFloat(purchaseOrder.value.total_amount || 0);
+  const totalAmount = parseFloat(purchaseOrder.value.total_amount || 0);
+  const paid = totalPaid.value;
+  return Math.max(0, totalAmount - paid);
 });
 
 // Calculate balance after proposed payment
